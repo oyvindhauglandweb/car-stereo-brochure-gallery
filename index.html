@@ -195,7 +195,17 @@ modal.scrollTop = 0;
  <!--   <div class="detail-row"><span class="detail-label">Full model series:</span> ${b.model_series_full}</div> -->
  <!--   <div class="detail-row"><span class="detail-label">Additional model series:</span> ${b.additional_model_series}</div> --> 
     <div class="detail-row"><span class="detail-label">Page count:</span> ${b.page_count}</div>
-    <div class="detail-row"><span class="detail-label">Owner:</span> ${b.owner}</div>
+    <div class="detail-row"><span class="detail-label">Owner:</span> 
+    ${b.owner.split(', ').map(owner => `
+  <a
+    href="https://sites.google.com/view/carstereobrochuresmenu/browse-by-owner/${encodeURIComponent(owner.toLowerCase().replace(/\s+/g,'-'))}"
+    target="_blank"
+    style="text-decoration:none;color:#1f789d;margin-right:8px;"
+  >
+    ${owner}
+  </a>
+`).join('')}
+</div>
     <div class="detail-row"><span class="detail-label">Submitted by:</span> ${b.submitted_by}</div>
  <!--   <div class="detail-row"><span class="detail-label">Status:</span> ${b.status}</div> -->
  <!--   <div class="detail-row"><span class="detail-label">Claim ID:</span> ${b.claim_id}</div> -->

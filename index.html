@@ -179,7 +179,18 @@ modal.scrollTop = 0;
     <div class="detail-row"><span class="detail-label">Language:</span> ${b.language}</div>
     <div class="detail-row"><span class="detail-label">Market:</span> ${b.market}</div>
     <div class="detail-row"><span class="detail-label">Type:</span> ${b.type}</div>
-    <div class="detail-row"><span class="detail-label">Model series:</span> ${b.model_series}</div>
+    <div class="detail-row">
+  <span class="detail-label">
+    Model series:
+    <a 
+      href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/alpine-model-series-names"
+      target="_blank"
+      style="margin-left:6px;text-decoration:none;color:#1f789d;font-weight:bold;"
+      title="Open Model Series Guide"
+    >?</a>
+  </span>
+  ${b.model_series}
+</div>
  <!--   <div class="detail-row"><span class="detail-label">Full model series:</span> ${b.model_series_full}</div> -->
  <!--   <div class="detail-row"><span class="detail-label">Additional model series:</span> ${b.additional_model_series}</div> --> 
     <div class="detail-row"><span class="detail-label">Page count:</span> ${b.page_count}</div>

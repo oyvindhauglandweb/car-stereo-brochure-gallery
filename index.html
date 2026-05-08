@@ -15,18 +15,18 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 .title{margin-top:4px;color:#333}
 .meta{margin-top:6px;color:#777;font-size:14px}
 
+.page-title{text-align:center;margin-bottom:22px;font-size:22px;font-weight:bold}
+
 .modal{
   display:none;
-position:absolute;
-left:0;
-right:0;
-min-height:100vh;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.82);
   z-index:9999;
   justify-content:center;
   align-items:flex-start;
   overflow-y:auto;
-  padding:30px 16px;
+  padding:30px 16px 80px;
   box-sizing:border-box;
 }
 
@@ -34,16 +34,15 @@ min-height:100vh;
   background:white;
   max-width:1000px;
   width:100%;
-  max-height:none;
-  overflow:visible;
   border-radius:14px;
   display:grid;
   grid-template-columns:360px 1fr;
   margin-bottom:40px;
 }
+
 .modal-image{width:100%;height:100%;object-fit:contain;background:#eee}
 .modal-info{padding:24px}
-.close{position:absolute;top:18px;right:28px;color:white;font-size:42px;cursor:pointer}
+.close{position:fixed;top:18px;right:28px;color:white;font-size:42px;cursor:pointer}
 .detail-row{margin-bottom:10px}
 .detail-label{font-weight:bold}
 
@@ -58,32 +57,25 @@ min-height:100vh;
   font-weight:bold;
 }
 
+.owner-link{
+  text-decoration:none;
+  color:#1f789d;
+  margin-right:8px;
+}
+
 @media(max-width:800px){
-  .modal{
-    align-items:flex-start;
-    padding:20px 10px 80px;
-  }
-
-  .modal-content{
-    grid-template-columns:1fr;
-    width:100%;
-    max-height:none;
-    overflow:visible;
-  }
-
-  .modal-image{
-    max-height:70vh;
-    object-fit:contain;
-  }
-
-  .modal-info{
-    padding:18px;
-  }
+  body{padding:10px}
+  .modal{padding:20px 10px 80px}
+  .modal-content{grid-template-columns:1fr;width:100%}
+  .modal-image{max-height:70vh;object-fit:contain}
+  .modal-info{padding:18px}
 }
 </style>
 </head>
 
 <body>
+
+<div class="page-title" id="pageTitle">Public Brochure Gallery</div>
 <div class="gallery" id="gallery">Loading...</div>
 
 <div class="modal" id="modal">
@@ -104,7 +96,28 @@ min-height:100vh;
 const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
 const TABLE_ID = "959905";
 
+let brochureData = [];
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char];
+  });
+}
+
 async function loadBrochures() {
+  const params = new URLSearchParams(window.location.search);
+  const ownerFilter = params.get("owner");
+
+  if(ownerFilter){
+    document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
+  }
+
   const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false`, {
     headers: {
       Authorization: `Token ${BASEROW_TOKEN}`
@@ -115,13 +128,17 @@ async function loadBrochures() {
 
   const brochures = data.results
     .filter(item => item.field_8379597?.value !== "Rejected")
+    .filter(item => {
+      if (!ownerFilter) return true;
+      const owners = item.field_8379595?.map(x => x.value) || [];
+      return owners.includes(ownerFilter);
+    })
     .map(item => ({
       id: item.id,
       brochure: item.field_8379584?.[0]?.value || "",
       brand: item.field_8379585?.[0]?.value || "",
       type: item.field_8379586?.[0]?.value || "",
       model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
-      model_series_full: item.field_8379587?.map(x => x.value).join(", ") || "",
       title: item.field_8379608 || "",
       year: item.field_8379588 || "",
       month: item.field_8379589?.value || "",
@@ -130,11 +147,7 @@ async function loadBrochures() {
       page_count: item.field_8379594 || "",
       owner: item.field_8379595?.map(x => x.value).join(", ") || "",
       submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
-      status: item.field_8379597?.value || "",
-      created_time: item.field_8379600 || "",
       notes: item.field_8379601 || "",
-      claim_id: item.field_8379605 || "",
-      additional_model_series: item.field_8415013 || "",
       claim_ownership_url: item.field_8384825?.url || "",
       image:
         item.field_8379592?.[0]?.url ||
@@ -142,83 +155,76 @@ async function loadBrochures() {
         ""
     }));
 
+  brochureData = brochures;
+
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  brochures.forEach(b => {
+  brochures.forEach((b, index) => {
     gallery.innerHTML += `
-      <div class="card" onclick='openModal(${JSON.stringify(b)}, this)'>
-        <img src="${b.image}" alt="${b.brochure}">
+      <div class="card" onclick="openModal(${index})">
+        <img src="${esc(b.image)}" alt="${esc(b.brochure)}">
         <div class="info">
-          <div class="brand">${b.brand}</div>
-          <div class="title">${b.title}</div>
-          <div class="meta">${b.month} ${b.year} • ${b.language}</div>
+          <div class="brand">${esc(b.brand)}</div>
+          <div class="title">${esc(b.title)}</div>
+          <div class="meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</div>
         </div>
       </div>
     `;
   });
 }
 
-function openModal(b, card){
+function openModal(index){
+  const b = brochureData[index];
+
   const modal = document.getElementById("modal");
   modal.style.display = "flex";
+  modal.scrollTop = 0;
 
-const targetTop = Math.max(0, card.offsetTop - 20);
-
-modal.style.top = targetTop + "px";
-modal.scrollTop = 0;
-  
   document.getElementById("modalImage").src = b.image;
   document.getElementById("modalBrochure").innerText = b.brochure;
 
+  const ownerLinks = b.owner
+    ? b.owner.split(", ").map(owner => `
+        <a class="owner-link"
+           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?owner=${encodeURIComponent(owner)}"
+           target="_blank">${esc(owner)}</a>
+      `).join("")
+    : "";
+
   document.getElementById("modalDetails").innerHTML = `
-    <div class="detail-row"><span class="detail-label">Brand:</span> ${b.brand}</div>
-    <div class="detail-row"><span class="detail-label">Title:</span> ${b.title}</div>
-    <div class="detail-row"><span class="detail-label">Year:</span> ${b.year}</div>
-    <div class="detail-row"><span class="detail-label">Month:</span> ${b.month}</div>
-    <div class="detail-row"><span class="detail-label">Language:</span> ${b.language}</div>
-    <div class="detail-row"><span class="detail-label">Market:</span> ${b.market}</div>
-    <div class="detail-row"><span class="detail-label">Type:</span> ${b.type}</div>
-   <div class="detail-row">
-  <span class="detail-label">
-    <a
-      href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/alpine-model-series-names"
-      target="_blank"
-      style="text-decoration:none;color:inherit;"
-      title="Open Model Series Guide"
-    >
-      Model series:
-    </a>
-  </span>
-  ${b.model_series}
-</div>
- <!--   <div class="detail-row"><span class="detail-label">Full model series:</span> ${b.model_series_full}</div> -->
- <!--   <div class="detail-row"><span class="detail-label">Additional model series:</span> ${b.additional_model_series}</div> --> 
-    <div class="detail-row"><span class="detail-label">Page count:</span> ${b.page_count}</div>
-    <div class="detail-row"><span class="detail-label">Owner:</span> 
-    ${b.owner.split(', ').map(owner => `
-  <a
-    href="https://sites.google.com/view/carstereobrochuresmenu/browse-by-owner/${encodeURIComponent(owner.toLowerCase().replace(/\s+/g,'-'))}"
-    target="_blank"
-    style="text-decoration:none;color:#1f789d;margin-right:8px;"
-  >
-    ${owner}
-  </a>
-`).join('')}
-</div>
-    <div class="detail-row"><span class="detail-label">Submitted by:</span> ${b.submitted_by}</div>
- <!--   <div class="detail-row"><span class="detail-label">Status:</span> ${b.status}</div> -->
- <!--   <div class="detail-row"><span class="detail-label">Claim ID:</span> ${b.claim_id}</div> -->
-    <div class="detail-row"><span class="detail-label">Notes:</span> ${b.notes}</div>
+    <div class="detail-row"><span class="detail-label">Brand:</span> ${esc(b.brand)}</div>
+    <div class="detail-row"><span class="detail-label">Title:</span> ${esc(b.title)}</div>
+    <div class="detail-row"><span class="detail-label">Year:</span> ${esc(b.year)}</div>
+    <div class="detail-row"><span class="detail-label">Month:</span> ${esc(b.month)}</div>
+    <div class="detail-row"><span class="detail-label">Language:</span> ${esc(b.language)}</div>
+    <div class="detail-row"><span class="detail-label">Market:</span> ${esc(b.market)}</div>
+    <div class="detail-row"><span class="detail-label">Type:</span> ${esc(b.type)}</div>
+
+    <div class="detail-row">
+      <span class="detail-label">
+        <a href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/alpine-model-series-names"
+           target="_blank"
+           style="text-decoration:none;color:inherit;">
+          Model series:
+        </a>
+      </span>
+      ${esc(b.model_series)}
+    </div>
+
+    <div class="detail-row"><span class="detail-label">Page count:</span> ${esc(b.page_count)}</div>
+    <div class="detail-row"><span class="detail-label">Owner:</span> ${ownerLinks}</div>
+    <div class="detail-row"><span class="detail-label">Submitted by:</span> ${esc(b.submitted_by)}</div>
+    <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
   `;
 
-const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
+  const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 
-document.getElementById("claimButton").href =
-  b.claim_ownership_url +
-  separator +
-  "prefill_Brochure=" +
-  encodeURIComponent(b.brochure);
+  document.getElementById("claimButton").href =
+    b.claim_ownership_url +
+    separator +
+    "prefill_Brochure=" +
+    encodeURIComponent(b.brochure);
 }
 
 function closeModal(){

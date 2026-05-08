@@ -149,6 +149,7 @@ async function loadBrochures() {
       submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
       notes: item.field_8379601 || "",
       claim_ownership_url: item.field_8384825?.url || "",
+      model_series_guide_url: item.field_8445075?.[0]?.value || "",
       image:
         item.field_8379592?.[0]?.url ||
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||

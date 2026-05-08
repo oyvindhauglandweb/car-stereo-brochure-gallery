@@ -186,9 +186,8 @@ const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 document.getElementById("claimButton").href =
   b.claim_ownership_url +
   separator +
-  "brochure=" +
-  "Brochure=" +
-encodeURIComponent(b.brochure);
+  "prefill_Brochure=" +
+  encodeURIComponent(b.brochure);
 }
 
 function closeModal(){

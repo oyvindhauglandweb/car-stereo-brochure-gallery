@@ -187,9 +187,12 @@ function openModal(index){
 
   const ownerLinks = b.owner
     ? b.owner.split(", ").map(owner => `
-        <a class="owner-link"
-           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?owner=${encodeURIComponent(owner)}"
-           target="_blank">${esc(owner)}</a>
+<a class="owner-link"
+   href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?owner=${encodeURIComponent(owner)}"
+   target="_blank"
+   title="View brochures owned by ${esc(owner)}">
+   ${esc(owner)}
+</a>
       `).join("")
     : "";
 
@@ -205,12 +208,12 @@ function openModal(index){
    <div class="detail-row">
   <span class="detail-label">
     <a
-      href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/alpine-model-series-names"
-      target="_blank"
-      style="text-decoration:none;color:#1f789d;"
-    >
-      Model series:
-    </a>
+  href="${esc(b.model_series_guide_url)}"
+  target="_blank"
+  style="text-decoration:none;color:#1f789d;"
+  title="Open model series guide for ${esc(b.brand)}">
+  Model series:
+</a>
   </span>
   ${esc(b.model_series)}
 </div>

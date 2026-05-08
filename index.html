@@ -3,113 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Car Stereo Brochure Gallery</title>
 
 <style>
-
-body{
-    margin:0;
-    padding:20px;
-    background:#f2f2f2;
-    font-family:Arial, sans-serif;
-}
-
-.gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-    max-width:1400px;
-    margin:auto;
-}
-
-.card{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 2px 10px rgba(0,0,0,0.12);
-    transition:transform 0.2s;
-}
-
-.card:hover{
-    transform:translateY(-4px);
-}
-
-.card img{
-    width:100%;
-    aspect-ratio:210 / 297;
-    object-fit:contain;
-    background:#eaeaea;
-    display:block;
-}
-
-.info{
-    padding:14px;
-}
-
-.brand{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:6px;
-}
-
-.model{
-    color:#444;
-    margin-bottom:4px;
-}
-
-.year{
-    color:#888;
-    font-size:14px;
-}
-
-@media (max-width:700px){
-
-    body{
-        padding:10px;
-    }
-
-    .gallery{
-        grid-template-columns:1fr;
-    }
-
-}
-
+body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1400px;margin:auto}
+.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.card img{width:100%;aspect-ratio:210/297;object-fit:contain;background:#eaeaea;display:block}
+.info{padding:14px}
+.brand{font-size:18px;font-weight:bold}
+.title{margin-top:4px;color:#333}
+.meta{margin-top:6px;color:#777;font-size:14px}
 </style>
 </head>
 
 <body>
+<div class="gallery" id="gallery">Loading...</div>
 
-<div class="gallery">
+<script>
+const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
+const TABLE_ID = "959905";
 
-    <div class="card">
-        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop" alt="">
+async function loadBrochures() {
+  const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false`, {
+    headers: {
+      Authorization: `Token ${BASEROW_TOKEN}`
+    }
+  });
+
+  const data = await res.json();
+
+  const brochures = data.results
+    .filter(item => item.field_8379597?.value !== "Rejected")
+    .map(item => ({
+      brochure: item.field_8379584?.[0]?.value || "",
+      brand: item.field_8379585?.[0]?.value || "",
+      title: item.field_8379608 || "",
+      year: item.field_8379588 || "",
+      language: item.field_8379590?.[0]?.value || "",
+      image:
+        item.field_8379592?.[0]?.url ||
+        item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
+        ""
+    }));
+
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "";
+
+  brochures.forEach(b => {
+    gallery.innerHTML += `
+      <div class="card">
+        <img src="${b.image}" alt="${b.brochure}">
         <div class="info">
-            <div class="brand">Alpine</div>
-            <div class="model">New Sound Technology</div>
-            <div class="year">1981</div>
+          <div class="brand">${b.brand}</div>
+          <div class="title">${b.title}</div>
+          <div class="meta">${b.year} • ${b.language}</div>
         </div>
-    </div>
+      </div>
+    `;
+  });
+}
 
-    <div class="card">
-        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop" alt="">
-        <div class="info">
-            <div class="brand">Pioneer</div>
-            <div class="model">Component Series</div>
-            <div class="year">1984</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=1200&auto=format&fit=crop" alt="">
-        <div class="info">
-            <div class="brand">Clarion</div>
-            <div class="model">Digital Audio</div>
-            <div class="year">1986</div>
-        </div>
-    </div>
-
-</div>
-
+loadBrochures();
+</script>
 </body>
 </html>

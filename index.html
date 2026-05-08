@@ -8,20 +8,57 @@
 <style>
 body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1400px;margin:auto}
-.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12);cursor:pointer}
 .card img{width:100%;aspect-ratio:210/297;object-fit:contain;background:#eaeaea;display:block}
 .info{padding:14px}
 .brand{font-size:18px;font-weight:bold}
 .title{margin-top:4px;color:#333}
 .meta{margin-top:6px;color:#777;font-size:14px}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;justify-content:center;align-items:center;padding:20px}
+.modal-content{background:white;max-width:1000px;width:100%;max-height:90vh;overflow:auto;border-radius:14px;display:grid;grid-template-columns:360px 1fr}
+.modal-image{width:100%;height:100%;object-fit:contain;background:#eee}
+.modal-info{padding:24px}
+.close{position:absolute;top:18px;right:28px;color:white;font-size:42px;cursor:pointer}
+.detail-row{margin-bottom:10px}
+.detail-label{font-weight:bold}
+
+.claim-button{
+  display:inline-block;
+  margin-top:18px;
+  padding:12px 18px;
+  background:#1f789d;
+  color:white;
+  text-decoration:none;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+@media(max-width:800px){
+  .modal-content{grid-template-columns:1fr}
+}
 </style>
 </head>
 
 <body>
 <div class="gallery" id="gallery">Loading...</div>
 
+<div class="modal" id="modal">
+  <div class="close" onclick="closeModal()">×</div>
+
+  <div class="modal-content">
+    <img class="modal-image" id="modalImage">
+
+    <div class="modal-info">
+      <h2 id="modalBrochure"></h2>
+      <div id="modalDetails"></div>
+      <a id="claimButton" class="claim-button" target="_blank">Claim ownership</a>
+    </div>
+  </div>
+</div>
+
 <script>
-const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
+const BASEROW_TOKEN = "PASTE_YOUR_READ_ONLY_TOKEN_HERE";
 const TABLE_ID = "959905";
 
 async function loadBrochures() {
@@ -35,42 +72,79 @@ async function loadBrochures() {
 
   const brochures = data.results
     .filter(item => item.field_8379597?.value !== "Rejected")
-.map(item => ({
-  brochure: item.field_8379584?.[0]?.value || "",
-  brand: item.field_8379585?.[0]?.value || "",
-  type: item.field_8379586?.[0]?.value || "",
-  model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
-  title: item.field_8379608 || "",
-  year: item.field_8379588 || "",
-  month: item.field_8379589?.value || "",
-  language: item.field_8379590?.[0]?.value || "",
-  market: item.field_8379591?.[0]?.value || "",
-  page_count: item.field_8379594 || "",
-  image:
-    item.field_8379592?.[0]?.url ||
-    item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
-    ""
-}))
+    .map(item => ({
+      id: item.id,
+      brochure: item.field_8379584?.[0]?.value || "",
+      brand: item.field_8379585?.[0]?.value || "",
+      type: item.field_8379586?.[0]?.value || "",
+      model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
+      model_series_full: item.field_8379587?.map(x => x.value).join(", ") || "",
+      title: item.field_8379608 || "",
+      year: item.field_8379588 || "",
+      month: item.field_8379589?.value || "",
+      language: item.field_8379590?.[0]?.value || "",
+      market: item.field_8379591?.[0]?.value || "",
+      page_count: item.field_8379594 || "",
+      owner: item.field_8379595?.map(x => x.value).join(", ") || "",
+      submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
+      status: item.field_8379597?.value || "",
+      created_time: item.field_8379600 || "",
+      notes: item.field_8379601 || "",
+      claim_id: item.field_8379605 || "",
+      additional_model_series: item.field_8415013 || "",
+      claim_ownership_url: item.field_8384825?.url || "",
+      image:
+        item.field_8379592?.[0]?.url ||
+        item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
+        ""
+    }));
 
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
   brochures.forEach(b => {
-  gallery.innerHTML += `
-    <div class="card">
-      <img src="${b.image}" alt="${b.brochure}">
-      <div class="info">
-        <div class="brand">${b.brand}</div>
-        <div class="title">${b.title}</div>
-        <div class="meta">${b.model_series}</div>
-        <div class="meta">${b.month} ${b.year} • ${b.language}</div>
-        <!--
-        <div class="meta">${b.market}</div>
-        -->
+    gallery.innerHTML += `
+      <div class="card" onclick='openModal(${JSON.stringify(b)})'>
+        <img src="${b.image}" alt="${b.brochure}">
+        <div class="info">
+          <div class="brand">${b.brand}</div>
+          <div class="title">${b.title}</div>
+          <div class="meta">${b.month} ${b.year} • ${b.language}</div>
+        </div>
       </div>
-    </div>
+    `;
+  });
+}
+
+function openModal(b){
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modalImage").src = b.image;
+  document.getElementById("modalBrochure").innerText = b.brochure;
+
+  document.getElementById("modalDetails").innerHTML = `
+    <div class="detail-row"><span class="detail-label">Brand:</span> ${b.brand}</div>
+    <div class="detail-row"><span class="detail-label">Title:</span> ${b.title}</div>
+    <div class="detail-row"><span class="detail-label">Year:</span> ${b.year}</div>
+    <div class="detail-row"><span class="detail-label">Month:</span> ${b.month}</div>
+    <div class="detail-row"><span class="detail-label">Language:</span> ${b.language}</div>
+    <div class="detail-row"><span class="detail-label">Market:</span> ${b.market}</div>
+    <div class="detail-row"><span class="detail-label">Type:</span> ${b.type}</div>
+    <div class="detail-row"><span class="detail-label">Model series:</span> ${b.model_series}</div>
+    <div class="detail-row"><span class="detail-label">Full model series:</span> ${b.model_series_full}</div>
+    <div class="detail-row"><span class="detail-label">Additional model series:</span> ${b.additional_model_series}</div>
+    <div class="detail-row"><span class="detail-label">Page count:</span> ${b.page_count}</div>
+    <div class="detail-row"><span class="detail-label">Owner:</span> ${b.owner}</div>
+    <div class="detail-row"><span class="detail-label">Submitted by:</span> ${b.submitted_by}</div>
+    <div class="detail-row"><span class="detail-label">Status:</span> ${b.status}</div>
+    <div class="detail-row"><span class="detail-label">Claim ID:</span> ${b.claim_id}</div>
+    <div class="detail-row"><span class="detail-label">Notes:</span> ${b.notes}</div>
   `;
-});
+
+  document.getElementById("claimButton").href = b.claim_ownership_url || "#";
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display = "none";
 }
 
 loadBrochures();

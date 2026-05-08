@@ -35,19 +35,22 @@ async function loadBrochures() {
 
   const brochures = data.results
     .filter(item => item.field_8379597?.value !== "Rejected")
-  .map(item => ({
+.map(item => ({
   brochure: item.field_8379584?.[0]?.value || "",
   brand: item.field_8379585?.[0]?.value || "",
+  type: item.field_8379586?.[0]?.value || "",
+  model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
   title: item.field_8379608 || "",
   year: item.field_8379588 || "",
+  month: item.field_8379589?.value || "",
   language: item.field_8379590?.[0]?.value || "",
-  market: item.field_1234567 || "",
-  model_series: item.field_7654321 || "",
+  market: item.field_8379591?.[0]?.value || "",
+  page_count: item.field_8379594 || "",
   image:
     item.field_8379592?.[0]?.url ||
     item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
     ""
-}));
+}))
 
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";

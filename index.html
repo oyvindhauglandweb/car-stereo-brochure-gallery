@@ -22,7 +22,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   background:rgba(0,0,0,.82);
   z-index:9999;
   justify-content:center;
-  align-items:center;
+  align-items:flex-start;
   overflow-y:auto;
   padding:30px 16px;
   box-sizing:border-box;
@@ -145,7 +145,7 @@ async function loadBrochures() {
 
   brochures.forEach(b => {
     gallery.innerHTML += `
-      <div class="card" onclick='openModal(${JSON.stringify(b)})'>
+      <div class="card" onclick='openModal(${JSON.stringify(b)}, this)'>
         <img src="${b.image}" alt="${b.brochure}">
         <div class="info">
           <div class="brand">${b.brand}</div>
@@ -157,8 +157,15 @@ async function loadBrochures() {
   });
 }
 
-function openModal(b){
-  document.getElementById("modal").style.display = "flex";
+function openModal(b, card){
+  const modal = document.getElementById("modal");
+  modal.style.display = "flex";
+
+  const rect = card.getBoundingClientRect();
+  const targetTop = Math.max(20, rect.top - 20);
+
+  modal.scrollTop = 0;
+  modal.style.paddingTop = targetTop + "px";
   document.getElementById("modalImage").src = b.image;
   document.getElementById("modalBrochure").innerText = b.brochure;
 

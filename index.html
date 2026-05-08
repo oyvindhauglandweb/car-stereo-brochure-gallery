@@ -17,8 +17,10 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 .modal{
   display:none;
-  position:fixed;
-  inset:0;
+position:absolute;
+left:0;
+right:0;
+min-height:100vh;
   background:rgba(0,0,0,.82);
   z-index:9999;
   justify-content:center;
@@ -161,11 +163,11 @@ function openModal(b, card){
   const modal = document.getElementById("modal");
   modal.style.display = "flex";
 
-  const rect = card.getBoundingClientRect();
-  const targetTop = Math.max(20, rect.top - 20);
+const targetTop = Math.max(0, card.offsetTop - 20);
 
-  modal.scrollTop = 0;
-  modal.style.paddingTop = targetTop + "px";
+modal.style.top = targetTop + "px";
+modal.scrollTop = 0;
+  
   document.getElementById("modalImage").src = b.image;
   document.getElementById("modalBrochure").innerText = b.brochure;
 

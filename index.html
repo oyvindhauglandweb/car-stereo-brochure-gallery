@@ -35,17 +35,19 @@ async function loadBrochures() {
 
   const brochures = data.results
     .filter(item => item.field_8379597?.value !== "Rejected")
-    .map(item => ({
-      brochure: item.field_8379584?.[0]?.value || "",
-      brand: item.field_8379585?.[0]?.value || "",
-      title: item.field_8379608 || "",
-      year: item.field_8379588 || "",
-      language: item.field_8379590?.[0]?.value || "",
-      image:
-        item.field_8379592?.[0]?.url ||
-        item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
-        ""
-    }));
+  .map(item => ({
+  brochure: item.field_8379584?.[0]?.value || "",
+  brand: item.field_8379585?.[0]?.value || "",
+  title: item.field_8379608 || "",
+  year: item.field_8379588 || "",
+  language: item.field_8379590?.[0]?.value || "",
+  market: item.field_1234567 || "",
+  model_series: item.field_7654321 || "",
+  image:
+    item.field_8379592?.[0]?.url ||
+    item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
+    ""
+}));
 
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";

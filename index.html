@@ -51,17 +51,19 @@ async function loadBrochures() {
   gallery.innerHTML = "";
 
   brochures.forEach(b => {
-    gallery.innerHTML += `
-      <div class="card">
-        <img src="${b.image}" alt="${b.brochure}">
-        <div class="info">
-          <div class="brand">${b.brand}</div>
-          <div class="title">${b.title}</div>
-          <div class="meta">${b.year} • ${b.language}</div>
-        </div>
+  gallery.innerHTML += `
+    <div class="card">
+      <img src="${b.image}" alt="${b.brochure}">
+      <div class="info">
+        <div class="brand">${b.brand}</div>
+        <div class="title">${b.title}</div>
+        <div class="meta">${b.year} • ${b.month} • ${b.language}</div>
+        <div class="meta">${b.market}</div>
+        <div class="meta">${b.model_series}</div>
       </div>
-    `;
-  });
+    </div>
+  `;
+});
 }
 
 loadBrochures();

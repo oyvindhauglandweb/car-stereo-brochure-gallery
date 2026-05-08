@@ -140,7 +140,10 @@ function openModal(b){
     <div class="detail-row"><span class="detail-label">Notes:</span> ${b.notes}</div>
   `;
 
-  document.getElementById("claimButton").href = b.claim_ownership_url || "#";
+  document.getElementById("claimButton").href =
+  b.claim_ownership_url +
+  "?prefill_Brochure=" +
+  encodeURIComponent(b.brochure);
 }
 
 function closeModal(){

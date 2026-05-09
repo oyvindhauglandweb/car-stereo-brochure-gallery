@@ -40,7 +40,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   margin-bottom:40px;
 }
 
-.modal-image{width:100%;height:100%;object-fit:contain;background:#eee}
+.modal-image{width:100%;height:100%;object-fit:contain;cursor:pointer;background:#eee}
 .modal-info{padding:24px}
 .detail-row{margin-bottom:10px}
 .detail-label{font-weight:bold}
@@ -106,7 +106,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 <div class="modal" id="modal">
   <div class="modal-content">
-    <img class="modal-image" id="modalImage">
+    <img class="modal-image" id="modalImage" onclick="closeModal()">
 
     <div class="modal-info">
       <h2 id="modalBrochure"></h2>

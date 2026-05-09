@@ -49,31 +49,34 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 .button-row{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap:10px;
   margin-top:18px;
 }
-  
-.claim-button{
-  display:inline-block;
+
+.claim-button,
+.close-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding:12px 18px;
-  background:#1f789d;
-  color:white;
-  text-decoration:none;
   border-radius:8px;
   font-weight:bold;
   white-space:nowrap;
+  box-sizing:border-box;
+}
+
+.claim-button{
+  background:#1f789d;
+  color:white;
+  text-decoration:none;
 }
 
 .close-button{
-  display:inline-block;
-  padding:12px 18px;
   background:#666;
   color:white;
   border:none;
-  border-radius:8px;
-  font-weight:bold;
   cursor:pointer;
 }
 

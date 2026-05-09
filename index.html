@@ -187,13 +187,7 @@ function openModal(index){
   modal.style.display = "flex";
   modal.scrollTop = 0;
 
-  window.scrollTo({
-    top: Math.max(0, card.offsetTop - 20),
-    behavior: "smooth"
-  });
-
   document.getElementById("modalImage").src = b.image;
-  document.getElementById("modalBrochure").innerText = b.brochure;
 
   const ownerLinks = b.owner
     ? b.owner.split(", ").map(owner => `
@@ -241,7 +235,6 @@ function openModal(index){
     separator +
     "prefill_Brochure=" +
     encodeURIComponent(b.brochure);
-    }, 250);
 }
 
 function closeModal(){

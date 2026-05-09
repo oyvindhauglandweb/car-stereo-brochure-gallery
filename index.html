@@ -191,7 +191,8 @@ function openModal(index, card){
   modal.scrollTop = 0;
 
   document.getElementById("modalImage").src = b.image;
-
+document.getElementById("modalBrochure").innerText = b.brochure;
+  
   const ownerLinks = b.owner
     ? b.owner.split(", ").map(owner => `
 <a class="owner-link"
@@ -238,8 +239,6 @@ function openModal(index, card){
     separator +
     "prefill_Brochure=" +
     encodeURIComponent(b.brochure);
-
-  }, 250);
 }
 
 function closeModal(){

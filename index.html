@@ -168,7 +168,7 @@ async function loadBrochures() {
 
   brochures.forEach((b, index) => {
     gallery.innerHTML += `
-      <div class="card" onclick="openModal(${index})">
+      <div class="card" onclick="openModal(${index}, this)">
         <img src="${esc(b.image)}" alt="${esc(b.brochure)}">
         <div class="info">
           <div class="brand">${esc(b.brand)}</div>
@@ -180,12 +180,15 @@ async function loadBrochures() {
   });
 }
 
-function openModal(index){
-  const b = brochureData[index];
+function openModal(index, card){
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
 
-  const modal = document.getElementById("modal");
-  modal.style.display = "flex";
-  modal.scrollTop = 0;
+  setTimeout(() => {
+    const b = brochureData[index];
+
+    const modal = document.getElementById("modal");
+    modal.style.display = "flex";
+    modal.scrollTop = 0;
 
   document.getElementById("modalImage").src = b.image;
   document.getElementById("modalBrochure").innerText = b.brochure;
@@ -236,6 +239,7 @@ function openModal(index){
     separator +
     "prefill_Brochure=" +
     encodeURIComponent(b.brochure);
+    }, 250);
 }
 
 function closeModal(){

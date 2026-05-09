@@ -195,7 +195,11 @@ async function loadBrochures() {
       submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
       notes: item.field_8379601 || "",
       claim_ownership_url: item.field_8384825?.url || "",
-      model_series_guide_url: item.field_8445075?.[0]?.value || "",
+      model_series_guide_url:
+        item.field_8445075?.[0]?.value ||
+        item.field_8445075?.[0]?.url ||
+        item.field_8445075 ||
+        "",
       image:
         item.field_8379592?.[0]?.url ||
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
@@ -269,7 +273,7 @@ function openModal(index, card){
 
     <div class="detail-row">
       <span class="detail-label">
-        <a href="${esc(b.model_series_guide_url)}"
+        <a href="${b.model_series_guide_url ? esc(b.model_series_guide_url) : '#'}"
            target="_blank"
            style="text-decoration:none;color:#1f789d;"
            title="Open model series guide for ${esc(b.brand)}">

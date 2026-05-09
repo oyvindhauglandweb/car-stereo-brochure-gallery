@@ -19,8 +19,9 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 .modal{
   display:none;
-  position:fixed;
-  inset:0;
+  position:absolute;
+  left:0;
+  right:0;
   background:rgba(0,0,0,.82);
   z-index:9999;
   justify-content:center;
@@ -28,6 +29,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   overflow-y:auto;
   padding:30px 16px 80px;
   box-sizing:border-box;
+  min-height:100vh;
 }
 
 .modal-content{
@@ -183,16 +185,10 @@ async function loadBrochures() {
 function openModal(index, card){
   const b = brochureData[index];
 
-  card.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-
-  setTimeout(() => {
-
-    const modal = document.getElementById("modal");
-    modal.style.display = "flex";
-    modal.scrollTop = 0;
+  const modal = document.getElementById("modal");
+  modal.style.top = Math.max(0, card.offsetTop - 20) + "px";
+  modal.style.display = "flex";
+  modal.scrollTop = 0;
 
   document.getElementById("modalImage").src = b.image;
 

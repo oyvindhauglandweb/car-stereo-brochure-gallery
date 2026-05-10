@@ -111,12 +111,27 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   width:auto;
 }
 
-.home-link{
-  color:#333;
+.top-buttons{
+  display:flex;
+  gap:10px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 18px;
+  height:44px;
+  background:#1f789d;
+  color:white;
   text-decoration:none;
-  font-size:14px;
-  text-transform:uppercase;
-  letter-spacing:.04em;
+  border-radius:8px;
+  font-weight:bold;
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  line-height:1;
+  white-space:nowrap;
+  box-sizing:border-box;
 }
   
 </style>
@@ -126,15 +141,28 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
   
 <header class="site-header">
-  <a href="https://sites.google.com/view/carstereobrochuresmenu" target="_top">
-    <img src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+
+  <a href="https://sites.google.com/view/carstereobrochuresmenu"
+     target="_top">
+    <img src="logo.png" alt="Car Stereo Brochures">
   </a>
 
-  <a class="home-link"
-     href="https://sites.google.com/view/carstereobrochuresmenu"
-     target="_top">
-     Home
-  </a>
+  <div class="top-buttons">
+
+    <a class="top-button"
+       href="https://sites.google.com/view/carstereobrochuresmenu"
+       target="_top">
+       Home
+    </a>
+
+    <a class="top-button"
+       href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/public-view"
+       target="_top">
+       Back
+    </a>
+
+  </div>
+
 </header>
   
 <div class="page-title" id="pageTitle">Public Brochure Gallery</div>

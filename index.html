@@ -127,7 +127,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 }
 
 .site-header{
-  display:none;
+  display:flex;
   align-items:center;
   justify-content:space-between;
   max-width:1400px;
@@ -267,18 +267,7 @@ async function loadBrochures() {
   const languageFilter = params.get("language");
   const marketFilter = params.get("market");
   const submittedByFilter = params.get("submitted_by");
-   const hasFilter =
-  ownerFilter ||
-  modelSeriesFilter ||
-  brandFilter ||
-  yearFilter ||
-  languageFilter ||
-  marketFilter ||
-  submittedByFilter;
 
-if(hasFilter){
-  document.getElementById("siteHeader").style.display = "flex";
-}
   if(ownerFilter){
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){

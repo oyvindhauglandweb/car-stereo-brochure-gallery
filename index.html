@@ -275,6 +275,8 @@ async function loadBrochures() {
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){
     document.getElementById("pageTitle").innerText = "Brochures in model series: " + modelSeriesFilter;
+  } else if(brandFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " Brochure Gallery";
   } else if(brandFilter && yearFilter){
     document.getElementById("pageTitle").innerText = brandFilter + " brochures from " + yearFilter;
   } else if(brandFilter && languageFilter){

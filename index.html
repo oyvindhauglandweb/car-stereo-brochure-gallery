@@ -351,15 +351,26 @@ if(hasFilter){
     "https://sites.google.com/view/carstereobrochuresmenu";
 }
   
-  const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false`, {
+  let allRows = [];
+let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
+
+while(nextUrl){
+  const res = await fetch(nextUrl, {
     headers: {
       Authorization: `Token ${BASEROW_TOKEN}`
     }
   });
 
   const data = await res.json();
-setupBrandDropdown(data.results, brandFilter);
-  const brochures = data.results
+
+  allRows = allRows.concat(data.results || []);
+  nextUrl = data.next;
+}
+
+setupBrandDropdown(allRows, brandFilter);
+
+const brochures = allRows
+  
     .filter(item => item.field_8379597?.value !== "Rejected")
     .filter(item => {
       if (!ownerFilter) return true;

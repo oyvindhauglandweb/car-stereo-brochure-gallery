@@ -26,7 +26,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   justify-content:center;
   align-items:flex-start;
   overflow-y:auto;
-  padding:30px 16px 0px;
+  padding:30px 16px 0;
   box-sizing:border-box;
 }
 
@@ -148,7 +148,6 @@ function esc(value){
 
 function getUrl(value){
   if (!value) return "";
-
   if (typeof value === "string") return value;
 
   if (Array.isArray(value)) {
@@ -178,10 +177,16 @@ async function loadBrochures() {
 
   if(ownerFilter){
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
-  }
-
-  if(modelSeriesFilter){
+  } else if(modelSeriesFilter){
     document.getElementById("pageTitle").innerText = "Brochures in model series: " + modelSeriesFilter;
+  } else if(brandFilter && yearFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " brochures from " + yearFilter;
+  } else if(brandFilter && languageFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " brochures in " + languageFilter;
+  } else if(brandFilter && marketFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " brochures for " + marketFilter;
+  } else if(submittedByFilter){
+    document.getElementById("pageTitle").innerText = "Brochures submitted by " + submittedByFilter;
   }
 
   const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false`, {
@@ -204,18 +209,12 @@ async function loadBrochures() {
       const series = item.field_8384650?.map(x => x.value) || [];
       return series.includes(modelSeriesFilter);
     })
-    .map(item => ({
-      id: item.id,
-      brochure: item.field_8379584?.[0]?.value || "",
-      brand: item.field_8379585?.[0]?.value || "",
-      type: item.field_8379586?.[0]?.value || "",
-      model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
-      .filter(item => {
+    .filter(item => {
       if (!brandFilter) return true;
       return item.field_8379585?.[0]?.value === brandFilter;
     })
-     .filter(item => {
-     if (!yearFilter) return true;
+    .filter(item => {
+      if (!yearFilter) return true;
       return item.field_8379588 === yearFilter;
     })
     .filter(item => {
@@ -231,6 +230,12 @@ async function loadBrochures() {
       const submittedBy = item.field_8379596?.map(x => x.value) || [];
       return submittedBy.includes(submittedByFilter);
     })
+    .map(item => ({
+      id: item.id,
+      brochure: item.field_8379584?.[0]?.value || "",
+      brand: item.field_8379585?.[0]?.value || "",
+      type: item.field_8379586?.[0]?.value || "",
+      model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
       title: item.field_8379608 || "",
       year: item.field_8379588 || "",
       month: item.field_8379589?.value || "",
@@ -293,6 +298,17 @@ function openModal(index, card){
       `).join("")
     : "";
 
+  const submittedByLinks = b.submitted_by
+    ? b.submitted_by.split(", ").map(name => `
+        <a class="series-link"
+           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?submitted_by=${encodeURIComponent(name)}"
+           target="_blank"
+           title="View brochures submitted by ${esc(name)}">
+           ${esc(name)}
+        </a>
+      `).join("")
+    : "";
+
   const modelSeriesLinks = b.model_series
     ? b.model_series.split(", ").map(series => `
         <a class="series-link"
@@ -304,73 +320,61 @@ function openModal(index, card){
       `).join("")
     : "";
 
- document.getElementById("modalDetails").innerHTML = `
-  <div class="detail-row"><span class="detail-label">Brand:</span> ${esc(b.brand)}</div>
-  <div class="detail-row"><span class="detail-label">Title:</span> ${esc(b.title)}</div>
+  document.getElementById("modalDetails").innerHTML = `
+    <div class="detail-row"><span class="detail-label">Brand:</span> ${esc(b.brand)}</div>
+    <div class="detail-row"><span class="detail-label">Title:</span> ${esc(b.title)}</div>
 
-  <div class="detail-row">
-    <span class="detail-label">Year:</span>
-    <a class="series-link"
-       href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&year=${encodeURIComponent(b.year)}"
-       target="_blank"
-       title="View ${esc(b.brand)} brochures from ${esc(b.year)}">
-       ${esc(b.year)}
-    </a>
-  </div>
-
-  <div class="detail-row"><span class="detail-label">Month:</span> ${esc(b.month)}</div>
-
-  <div class="detail-row">
-    <span class="detail-label">Language:</span>
-    <a class="series-link"
-       href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&language=${encodeURIComponent(b.language)}"
-       target="_blank"
-       title="View ${esc(b.brand)} brochures in ${esc(b.language)}">
-       ${esc(b.language)}
-    </a>
-  </div>
-
-  <div class="detail-row">
-    <span class="detail-label">Market:</span>
-    <a class="series-link"
-       href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&market=${encodeURIComponent(b.market)}"
-       target="_blank"
-       title="View ${esc(b.brand)} brochures for ${esc(b.market)}">
-       ${esc(b.market)}
-    </a>
-  </div>
-
-  <div class="detail-row"><span class="detail-label">Type:</span> ${esc(b.type)}</div>
-
-  <div class="detail-row">
-    <span class="detail-label">
-      <a href="${esc(b.model_series_guide_url)}"
-         target="_blank"
-         style="text-decoration:none;color:#1f789d;"
-         title="Open model series guide for ${esc(b.brand)}">
-        Model series:
-      </a>
-    </span>
-    ${modelSeriesLinks}
-  </div>
-
-  <div class="detail-row"><span class="detail-label">Page count:</span> ${esc(b.page_count)}</div>
-  <div class="detail-row"><span class="detail-label">Owner:</span> ${ownerLinks}</div>
-
-  <div class="detail-row">
-    <span class="detail-label">Submitted by:</span>
-    ${b.submitted_by ? b.submitted_by.split(", ").map(name => `
+    <div class="detail-row">
+      <span class="detail-label">Year:</span>
       <a class="series-link"
-         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?submitted_by=${encodeURIComponent(name)}"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&year=${encodeURIComponent(b.year)}"
          target="_blank"
-         title="View brochures submitted by ${esc(name)}">
-         ${esc(name)}
+         title="View ${esc(b.brand)} brochures from ${esc(b.year)}">
+         ${esc(b.year)}
       </a>
-    `).join("") : ""}
-  </div>
+    </div>
 
-  <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
-`;
+    <div class="detail-row"><span class="detail-label">Month:</span> ${esc(b.month)}</div>
+
+    <div class="detail-row">
+      <span class="detail-label">Language:</span>
+      <a class="series-link"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&language=${encodeURIComponent(b.language)}"
+         target="_blank"
+         title="View ${esc(b.brand)} brochures in ${esc(b.language)}">
+         ${esc(b.language)}
+      </a>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Market:</span>
+      <a class="series-link"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&market=${encodeURIComponent(b.market)}"
+         target="_blank"
+         title="View ${esc(b.brand)} brochures for ${esc(b.market)}">
+         ${esc(b.market)}
+      </a>
+    </div>
+
+    <div class="detail-row"><span class="detail-label">Type:</span> ${esc(b.type)}</div>
+
+    <div class="detail-row">
+      <span class="detail-label">
+        <a href="${esc(b.model_series_guide_url)}"
+           target="_blank"
+           style="text-decoration:none;color:#1f789d;"
+           title="Open model series guide for ${esc(b.brand)}">
+          Model series:
+        </a>
+      </span>
+      ${modelSeriesLinks}
+    </div>
+
+    <div class="detail-row"><span class="detail-label">Page count:</span> ${esc(b.page_count)}</div>
+    <div class="detail-row"><span class="detail-label">Owner:</span> ${ownerLinks}</div>
+    <div class="detail-row"><span class="detail-label">Submitted by:</span> ${submittedByLinks}</div>
+    <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
+  `;
 
   const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 

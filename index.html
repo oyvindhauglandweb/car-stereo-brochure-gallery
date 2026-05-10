@@ -346,7 +346,11 @@ async function loadBrochures() {
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
         ""
     }));
-
+  
+brochures.sort((a, b) => {
+  return parseInt(a.year || 0) - parseInt(b.year || 0);
+});
+  
   brochureData = brochures;
 
   const gallery = document.getElementById("gallery");

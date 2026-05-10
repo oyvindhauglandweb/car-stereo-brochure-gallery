@@ -98,7 +98,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 }
 
 .site-header{
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:space-between;
   max-width:1400px;
@@ -140,7 +140,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 <body>
 
   
-<header class="site-header">
+<header class="site-header" id="siteHeader">
 
   <a href="https://sites.google.com/view/carstereobrochuresmenu"
      target="_top">
@@ -294,6 +294,18 @@ async function loadBrochures() {
       const submittedBy = item.field_8379596?.map(x => x.value) || [];
       return submittedBy.includes(submittedByFilter);
     })
+    const hasFilter =
+  ownerFilter ||
+  modelSeriesFilter ||
+  brandFilter ||
+  yearFilter ||
+  languageFilter ||
+  marketFilter ||
+  submittedByFilter;
+
+if(hasFilter){
+  document.getElementById("siteHeader").style.display = "flex";
+}
     .map(item => ({
       id: item.id,
       brochure: item.field_8379584?.[0]?.value || "",

@@ -96,11 +96,42 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   .modal-image{max-height:70vh;object-fit:contain}
   .modal-info{padding:18px}
 }
+
+.site-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  max-width:1400px;
+  margin:0 auto 24px;
+  padding:10px 0;
+}
+
+.site-header img{
+  height:48px;
+  width:auto;
+}
+
+.home-link{
+  color:#333;
+  text-decoration:none;
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+  
 </style>
 </head>
 
 <body>
-
+<header class="site-header">
+  <a href="https://sites.google.com/view/carstereobrochuresmenu" target="_top">
+    <img src="YOUR-LOGO-URL-HERE" alt="Car Stereo Brochures">
+  </a>
+  <a class="home-link" href="https://sites.google.com/view/carstereobrochuresmenu" target="_top">
+    Home
+  </a>
+</header>
+  
 <div class="page-title" id="pageTitle">Public Brochure Gallery</div>
 <div class="gallery" id="gallery">Loading...</div>
 

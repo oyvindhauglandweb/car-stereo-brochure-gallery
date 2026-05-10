@@ -441,7 +441,15 @@ function openModal(index, card){
     : "";
 
   document.getElementById("modalDetails").innerHTML = `
-    <div class="detail-row"><span class="detail-label">Brand:</span> ${esc(b.brand)}</div>
+    <div class="detail-row">
+  <span class="detail-label">Brand:</span>
+  <a class="series-link"
+     href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}"
+     target="_blank"
+     title="View all ${esc(b.brand)} brochures">
+     ${esc(b.brand)}
+  </a>
+</div>
     <div class="detail-row"><span class="detail-label">Title:</span> ${esc(b.title)}</div>
 
     <div class="detail-row">

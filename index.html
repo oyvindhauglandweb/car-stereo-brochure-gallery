@@ -144,7 +144,14 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   display:flex;
   gap:10px;
 }
-.brand-select{
+.filter-row{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.filter-select{
   height:44px;
   padding:0 14px;
   border-radius:8px;
@@ -210,24 +217,18 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 <div class="top-buttons">
 
-<select id="brandSelect"
-        class="brand-select"
-        onchange="changeBrand(this.value)">
-<option value="">All brands</option>
-</select>
-  
-<button type="button"
-   class="top-button view-toggle"
-   onclick="toggleView()"
-   id="viewToggle">
-   List view
-</button>
+  <button type="button"
+          class="top-button view-toggle"
+          onclick="toggleView()"
+          id="viewToggle">
+    List view
+  </button>
 
-<a class="top-button"
-   href="https://sites.google.com/view/carstereobrochuresmenu"
-   target="_top">
-   Home
-</a>
+  <a class="top-button"
+     href="https://sites.google.com/view/carstereobrochuresmenu"
+     target="_top">
+     Home
+  </a>
 
   <a class="top-button"
      id="backButton"
@@ -238,7 +239,33 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 </div>
 
-  </div>
+<div class="filter-row">
+
+  <select id="brandSelect"
+          class="filter-select"
+          onchange="changeBrand(this.value)">
+    <option value="">All brands</option>
+  </select>
+
+  <select id="yearSelect"
+          class="filter-select"
+          onchange="changeYear(this.value)">
+    <option value="">All years</option>
+  </select>
+
+  <select id="languageSelect"
+          class="filter-select"
+          onchange="changeLanguage(this.value)">
+    <option value="">All languages</option>
+  </select>
+
+  <select id="ownerSelect"
+          class="filter-select"
+          onchange="changeOwner(this.value)">
+    <option value="">All owners</option>
+  </select>
+
+</div>
 
 </header>
   
@@ -367,7 +394,12 @@ while(nextUrl){
   nextUrl = data.next;
 }
 
-setupBrandDropdown(allRows, brandFilter);
+setupFilters(allRows, {
+  brand: brandFilter,
+  year: yearFilter,
+  language: languageFilter,
+  owner: ownerFilter
+});
 
 const brochures = allRows
   
@@ -659,6 +691,56 @@ function changeBrand(brand){
 
   }
 }
+
+function fillSelect(selectId, values, selectedValue){
+  const select = document.getElementById(selectId);
+
+  values.forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+
+    if(value === selectedValue){
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  });
+}
+
+function setupFilters(items, selected){
+  const brands = [...new Set(items.map(item => item.field_8379585?.[0]?.value).filter(Boolean))].sort();
+  const years = [...new Set(items.map(item => item.field_8379588).filter(Boolean))].sort();
+  const languages = [...new Set(items.map(item => item.field_8379590?.[0]?.value).filter(Boolean))].sort();
+  const owners = [...new Set(items.flatMap(item => item.field_8379595?.map(x => x.value) || []))].sort();
+
+  fillSelect("brandSelect", brands, selected.brand);
+  fillSelect("yearSelect", years, selected.year);
+  fillSelect("languageSelect", languages, selected.language);
+  fillSelect("ownerSelect", owners, selected.owner);
+}
+
+function goWithFilters(overrides){
+  const params = new URLSearchParams(window.location.search);
+
+  Object.entries(overrides).forEach(([key, value]) => {
+    if(value){
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+  });
+
+  window.location.href =
+    "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?" +
+    params.toString();
+}
+
+function changeBrand(value){ goWithFilters({brand:value}); }
+function changeYear(value){ goWithFilters({year:value}); }
+function changeLanguage(value){ goWithFilters({language:value}); }
+function changeOwner(value){ goWithFilters({owner:value}); }
+  
 loadBrochures();
 </script>
 </body>

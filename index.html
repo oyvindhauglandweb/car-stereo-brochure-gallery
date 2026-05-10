@@ -178,11 +178,12 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
   <div class="top-buttons">
 
-    <a class="top-button"
-       href="https://sites.google.com/view/carstereobrochuresmenu"
-       target="_top">
-       Home
-    </a>
+<a class="top-button"
+   id="backButton"
+   href="#"
+   target="_top">
+   Back
+</a>
 
     <a class="top-button"
        href="https://sites.google.com/view/carstereobrochuresmenu/car-stereo-brochures-catalog/public-view"
@@ -282,6 +283,25 @@ async function loadBrochures() {
     document.getElementById("pageTitle").innerText = "Brochures submitted by " + submittedByFilter;
   }
 
+const hasFilter =
+  ownerFilter ||
+  modelSeriesFilter ||
+  brandFilter ||
+  yearFilter ||
+  languageFilter ||
+  marketFilter ||
+  submittedByFilter;
+
+const backButton = document.getElementById("backButton");
+
+if(hasFilter){
+  backButton.href =
+    "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
+} else {
+  backButton.href =
+    "https://sites.google.com/view/carstereobrochuresmenu";
+}
+  
   const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false`, {
     headers: {
       Authorization: `Token ${BASEROW_TOKEN}`

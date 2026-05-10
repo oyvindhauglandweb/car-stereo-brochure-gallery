@@ -372,6 +372,7 @@ setupBrandDropdown(allRows, brandFilter);
 const brochures = allRows
   
     .filter(item => item.field_8379597?.value !== "Rejected")
+    .filter(item => item.field_8379592?.length > 0)
     .filter(item => {
       if (!ownerFilter) return true;
       const owners = item.field_8379595?.map(x => x.value) || [];

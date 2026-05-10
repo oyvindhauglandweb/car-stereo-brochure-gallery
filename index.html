@@ -238,7 +238,18 @@ async function loadBrochures() {
   const languageFilter = params.get("language");
   const marketFilter = params.get("market");
   const submittedByFilter = params.get("submitted_by");
+   const hasFilter =
+  ownerFilter ||
+  modelSeriesFilter ||
+  brandFilter ||
+  yearFilter ||
+  languageFilter ||
+  marketFilter ||
+  submittedByFilter;
 
+if(hasFilter){
+  document.getElementById("siteHeader").style.display = "flex";
+}
   if(ownerFilter){
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){
@@ -294,18 +305,7 @@ async function loadBrochures() {
       const submittedBy = item.field_8379596?.map(x => x.value) || [];
       return submittedBy.includes(submittedByFilter);
     })
-    const hasFilter =
-  ownerFilter ||
-  modelSeriesFilter ||
-  brandFilter ||
-  yearFilter ||
-  languageFilter ||
-  marketFilter ||
-  submittedByFilter;
-
-if(hasFilter){
-  document.getElementById("siteHeader").style.display = "flex";
-}
+ 
     .map(item => ({
       id: item.id,
       brochure: item.field_8379584?.[0]?.value || "",

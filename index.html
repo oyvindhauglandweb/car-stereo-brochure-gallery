@@ -162,7 +162,30 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   white-space:nowrap;
   box-sizing:border-box;
 }
-  
+.view-toggle{
+  border:none;
+  cursor:pointer;
+}
+
+.gallery.list-view{
+  display:block;
+}
+
+.gallery.list-view .card{
+  display:grid;
+  grid-template-columns:90px 1fr;
+  margin-bottom:12px;
+}
+
+.gallery.list-view .card img{
+  width:90px;
+  height:120px;
+  aspect-ratio:auto;
+}
+
+.gallery.list-view .info{
+  padding:12px;
+}  
 </style>
 </head>
 
@@ -181,6 +204,12 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   <a class="top-button"
      href="https://sites.google.com/view/carstereobrochuresmenu"
      target="_top">
+     <button type="button"
+        class="top-button view-toggle"
+        onclick="toggleView()"
+        id="viewToggle">
+        List view
+     </button>
      Home
   </a>
 
@@ -545,7 +574,22 @@ function openModal(index, card){
 function closeModal(){
   document.getElementById("modal").style.display = "none";
 }
+let currentView = "image";
 
+function toggleView(){
+  const gallery = document.getElementById("gallery");
+  const button = document.getElementById("viewToggle");
+
+  if(currentView === "image"){
+    currentView = "list";
+    gallery.classList.add("list-view");
+    button.innerText = "Image view";
+  } else {
+    currentView = "image";
+    gallery.classList.remove("list-view");
+    button.innerText = "List view";
+  }
+}
 loadBrochures();
 </script>
 </body>

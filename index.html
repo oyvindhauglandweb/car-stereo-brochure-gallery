@@ -144,7 +144,16 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   display:flex;
   gap:10px;
 }
-
+.brand-select{
+  height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  background:white;
+  max-width:220px;
+}
 .top-button{
   display:flex;
   align-items:center;
@@ -201,6 +210,12 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 
 <div class="top-buttons">
 
+<select id="brandSelect"
+        class="brand-select"
+        onchange="changeBrand(this.value)">
+<option value="">All brands</option>
+</select>
+  
 <button type="button"
    class="top-button view-toggle"
    onclick="toggleView()"
@@ -343,7 +358,7 @@ if(hasFilter){
   });
 
   const data = await res.json();
-
+setupBrandDropdown(data.results, brandFilter);
   const brochures = data.results
     .filter(item => item.field_8379597?.value !== "Rejected")
     .filter(item => {
@@ -589,6 +604,47 @@ function toggleView(){
     currentView = "image";
     gallery.classList.remove("list-view");
     button.innerText = "List view";
+  }
+}
+function setupBrandDropdown(items, selectedBrand){
+
+  const select = document.getElementById("brandSelect");
+
+  const brands = [...new Set(
+    items
+      .map(item => item.field_8379585?.[0]?.value)
+      .filter(Boolean)
+  )].sort();
+
+  brands.forEach(brand => {
+
+    const option = document.createElement("option");
+
+    option.value = brand;
+    option.textContent = brand;
+
+    if(brand === selectedBrand){
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+
+  });
+}
+
+function changeBrand(brand){
+
+  if(brand){
+
+    window.location.href =
+      "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=" +
+      encodeURIComponent(brand);
+
+  } else {
+
+    window.location.href =
+      "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
+
   }
 }
 loadBrochures();

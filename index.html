@@ -92,9 +92,8 @@ body{
 
 .community-card{
   background:#f2f2f2;
-  border-radius:12px;
-  padding:20px;
-  border:1px solid #ccc;
+  padding:0;
+  border:none;
 }
 
 .community-card h3{
@@ -135,21 +134,21 @@ body{
 }
 
 .guide-row{
-  display:block;
+  width:100%;
 }
 
 .guide-select{
   width:100%;
-  height:44px;
-  padding:0 14px;
-  border-radius:8px;
+  min-height:44px;
+  padding:14px 18px;
+  background:white;
   border:1px solid #ccc;
+  border-radius:8px;
   font-size:16px;
   font-weight:bold;
   font-family:Arial,sans-serif;
-  background:white;
   box-sizing:border-box;
-}  
+} 
   
 .guide-row select{
   height:44px;
@@ -234,7 +233,7 @@ body{
     <div class="community-card">
 
     <div class="guide-row">
-  <span>Choose a brand to open its Model Series guide.</span>
+
 
 <select id="brandGuideSelect" class="guide-select">
   <option value="">

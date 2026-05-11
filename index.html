@@ -220,6 +220,10 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   display:block;
 }
 
+.gallery.list-view .image-meta{
+  display:none;
+}  
+  
 @media(max-width:800px){
   body{
     padding:10px;
@@ -548,17 +552,18 @@ async function loadBrochures() {
         <div class="info">
           <div class="brand">${esc(b.brand)}</div>
           <div class="title">${esc(b.title)}</div>
-          <div class="meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</div>
+          <div class="meta image-meta">
+  ${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}
+</div>
 <div class="list-extra">
   <div>
-    <strong>Published:</strong> ${esc(b.month)} ${esc(b.year)}
-    • <strong>Language:</strong> ${esc(b.language)}
-    • <strong>Type:</strong> ${esc(b.type)}
-    • <strong>Pages:</strong> ${esc(b.page_count)}
+    ${esc(b.month)} ${esc(b.year)}
+    • ${esc(b.language)}
+    • Pages: ${esc(b.page_count)}
   </div>
 
   <div>
-    <strong>Model series:</strong> ${esc(b.model_series)}
+    Model series: ${esc(b.model_series)}
   </div>
 </div>
         </div>

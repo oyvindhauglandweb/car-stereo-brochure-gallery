@@ -160,28 +160,34 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   font-family:Arial,sans-serif;
   background:white;
   max-width:220px;
+  box-sizing:border-box;
 }
 .top-button{
-  display:flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:12px 18px;
+  width:44px;
+  min-width:44px;
   height:44px;
-  background:#1f789d;
-  color:white;
+  padding:0;
+  background:white;
+  color:black;
   text-decoration:none;
+  border:1px solid #ccc;
   border-radius:8px;
-  font-weight:bold;
-  font-size:26px;
+  font-size:24px;
+  font-weight:700;
   font-family:Arial,sans-serif;
   line-height:1;
-  white-space:nowrap;
+  cursor:pointer;
   box-sizing:border-box;
+  vertical-align:middle;
 }
 .view-toggle{
   border:none;
   cursor:pointer;
-  font-size:22px;
+  font-size:24px;
+  font-weight:700;
 }
 
 .gallery.list-view{

@@ -81,11 +81,9 @@ body{
 }
 
 .primary{
-  background:#1f789d;
-  color:white;
-  color:white;
-  border:none;
-
+  background:white;
+  color:#333;
+  border:1px solid #ccc;
 }
 
 .primary:hover{
@@ -111,6 +109,25 @@ body{
   font-weight:bold;
 }
 
+  .tribute-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:44px;
+  padding:14px 18px;
+  background:white;
+  border:1px solid #ccc;
+  border-radius:8px;
+  text-decoration:none;
+  color:#1f789d;
+  font-size:16px;
+  font-weight:bold;
+  font-family:Arial,sans-serif;
+  box-sizing:border-box;
+  text-align:center;
+}
+  
 .admin-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -118,13 +135,22 @@ body{
 }
 
 .guide-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  flex-wrap:wrap;
+  display:block;
 }
 
+.guide-select{
+  width:100%;
+  height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  font-weight:bold;
+  font-family:Arial,sans-serif;
+  background:white;
+  box-sizing:border-box;
+}  
+  
 .guide-row select{
   height:44px;
 }
@@ -210,10 +236,11 @@ body{
     <div class="guide-row">
   <span>Choose a brand to open its Model Series guide.</span>
 
-  <select id="brandGuideSelect"
-              style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #ccc;font-size:16px;background:white;">
-        <option value="">Choose brand...</option>
-      </select>
+<select id="brandGuideSelect" class="guide-select">
+  <option value="">
+    Choose a brand to open its Model Series guide.
+  </option>
+</select>
       </div>
     </div>
 
@@ -223,20 +250,11 @@ body{
 
     <h2>Community</h2>
 
-    <div class="community-card">
-
-      <h3>
-        Made possible with help from members of:
-      </h3>
-
-      <a class="community-link"
-         href="https://www.facebook.com/groups/1552004781684334/"
-         target="_blank">
-         Alpine Collectors and Fans Group
-      </a>
-
-    </div>
-
+    <a class="tribute-button"
+   href="https://www.facebook.com/groups/1552004781684334/"
+   target="_blank">
+   Made possible with help from members of Alpine Collectors and Fans Group.
+</a>
   </div>
 
   <div class="section">

@@ -570,7 +570,7 @@ async function loadBrochures() {
       </div>
     `;
   });
-
+  applySavedView();
   if(brochures.length === 0){
     gallery.innerHTML = "No brochures found.";
   }
@@ -698,6 +698,24 @@ function closeModal(){
   document.getElementById("modal").style.display = "none";
 }
 
+function applySavedView(){
+  const savedView = localStorage.getItem("brochureView") || "image";
+  const gallery = document.getElementById("gallery");
+  const button = document.getElementById("viewToggle");
+
+  currentView = savedView;
+
+  if(savedView === "list"){
+    gallery.classList.add("list-view");
+    button.innerText = "⊞";
+    button.title = "Toggle image view";
+  } else {
+    gallery.classList.remove("list-view");
+    button.innerText = "☰";
+    button.title = "Toggle list view";
+  }
+}
+  
 function toggleView(){
 
   const gallery = document.getElementById("gallery");
@@ -706,7 +724,7 @@ function toggleView(){
   if(currentView === "image"){
 
     currentView = "list";
-
+    localStorage.setItem("brochureView", "list");
     gallery.classList.add("list-view");
 
     button.innerText = "⊞";
@@ -715,7 +733,7 @@ function toggleView(){
   } else {
 
     currentView = "image";
-
+    localStorage.setItem("brochureView", "image");
     gallery.classList.remove("list-view");
 
     button.innerText = "☰";

@@ -275,14 +275,14 @@ async function loadBrandGuides(){
   const select = document.getElementById("brandGuideSelect");
 
   data.results
-    .filter(item => item.field_8445074?.value === "Present")
+    .filter(item => item.field_8476152?.value === "Present")
     .forEach(item => {
 
       const brand =
-        item.field_8355154 || "";
+        item.field_8351135 || "";
 
       const url =
-        item.field_8445073 || "";
+        item.field_8445075 || "";
 
       if(!brand || !url) return;
 

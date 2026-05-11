@@ -160,6 +160,18 @@ body{
   text-align:center;
   text-align-last:center;
 }
+.facebook-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(220px, 1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+@media(max-width:800px){
+  .facebook-grid{
+    grid-template-columns:1fr;
+  }
+}
   
 .guide-row select{
   height:44px;
@@ -270,6 +282,33 @@ body{
    target="_blank">
    Thanks to members of Alpine Collectors and Fans Group.
 </a>
+    <div class="facebook-grid">
+
+  <select id="classicSelect" class="guide-select">
+    <option value="">Classic groups...</option>
+  </select>
+
+  <select id="buySellSelect" class="guide-select">
+    <option value="">Buy / Sell...</option>
+  </select>
+
+  <select id="alpineSelect" class="guide-select">
+    <option value="">Alpine groups...</option>
+  </select>
+
+  <select id="pioneerSelect" class="guide-select">
+    <option value="">Pioneer groups...</option>
+  </select>
+
+  <select id="otherSelect" class="guide-select">
+    <option value="">Other brands...</option>
+  </select>
+
+  <select id="spareSelect" class="guide-select">
+    <option value="">Spare...</option>
+  </select>
+
+</div>
   </div>
 
   <div class="section">
@@ -360,7 +399,76 @@ async function loadBrandGuides(){
 
 }
 
+async function loadFacebookLinks(){
+
+  const TABLE_ID = "969808";
+
+  const res = await fetch(
+    `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`,
+    {
+      headers:{
+        Authorization:`Token ${BASEROW_TOKEN}`
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  const mapping = {
+    "Facebook Classic Groups": "classicSelect",
+    "Facebook Buy / Sell": "buySellSelect",
+    "Facebook Alpine": "alpineSelect",
+    "Facebook Pioneer": "pioneerSelect",
+    "Facebook Other Brands": "otherSelect",
+    "Facebook Spare": "spareSelect"
+  };
+
+  data.results
+    .filter(item => item.field_8476262?.value === "Present")
+    .forEach(item => {
+
+      const group =
+        item.field_8476260?.value || "";
+
+      const title =
+        item.field_8476261 || "";
+
+      const url =
+        item.field_8476315 || "";
+
+      const selectId = mapping[group];
+
+      if(!selectId || !title || !url) return;
+
+      const select = document.getElementById(selectId);
+
+      const option = document.createElement("option");
+
+      option.value = url;
+      option.textContent = title;
+
+      select.appendChild(option);
+
+    });
+
+  Object.values(mapping).forEach(selectId => {
+
+    const select = document.getElementById(selectId);
+
+    select.addEventListener("change", e => {
+
+      if(e.target.value){
+        window.location.href = e.target.value;
+      }
+
+    });
+
+  });
+
+}
+  
 loadBrandGuides();
+loadFacebookLinks();
 
 </script>
 

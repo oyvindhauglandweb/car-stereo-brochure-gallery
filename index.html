@@ -549,11 +549,18 @@ async function loadBrochures() {
           <div class="brand">${esc(b.brand)}</div>
           <div class="title">${esc(b.title)}</div>
           <div class="meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</div>
-            <div class="list-extra">
-            <div><strong>Type:</strong> ${esc(b.type)}</div>
-            <div><strong>Model series:</strong> ${esc(b.model_series)}</div>
-            <div><strong>Pages:</strong> ${esc(b.page_count)}</div>
-          </div>
+<div class="list-extra">
+  <div>
+    <strong>Published:</strong> ${esc(b.month)} ${esc(b.year)}
+    • <strong>Language:</strong> ${esc(b.language)}
+    • <strong>Type:</strong> ${esc(b.type)}
+    • <strong>Pages:</strong> ${esc(b.page_count)}
+  </div>
+
+  <div>
+    <strong>Model series:</strong> ${esc(b.model_series)}
+  </div>
+</div>
         </div>
       </div>
     `;

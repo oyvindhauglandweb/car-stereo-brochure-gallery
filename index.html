@@ -166,7 +166,9 @@ body{
   gap:12px;
   margin-top:20px;
 }
-
+.facebook-grid .guide-select{
+  height:56px;
+}
 @media(max-width:800px){
   .facebook-grid{
     grid-template-columns:1fr;
@@ -414,14 +416,19 @@ async function loadFacebookLinks(){
 
   const data = await res.json();
 
-  const mapping = {
-    "Facebook Classic Groups": "classicSelect",
-    "Facebook Buy / Sell": "buySellSelect",
-    "Facebook Alpine": "alpineSelect",
-    "Facebook Pioneer": "pioneerSelect",
-    "Facebook Other Brands": "otherSelect",
-    "Facebook Spare": "spareSelect"
-  };
+function getFacebookSelectId(group){
+  const g = String(group || "").toLowerCase();
+
+  if(g.includes("classic")) return "classicSelect";
+  if(g.includes("buy")) return "buySellSelect";
+  if(g.includes("sell")) return "buySellSelect";
+  if(g.includes("alpine")) return "alpineSelect";
+  if(g.includes("pioneer")) return "pioneerSelect";
+  if(g.includes("other")) return "otherSelect";
+  if(g.includes("spare")) return "spareSelect";
+
+  return "";
+}
 
   data.results
     .filter(item => item.field_8476262?.value === "Present")
@@ -436,7 +443,7 @@ async function loadFacebookLinks(){
       const url =
         item.field_8476315 || "";
 
-      const selectId = mapping[group];
+      const selectId = getFacebookSelectId(group);
 
       if(!selectId || !title || !url) return;
 
@@ -451,7 +458,8 @@ async function loadFacebookLinks(){
 
     });
 
-  Object.values(mapping).forEach(selectId => {
+  ["classicSelect", "buySellSelect", "alpineSelect", "pioneerSelect", "otherSelect", "spareSelect"].forEach(selectId => {
+    
 
     const select = document.getElementById(selectId);
 

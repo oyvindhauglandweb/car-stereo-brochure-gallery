@@ -172,7 +172,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   text-decoration:none;
   border-radius:8px;
   font-weight:bold;
-  font-size:16px;
+  font-size:26px;
   font-family:Arial,sans-serif;
   line-height:1;
   white-space:nowrap;
@@ -181,6 +181,7 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 .view-toggle{
   border:none;
   cursor:pointer;
+  font-size:22px;
 }
 
 .gallery.list-view{
@@ -646,11 +647,11 @@ function toggleView(){
   if(currentView === "image"){
     currentView = "list";
     gallery.classList.add("list-view");
-    button.innerText = "Image view";
+    button.innerText = "⊞";
   } else {
     currentView = "image";
     gallery.classList.remove("list-view");
-    button.innerText = "List view";
+    button.innerText = "☰";
   }
 }
 function setupBrandDropdown(items, selectedBrand){

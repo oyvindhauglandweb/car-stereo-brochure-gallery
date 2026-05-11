@@ -430,7 +430,7 @@ async function loadBrochures() {
   const backButton = document.getElementById("backButton");
 
   if(hasFilter){
-    backButton.href = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
+    backButton.href = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html";
   } else {
     backButton.href = "https://sites.google.com/view/carstereobrochuresmenu";
   }
@@ -590,7 +590,7 @@ function openModal(index, card){
   const ownerLinks = b.owner
     ? b.owner.split(", ").map(owner => `
         <a class="owner-link"
-           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?owner=${encodeURIComponent(owner)}"
+           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?owner=${encodeURIComponent(owner)}"
            target="_blank"
            title="View brochures owned by ${esc(owner)}">
            ${esc(owner)}
@@ -601,7 +601,7 @@ function openModal(index, card){
   const submittedByLinks = b.submitted_by
     ? b.submitted_by.split(", ").map(name => `
         <a class="series-link"
-           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?submitted_by=${encodeURIComponent(name)}"
+           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?submitted_by=${encodeURIComponent(name)}"
            target="_blank"
            title="View brochures submitted by ${esc(name)}">
            ${esc(name)}
@@ -612,7 +612,7 @@ function openModal(index, card){
   const modelSeriesLinks = b.model_series
     ? b.model_series.split(", ").map(series => `
         <a class="series-link"
-           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?model_series=${encodeURIComponent(series)}"
+           href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?model_series=${encodeURIComponent(series)}"
            target="_blank"
            title="View brochures in model series: ${esc(series)}">
            ${esc(series)}
@@ -624,7 +624,7 @@ function openModal(index, card){
     <div class="detail-row">
       <span class="detail-label">Brand:</span>
       <a class="series-link"
-         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?brand=${encodeURIComponent(b.brand)}"
          target="_blank"
          title="View all ${esc(b.brand)} brochures">
          ${esc(b.brand)}
@@ -636,7 +636,7 @@ function openModal(index, card){
     <div class="detail-row">
       <span class="detail-label">Year:</span>
       <a class="series-link"
-         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&year=${encodeURIComponent(b.year)}"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?brand=${encodeURIComponent(b.brand)}&year=${encodeURIComponent(b.year)}"
          target="_blank"
          title="View ${esc(b.brand)} brochures from ${esc(b.year)}">
          ${esc(b.year)}
@@ -648,7 +648,7 @@ function openModal(index, card){
     <div class="detail-row">
       <span class="detail-label">Language:</span>
       <a class="series-link"
-         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&language=${encodeURIComponent(b.language)}"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?brand=${encodeURIComponent(b.brand)}&language=${encodeURIComponent(b.language)}"
          target="_blank"
          title="View ${esc(b.brand)} brochures in ${esc(b.language)}">
          ${esc(b.language)}
@@ -658,7 +658,7 @@ function openModal(index, card){
     <div class="detail-row">
       <span class="detail-label">Market:</span>
       <a class="series-link"
-         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}&market=${encodeURIComponent(b.market)}"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?brand=${encodeURIComponent(b.brand)}&market=${encodeURIComponent(b.market)}"
          target="_blank"
          title="View ${esc(b.brand)} brochures for ${esc(b.market)}">
          ${esc(b.market)}
@@ -782,7 +782,7 @@ function goWithFilters(overrides){
   });
 
   window.location.href =
-    "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?" +
+    "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html?" +
     params.toString();
 }
 

@@ -1,1 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Stereo Brochures</title>
 
+<style>
+
+body{
+  margin:0;
+  padding:20px;
+  background:#f2f2f2;
+  font-family:Arial,sans-serif;
+  color:#333;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.logo{
+  max-width:320px;
+  width:100%;
+  height:auto;
+}
+
+.tagline{
+  margin-top:10px;
+  font-size:18px;
+  color:#666;
+}
+
+.section{
+  margin-bottom:40px;
+}
+
+.section h2{
+  margin-bottom:16px;
+  font-size:22px;
+}
+
+.button-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+
+.portal-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:64px;
+  background:white;
+  border:1px solid #ccc;
+  border-radius:12px;
+  text-decoration:none;
+  color:#333;
+  font-size:18px;
+  font-weight:bold;
+  transition:.2s;
+}
+
+.portal-button:hover{
+  background:#e9eef2;
+}
+
+.primary{
+  background:#1f789d;
+  color:white;
+  border:none;
+}
+
+.primary:hover{
+  background:#17627f;
+}
+
+.community-card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  border:1px solid #ccc;
+}
+
+.community-card h3{
+  margin-top:0;
+}
+
+.community-link{
+  display:block;
+  margin-top:12px;
+  color:#1f789d;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+
+.admin-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:50px;
+  background:#666;
+  color:white;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+@media(max-width:800px){
+
+  body{
+    padding:14px;
+  }
+
+  .portal-button{
+    height:56px;
+    font-size:16px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <img class="logo"
+         src="CarStereoBrochures2.png"
+         alt="Car Stereo Brochures">
+
+    <div class="tagline">
+      Explore • Preserve • Share
+    </div>
+  </div>
+
+  <div class="section">
+
+    <h2>Main</h2>
+
+    <div class="button-grid">
+
+      <a class="portal-button primary"
+         href="gallery.html">
+         Public Gallery
+      </a>
+
+      <a class="portal-button"
+         href="YOUR_ADD_BROCHURE_FORM_URL">
+         Add New Brochure
+      </a>
+
+      <a class="portal-button"
+         href="YOUR_REQUEST_ACCESS_FORM_URL">
+         Request Access
+      </a>
+
+      <a class="portal-button"
+         href="YOUR_CONTACT_FORM_URL">
+         Contact
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <h2>Model Series Guides</h2>
+
+    <div class="community-card">
+
+      <p>
+        Choose a brand to open its Model Series guide.
+      </p>
+
+      <select id="brandGuideSelect"
+              style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #ccc;font-size:16px;background:white;">
+        <option value="">Choose brand...</option>
+      </select>
+
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <h2>Community</h2>
+
+    <div class="community-card">
+
+      <h3>
+        Made possible with help from members of:
+      </h3>
+
+      <a class="community-link"
+         href="YOUR_FACEBOOK_GROUP_URL"
+         target="_blank">
+         Alpine Collectors and Fans Group
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <h2>Admin</h2>
+
+    <div class="admin-grid">
+
+      <a class="admin-button"
+         href="https://github.com"
+         target="_blank">
+         GitHub
+      </a>
+
+      <a class="admin-button"
+         href="https://baserow.io"
+         target="_blank">
+         Baserow
+      </a>
+
+      <a class="admin-button"
+         href="https://www.softr.io"
+         target="_blank">
+         Softr
+      </a>
+
+      <a class="admin-button"
+         href="https://sites.google.com"
+         target="_blank">
+         Google Sites
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const BASEROW_TOKEN = "PASTE_YOUR_READ_ONLY_TOKEN_HERE";
+
+async function loadBrandGuides(){
+
+  const TABLE_ID = "957417";
+
+  const res = await fetch(
+    `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`,
+    {
+      headers:{
+        Authorization:`Token ${BASEROW_TOKEN}`
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  const select = document.getElementById("brandGuideSelect");
+
+  data.results
+    .filter(item => item.field_8445074?.value === "Present")
+    .forEach(item => {
+
+      const brand =
+        item.field_8355154 || "";
+
+      const url =
+        item.field_8445073 || "";
+
+      if(!brand || !url) return;
+
+      const option = document.createElement("option");
+
+      option.value = url;
+      option.textContent = brand;
+
+      select.appendChild(option);
+
+    });
+
+  select.addEventListener("change", e => {
+
+    if(e.target.value){
+      window.open(e.target.value, "_blank");
+    }
+
+  });
+
+}
+
+loadBrandGuides();
+
+</script>
+
+</body>
+</html>

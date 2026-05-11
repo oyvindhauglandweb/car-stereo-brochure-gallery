@@ -208,6 +208,18 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   padding:12px;
 }
 
+  .list-extra{
+  display:none;
+  margin-top:8px;
+  color:#555;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.gallery.list-view .list-extra{
+  display:block;
+}
+
 @media(max-width:800px){
   body{
     padding:10px;
@@ -537,6 +549,11 @@ async function loadBrochures() {
           <div class="brand">${esc(b.brand)}</div>
           <div class="title">${esc(b.title)}</div>
           <div class="meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</div>
+            <div class="list-extra">
+            <div><strong>Type:</strong> ${esc(b.type)}</div>
+            <div><strong>Model series:</strong> ${esc(b.model_series)}</div>
+            <div><strong>Pages:</strong> ${esc(b.page_count)}</div>
+          </div>
         </div>
       </div>
     `;

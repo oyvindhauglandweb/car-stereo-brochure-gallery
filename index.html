@@ -670,17 +670,28 @@ function closeModal(){
 }
 
 function toggleView(){
+
   const gallery = document.getElementById("gallery");
   const button = document.getElementById("viewToggle");
 
   if(currentView === "image"){
+
     currentView = "list";
+
     gallery.classList.add("list-view");
+
     button.innerText = "⊞";
+    button.title = "Toggle image view";
+
   } else {
+
     currentView = "image";
+
     gallery.classList.remove("list-view");
+
     button.innerText = "☰";
+    button.title = "Toggle list view";
+
   }
 }
 

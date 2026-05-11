@@ -35,6 +35,15 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 .site-header > a:first-child{
   flex:0 0 100%;
   text-align:center;
+  order:1;
+}
+
+.top-buttons{
+  order:2;
+}
+
+.filter-row{
+  order:3;
 }
 
 .filter-row{
@@ -196,16 +205,16 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
     gap:14px;
   }
 
-  .filter-row{
-    order:2;
-    width:100%;
-  }
-
   .top-buttons{
-    order:3;
-    flex-direction:row;
-    width:auto;
-  }
+  order:2;
+  flex-direction:row;
+  width:auto;
+}
+
+.filter-row{
+  order:3;
+  width:100%;
+}
 
   .filter-select{
     width:calc(50% - 8px);
@@ -259,30 +268,32 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
     </select>
   </div>
 
-  <div class="top-buttons">
-    <button type="button"
-            class="top-button view-toggle"
-            onclick="toggleView()"
-            id="viewToggle"
-            title="Toggle list view">
-      ☰
-    </button>
+<div class="top-buttons">
 
-    <a class="top-button"
-       href="https://sites.google.com/view/carstereobrochuresmenu"
-       target="_top"
-       title="Home">
-       &#8962;
-    </a>
+  <a class="top-button"
+     id="backButton"
+     href="#"
+     target="_top"
+     title="Back">
+     &#8592;
+  </a>
 
-    <a class="top-button"
-       id="backButton"
-       href="#"
-       target="_top"
-       title="Back">
-       &#8592;
-    </a>
-  </div>
+  <a class="top-button"
+     href="https://sites.google.com/view/carstereobrochuresmenu"
+     target="_top"
+     title="Home">
+     &#8962;
+  </a>
+
+  <button type="button"
+          class="top-button view-toggle"
+          onclick="toggleView()"
+          id="viewToggle"
+          title="Toggle list view">
+    ☰
+  </button>
+
+</div>
 
 </header>
 

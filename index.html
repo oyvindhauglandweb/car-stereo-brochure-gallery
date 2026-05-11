@@ -16,6 +16,82 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
 .meta{margin-top:6px;color:#777;font-size:14px}
 .page-title{text-align:center;margin-bottom:22px;font-size:22px;font-weight:bold}
 
+.site-header{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:14px 18px;
+  max-width:1400px;
+  margin:0 auto 24px;
+  padding:10px 0;
+}
+
+.site-header img{
+  height:48px;
+  width:auto;
+}
+
+.site-header > a:first-child{
+  flex:0 0 100%;
+  text-align:center;
+}
+
+.filter-row{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.filter-select{
+  height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  background:white;
+  max-width:220px;
+  box-sizing:border-box;
+}
+
+.top-buttons{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:auto;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:white;
+  color:black;
+  text-decoration:none;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.view-toggle{
+  cursor:pointer;
+  font-size:24px;
+  font-weight:700;
+}
+
 .modal{
   display:none;
   position:absolute;
@@ -89,10 +165,51 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   margin-right:8px;
 }
 
-@media(max-width:800px){
+.gallery.list-view{
+  display:block;
+}
 
+.gallery.list-view .card{
+  display:grid;
+  grid-template-columns:90px 1fr;
+  margin-bottom:12px;
+}
+
+.gallery.list-view .card img{
+  width:90px;
+  height:120px;
+  aspect-ratio:auto;
+}
+
+.gallery.list-view .info{
+  padding:12px;
+}
+
+@media(max-width:800px){
   body{
     padding:10px;
+  }
+
+  .site-header{
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+
+  .filter-row{
+    order:2;
+    width:100%;
+  }
+
+  .top-buttons{
+    order:3;
+    flex-direction:row;
+    width:auto;
+  }
+
+  .filter-select{
+    width:calc(50% - 8px);
+    max-width:none;
   }
 
   .modal{
@@ -112,179 +229,63 @@ body{margin:0;padding:20px;background:#f2f2f2;font-family:Arial,sans-serif}
   .modal-info{
     padding:18px;
   }
-
-.site-header{
-  grid-template-columns:1fr;
-  justify-items:center;
-  gap:14px;
 }
-
-.filter-row{
-  order:2;
-}
-
-.top-buttons{
-  order:3;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  width:auto;
-}
-
-}
-
-.site-header{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:18px;
-  max-width:1400px;
-  margin:0 auto 24px;
-  padding:10px 0;
-}
-
-.site-header img{
-  height:48px;
-  width:auto;
-}
-
-.filter-row{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:14px;
-}
-.filter-select{
-  height:44px;
-  padding:0 14px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:16px;
-  font-family:Arial,sans-serif;
-  background:white;
-  max-width:220px;
-  box-sizing:border-box;
-}
-.top-button{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:44px;
-  min-width:44px;
-  height:44px;
-  padding:0;
-  background:white;
-  color:black;
-  text-decoration:none;
-  border:1px solid #ccc;
-  border-radius:8px;
-  font-size:26px;
-  font-weight:900;
-  font-family:Arial,sans-serif;
-  line-height:44px;
-  cursor:pointer;
-  box-sizing:border-box;
-}
-.view-toggle{
-  border:none;
-  cursor:pointer;
-  font-size:24px;
-  font-weight:700;
-}
-
-.gallery.list-view{
-  display:block;
-}
-
-.gallery.list-view .card{
-  display:grid;
-  grid-template-columns:90px 1fr;
-  margin-bottom:12px;
-}
-
-.gallery.list-view .card img{
-  width:90px;
-  height:120px;
-  aspect-ratio:auto;
-}
-
-.gallery.list-view .info{
-  padding:12px;
-}  
 </style>
 </head>
 
 <body>
 
-  
 <header class="site-header" id="siteHeader">
 
-  <a href="https://sites.google.com/view/carstereobrochuresmenu"
-     target="_top">
+  <a href="https://sites.google.com/view/carstereobrochuresmenu" target="_top">
     <img src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
   </a>
 
+  <div class="filter-row">
+    <select id="brandSelect" class="filter-select" onchange="changeBrand(this.value)">
+      <option value="">All brands</option>
+    </select>
 
+    <select id="yearSelect" class="filter-select" onchange="changeYear(this.value)">
+      <option value="">All years</option>
+    </select>
 
-<div class="filter-row">
+    <select id="languageSelect" class="filter-select" onchange="changeLanguage(this.value)">
+      <option value="">All languages</option>
+    </select>
 
-  <select id="brandSelect"
-          class="filter-select"
-          onchange="changeBrand(this.value)">
-    <option value="">All brands</option>
-  </select>
+    <select id="ownerSelect" class="filter-select" onchange="changeOwner(this.value)">
+      <option value="">All owners</option>
+    </select>
+  </div>
 
-  <select id="yearSelect"
-          class="filter-select"
-          onchange="changeYear(this.value)">
-    <option value="">All years</option>
-  </select>
+  <div class="top-buttons">
+    <button type="button"
+            class="top-button view-toggle"
+            onclick="toggleView()"
+            id="viewToggle"
+            title="Toggle list view">
+      ☰
+    </button>
 
-  <select id="languageSelect"
-          class="filter-select"
-          onchange="changeLanguage(this.value)">
-    <option value="">All languages</option>
-  </select>
+    <a class="top-button"
+       href="https://sites.google.com/view/carstereobrochuresmenu"
+       target="_top"
+       title="Home">
+       &#8962;
+    </a>
 
-  <select id="ownerSelect"
-          class="filter-select"
-          onchange="changeOwner(this.value)">
-    <option value="">All owners</option>
-  </select>
+    <a class="top-button"
+       id="backButton"
+       href="#"
+       target="_top"
+       title="Back">
+       &#8592;
+    </a>
+  </div>
 
-</div>
-
-<div class="top-buttons">
-
-<button type="button"
-        class="top-button view-toggle"
-        onclick="toggleView()"
-        id="viewToggle"
-        title="Toggle list view">
-  ☰
-</button>
-
-<a class="top-button"
-   href="https://sites.google.com/view/carstereobrochuresmenu"
-   target="_top"
-   title="Home">
-   &#8962;
-</a>
-
-<a class="top-button"
-   id="backButton"
-   href="#"
-   target="_top"
-   title="Back">
-   &#8592;
-</a>
-
-</div>
-  
 </header>
-  
+
 <div class="page-title" id="pageTitle">Public Brochure Gallery</div>
 <div class="gallery" id="gallery">Loading...</div>
 
@@ -317,6 +318,7 @@ const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
 const TABLE_ID = "959905";
 
 let brochureData = [];
+let currentView = "image";
 
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g, function(char){
@@ -363,62 +365,59 @@ async function loadBrochures() {
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){
     document.getElementById("pageTitle").innerText = "Brochures in model series: " + modelSeriesFilter;
-  } else if(brandFilter){
-    document.getElementById("pageTitle").innerText = brandFilter + " Brochure Gallery";
   } else if(brandFilter && yearFilter){
     document.getElementById("pageTitle").innerText = brandFilter + " brochures from " + yearFilter;
   } else if(brandFilter && languageFilter){
     document.getElementById("pageTitle").innerText = brandFilter + " brochures in " + languageFilter;
   } else if(brandFilter && marketFilter){
     document.getElementById("pageTitle").innerText = brandFilter + " brochures for " + marketFilter;
+  } else if(brandFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " Brochure Gallery";
   } else if(submittedByFilter){
     document.getElementById("pageTitle").innerText = "Brochures submitted by " + submittedByFilter;
   }
 
-const hasFilter =
-  ownerFilter ||
-  modelSeriesFilter ||
-  brandFilter ||
-  yearFilter ||
-  languageFilter ||
-  marketFilter ||
-  submittedByFilter;
+  const hasFilter =
+    ownerFilter ||
+    modelSeriesFilter ||
+    brandFilter ||
+    yearFilter ||
+    languageFilter ||
+    marketFilter ||
+    submittedByFilter;
 
-const backButton = document.getElementById("backButton");
+  const backButton = document.getElementById("backButton");
 
-if(hasFilter){
-  backButton.href =
-    "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
-} else {
-  backButton.href =
-    "https://sites.google.com/view/carstereobrochuresmenu";
-}
-  
+  if(hasFilter){
+    backButton.href = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
+  } else {
+    backButton.href = "https://sites.google.com/view/carstereobrochuresmenu";
+  }
+
   let allRows = [];
-let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
+  let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
 
-while(nextUrl){
-  const res = await fetch(nextUrl, {
-    headers: {
-      Authorization: `Token ${BASEROW_TOKEN}`
-    }
+  while(nextUrl){
+    const res = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Token ${BASEROW_TOKEN}`
+      }
+    });
+
+    const data = await res.json();
+
+    allRows = allRows.concat(data.results || []);
+    nextUrl = data.next;
+  }
+
+  setupFilters(allRows, {
+    brand: brandFilter,
+    year: yearFilter,
+    language: languageFilter,
+    owner: ownerFilter
   });
 
-  const data = await res.json();
-
-  allRows = allRows.concat(data.results || []);
-  nextUrl = data.next;
-}
-
-setupFilters(allRows, {
-  brand: brandFilter,
-  year: yearFilter,
-  language: languageFilter,
-  owner: ownerFilter
-});
-
-const brochures = allRows
-  
+  const brochures = allRows
     .filter(item => item.field_8379597?.value !== "Rejected")
     .filter(item => item.field_8379592?.length > 0)
     .filter(item => {
@@ -452,7 +451,6 @@ const brochures = allRows
       const submittedBy = item.field_8379596?.map(x => x.value) || [];
       return submittedBy.includes(submittedByFilter);
     })
- 
     .map(item => ({
       id: item.id,
       brochure: item.field_8379584?.[0]?.value || "",
@@ -475,38 +473,32 @@ const brochures = allRows
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
         ""
     }));
-  
-const monthOrder = {
-  January: 1,
-  February: 2,
-  March: 3,
-  April: 4,
-  May: 5,
-  June: 6,
-  July: 7,
-  August: 8,
-  September: 9,
-  October: 10,
-  November: 11,
-  December: 12
-};
 
-brochures.sort((a, b) => {
+  const monthOrder = {
+    January: 1,
+    February: 2,
+    March: 3,
+    April: 4,
+    May: 5,
+    June: 6,
+    July: 7,
+    August: 8,
+    September: 9,
+    October: 10,
+    November: 11,
+    December: 12
+  };
 
-  const yearDiff =
-    parseInt(a.year || 0) - parseInt(b.year || 0);
+  brochures.sort((a, b) => {
+    const yearDiff = parseInt(a.year || 0) - parseInt(b.year || 0);
 
-  if(yearDiff !== 0){
-    return yearDiff;
-  }
+    if(yearDiff !== 0){
+      return yearDiff;
+    }
 
-  return (
-    (monthOrder[a.month] || 0) -
-    (monthOrder[b.month] || 0)
-  );
+    return (monthOrder[a.month] || 0) - (monthOrder[b.month] || 0);
+  });
 
-});
-  
   brochureData = brochures;
 
   const gallery = document.getElementById("gallery");
@@ -576,14 +568,15 @@ function openModal(index, card){
 
   document.getElementById("modalDetails").innerHTML = `
     <div class="detail-row">
-  <span class="detail-label">Brand:</span>
-  <a class="series-link"
-     href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}"
-     target="_blank"
-     title="View all ${esc(b.brand)} brochures">
-     ${esc(b.brand)}
-  </a>
-</div>
+      <span class="detail-label">Brand:</span>
+      <a class="series-link"
+         href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=${encodeURIComponent(b.brand)}"
+         target="_blank"
+         title="View all ${esc(b.brand)} brochures">
+         ${esc(b.brand)}
+      </a>
+    </div>
+
     <div class="detail-row"><span class="detail-label">Title:</span> ${esc(b.title)}</div>
 
     <div class="detail-row">
@@ -650,7 +643,6 @@ function openModal(index, card){
 function closeModal(){
   document.getElementById("modal").style.display = "none";
 }
-let currentView = "image";
 
 function toggleView(){
   const gallery = document.getElementById("gallery");
@@ -664,47 +656,6 @@ function toggleView(){
     currentView = "image";
     gallery.classList.remove("list-view");
     button.innerText = "☰";
-  }
-}
-function setupBrandDropdown(items, selectedBrand){
-
-  const select = document.getElementById("brandSelect");
-
-  const brands = [...new Set(
-    items
-      .map(item => item.field_8379585?.[0]?.value)
-      .filter(Boolean)
-  )].sort();
-
-  brands.forEach(brand => {
-
-    const option = document.createElement("option");
-
-    option.value = brand;
-    option.textContent = brand;
-
-    if(brand === selectedBrand){
-      option.selected = true;
-    }
-
-    select.appendChild(option);
-
-  });
-}
-
-function changeBrand(brand){
-
-  if(brand){
-
-    window.location.href =
-      "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/?brand=" +
-      encodeURIComponent(brand);
-
-  } else {
-
-    window.location.href =
-      "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
-
   }
 }
 
@@ -756,7 +707,7 @@ function changeBrand(value){ goWithFilters({brand:value}); }
 function changeYear(value){ goWithFilters({year:value}); }
 function changeLanguage(value){ goWithFilters({language:value}); }
 function changeOwner(value){ goWithFilters({owner:value}); }
-  
+
 loadBrochures();
 </script>
 </body>

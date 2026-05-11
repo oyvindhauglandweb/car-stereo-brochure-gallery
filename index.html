@@ -298,7 +298,7 @@ async function loadBrandGuides(){
   select.addEventListener("change", e => {
 
     if(e.target.value){
-      window.open(e.target.value, "_blank");
+      window.location.href = e.target.value;
     }
 
   });

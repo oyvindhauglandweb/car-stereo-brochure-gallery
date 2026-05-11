@@ -405,7 +405,7 @@ async function loadFacebookLinks(){
   );
 
   const data = await res.json();
-
+  console.log("Facebook rows:", data.results);
 function getFacebookSelectId(group){
   const g = String(group || "").toLowerCase();
 
@@ -422,27 +422,32 @@ function getFacebookSelectId(group){
 
  data.results
   .filter(item => {
-    const active =
-      item.field_8476262?.value ||
-      item.field_8476262 ||
-      "";
+  const active =
+    item.field_8476262?.value ||
+    item.field_8476262?.[0]?.value ||
+    item.field_8476262 ||
+    "";
 
-    return active === "Present";
-  })
+  return active === "Present";
+})
   .forEach(item => {
 
-    const group =
-      item.field_8476260?.value ||
-      item.field_8476260 ||
-      "";
+   const group =
+  item.field_8476260?.value ||
+  item.field_8476260?.[0]?.value ||
+  item.field_8476260 ||
+  "";
 
-    const title =
-      item.field_8476261 || "";
+const title =
+  item.field_8476261?.value ||
+  item.field_8476261 ||
+  "";
 
-    const url =
-      item.field_8476315?.url ||
-      item.field_8476315 ||
-      "";
+const url =
+  item.field_8476315?.url ||
+  item.field_8476315?.value ||
+  item.field_8476315 ||
+  "";
 
       const selectId = getFacebookSelectId(group);
 

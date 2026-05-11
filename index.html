@@ -45,7 +45,16 @@ body{
   margin-bottom:16px;
   font-size:22px;
 }
+.main-actions{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
 
+.wide-button{
+  width:100%;
+}
+  
 .button-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(220px, 1fr));
@@ -202,35 +211,42 @@ body{
 
     <h2>Main</h2>
 
-    <div class="button-grid">
+    <div class="main-actions">
 
-      <a class="portal-button primary"
-         href="gallery.html">
-         Public Gallery
-      </a>
+  <a class="portal-button wide-button"
+     href="gallery.html">
+     Public Gallery
+  </a>
 
-      <a class="portal-button"
-         href="https://baserow.io/form/8oPGD7rTp5rhKQoUoIMg0PCHtgvvwgONL5e3VQNSidE">
-         Add New Brochure
-      </a>
+  <div class="button-grid">
 
-      <a class="portal-button"
-         href="https://baserow.io/form/2wePvgKoYp4pV_ZgBLywme2HFPXTI72kdddg3u183S4">
-         Request Access
-      </a>
+    <a class="portal-button"
+       href="https://baserow.io/form/8oPGD7rTp5rhKQoUoIMg0PCHtgvvwgONL5e3VQNSidE">
+       Add New Brochure
+    </a>
 
-      <a class="portal-button"
-         href="https://baserow.io/form/WZ8L3IJHlHzawstKkCD2kHG0uJE_uQpuesw-QaNIphs">
-         Contact
-      </a>
+    <a class="portal-button"
+       href="https://baserow.io/form/2wePvgKoYp4pV_ZgBLywme2HFPXTI72kdddg3u183S4">
+       Request Access
+    </a>
 
-    </div>
+    <a class="portal-button placeholder-button"
+       href="#">
+       -----
+    </a>
+
+    <a class="portal-button"
+       href="YOUR_HELP_URL">
+       Help
+    </a>
+
+  </div>
+
+</div>
 
   </div>
 
   <div class="section">
-
-    <h2>Model Series Guides</h2>
 
     <div class="community-card">
 
@@ -248,8 +264,6 @@ body{
   </div>
 
   <div class="section">
-
-    <h2>Community</h2>
 
     <a class="tribute-button"
    href="https://www.facebook.com/groups/1552004781684334/"

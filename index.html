@@ -48,15 +48,21 @@ body{
 
 .button-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  grid-template-columns:repeat(2, minmax(220px, 1fr));
   gap:16px;
+}
+
+@media(min-width:900px){
+  .button-grid{
+    grid-template-columns:repeat(4, 1fr);
+  }
 }
 
 .portal-button{
   display:flex;
   align-items:center;
   justify-content:center;
-  height:64px;
+  height:44px;
   background:white;
   border:1px solid #ccc;
   border-radius:12px;
@@ -82,7 +88,7 @@ body{
 }
 
 .community-card{
-  background:white;
+  background:#f2f2f2;
   border-radius:12px;
   padding:20px;
   border:1px solid #ccc;
@@ -106,6 +112,18 @@ body{
   gap:12px;
 }
 
+.guide-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.guide-row select{
+  height:44px;
+}
+  
 .admin-button{
   display:flex;
   align-items:center;
@@ -184,15 +202,14 @@ body{
 
     <div class="community-card">
 
-      <p>
-        Choose a brand to open its Model Series guide.
-      </p>
+    <div class="guide-row">
+  <span>Choose a brand to open its Model Series guide.</span>
 
-      <select id="brandGuideSelect"
+  <select id="brandGuideSelect"
               style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #ccc;font-size:16px;background:white;">
         <option value="">Choose brand...</option>
       </select>
-
+      </div>
     </div>
 
   </div>

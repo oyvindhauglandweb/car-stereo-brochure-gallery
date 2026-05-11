@@ -175,10 +175,6 @@ body{
   }
 }
   
-.guide-row select{
-  height:44px;
-}
-  
 .admin-button{
   display:flex;
   align-items:center;
@@ -431,11 +427,20 @@ function getFacebookSelectId(group){
 }
 
   data.results
-    .filter(item => item.field_8476262?.value === "Present")
+    .filter(item => {
+  const active =
+    item.field_8476262?.value ||
+    item.field_8476262 ||
+    "";
+
+  return active === "Present";
+})
     .forEach(item => {
 
-      const group =
-        item.field_8476260?.value || "";
+const group =
+  item.field_8476260?.value ||
+  item.field_8476260 ||
+  "";
 
       const title =
         item.field_8476261 || "";

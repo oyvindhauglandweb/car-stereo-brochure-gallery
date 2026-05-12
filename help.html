@@ -332,7 +332,10 @@ async function loadHelp(){
       active: getActiveValue(item.field_8510162),
       sort_order: Number(item.field_8510161 || 0)
     }))
-    .find(item => item.name === caseName && item.active === "Active");
+    .find(item =>
+  item.name.toLowerCase() === caseName.toLowerCase() &&
+  item.active === "Active"
+);
 
   if(!selectedCase){
     pageTitle.innerText = "Help page not found";

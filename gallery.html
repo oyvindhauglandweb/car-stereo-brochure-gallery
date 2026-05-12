@@ -596,10 +596,11 @@ setupFilters(allRows, {
       claim_ownership_url: item.field_8384825?.url || "",
       model_series_guide_url: getUrl(item.field_8460146),
       model_series_guide_present:
-      item.field_8497529?.value ||
-      item.field_8497529?.[0]?.value ||
-      item.field_8497529 ||
-      "",
+        item.field_8497529?.[0]?.value ||
+        item.field_8497529?.[0] ||
+        item.field_8497529?.value ||
+        item.field_8497529 ||
+        "",
       image:
         item.field_8379592?.[0]?.url ||
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||

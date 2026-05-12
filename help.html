@@ -361,7 +361,11 @@ async function loadHelp(){
       active: getActiveValue(item.field_8503759)
     }))
     .filter(item => item.active === "Active")
-    .filter(item => item.help_case.includes(selectedCase.name))
+    .filter(item =>
+  item.help_case.toLowerCase().includes(
+    selectedCase.name.toLowerCase()
+  )
+)
     .sort((a,b) => a.number - b.number);
 
   helpList.innerHTML = "";

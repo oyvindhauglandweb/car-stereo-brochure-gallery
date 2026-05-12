@@ -801,12 +801,12 @@ console.log("Guide URL:", b.model_series_guide_url);
 <span class="detail-label">
   ${
     String(b.model_series_guide_present).includes("Present")
-      ? `<a href="${esc(b.model_series_guide_url)}"
-            target="_blank"
-            style="text-decoration:none;color:var(--link);"
-            title="Open model series guide for ${esc(b.brand)}">
-            Model series:
-         </a>`
+      ? `<a href="model-series.html?brand=${encodeURIComponent(b.brand)}"
+   target="_blank"
+   style="text-decoration:none;color:var(--link);"
+   title="Open model series guide for ${esc(b.brand)}">
+   Model series:
+</a>`
       : `Model series:`
   }
 </span>

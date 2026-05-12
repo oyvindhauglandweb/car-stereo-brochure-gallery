@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Series Guides</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.logo{
+  max-width:320px;
+  width:100%;
+  height:auto;
+}
+
+.top-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--card);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  box-sizing:border-box;
+}
+
+.icon-back{
+  position:relative;
+  top:-1px;
+  font-size:28px;
+}
+
+.icon-home{
+  position:relative;
+  top:-2px;
+  font-size:30px;
+}
+
+.page-title{
+  text-align:center;
+  margin-bottom:28px;
+  font-size:26px;
+  font-weight:bold;
+}
+
+.intro{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:30px;
+  font-size:16px;
+}
+
+.guide-list{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+.guide-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+.guide-title{
+  font-size:30px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.guide-description{
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.5;
+  margin-bottom:20px;
+}
+
+.image-row{
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:28px;
+  align-items:center;
+}
+
+.logo-image{
+  width:100%;
+  max-height:180px;
+  object-fit:contain;
+  background:var(--soft);
+  border-radius:8px;
+}
+
+.example-image{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  background:var(--soft);
+  border-radius:8px;
+}
+
+.loading{
+  text-align:center;
+  color:var(--muted);
+  font-size:18px;
+}
+
+@media(max-width:800px){
+  body{
+    padding:14px;
+  }
+
+  .page-title{
+    font-size:24px;
+  }
+
+  .guide-card{
+    padding:18px;
+  }
+
+  .guide-title{
+    font-size:26px;
+  }
+
+  .image-row{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .logo-image{
+    max-height:160px;
+  }
+
+  .example-image{
+    max-height:none;
+  }
+}
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <img class="logo"
+         id="siteLogo"
+         src="CarStereoBrochures2.png"
+         alt="Car Stereo Brochures">
+
+    <div class="top-buttons">
+      <a class="top-button"
+         href="gallery.html"
+         title="Back to gallery">
+        <span class="icon-back">←</span>
+      </a>
+
+      <a class="top-button"
+         href="index.html"
+         title="Home">
+        <span class="icon-home">⌂</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="page-title" id="pageTitle">Model Series Guides</div>
+
+  <div class="intro" id="introText">
+    Loading model series guide...
+  </div>
+
+  <div class="guide-list" id="guideList">
+    <div class="loading">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
+const TABLE_ID = "972230";
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "light";
+  const logo = document.getElementById("siteLogo");
+
+  if(savedTheme === "dark"){
+    document.body.classList.add("dark-mode");
+    logo.src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    document.body.classList.remove("dark-mode");
+    logo.src = "CarStereoBrochures2.png";
+  }
+}
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char];
+  });
+}
+
+function getLinkedValue(value){
+  if (!value) return "";
+
+  if (Array.isArray(value)) {
+    return value.map(x => x.value || x.name || "").filter(Boolean).join(", ");
+  }
+
+  if (typeof value === "object") {
+    return value.value || value.name || "";
+  }
+
+  return value;
+}
+
+function getFileUrl(value){
+  if (!value) return "";
+
+  if (Array.isArray(value)) {
+    return (
+      value[0]?.url ||
+      value[0]?.thumbnails?.card_cover?.url ||
+      value[0]?.thumbnails?.small?.url ||
+      ""
+    );
+  }
+
+  if (typeof value === "object") {
+    return value.url || "";
+  }
+
+  return "";
+}
+
+async function loadModelSeries(){
+  applySavedTheme();
+
+  const params = new URLSearchParams(window.location.search);
+  const brandFilter = params.get("brand") || "";
+
+  const pageTitle = document.getElementById("pageTitle");
+  const introText = document.getElementById("introText");
+  const guideList = document.getElementById("guideList");
+
+  if(brandFilter){
+    pageTitle.innerText = brandFilter + " Model Series Guides";
+    introText.innerText = "Overview of " + brandFilter + " model series used in brochures and product catalogs.";
+  } else {
+    pageTitle.innerText = "Model Series Guides";
+    introText.innerText = "Choose a brand from the portal to open its model series guide.";
+  }
+
+  let allRows = [];
+  let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
+
+  while(nextUrl){
+    const res = await fetch(nextUrl, {
+      headers:{
+        Authorization:`Token ${BASEROW_TOKEN}`
+      }
+    });
+
+    const data = await res.json();
+
+    allRows = allRows.concat(data.results || []);
+    nextUrl = data.next;
+  }
+
+  const guides = allRows
+    .map(item => ({
+      name: item.field_8501352 || "",
+      brand: getLinkedValue(item.field_8501353),
+      logo: getFileUrl(item.field_8503005),
+      example: getFileUrl(item.field_8503078),
+      description: item.field_8503087 || "",
+      active:
+        item.field_8501354?.value ||
+        item.field_8501354 ||
+        "",
+      sort_order: Number(item.field_8503101 || 0)
+    }))
+    .filter(item => item.active === "Active")
+    .filter(item => {
+      if(!brandFilter) return true;
+      return item.brand === brandFilter;
+    })
+    .sort((a,b) => a.sort_order - b.sort_order);
+
+  guideList.innerHTML = "";
+
+  if(guides.length === 0){
+    guideList.innerHTML = `<div class="loading">No model series guides found.</div>`;
+    return;
+  }
+
+  guides.forEach(item => {
+    guideList.innerHTML += `
+      <div class="guide-card">
+
+        <div class="guide-title">
+          ${esc(item.name)}
+        </div>
+
+        ${
+          item.description
+            ? `<div class="guide-description">${esc(item.description)}</div>`
+            : ``
+        }
+
+        <div class="image-row">
+
+          ${
+            item.logo
+              ? `<img class="logo-image"
+                      src="${esc(item.logo)}"
+                      alt="${esc(item.name)} logo">`
+              : `<div></div>`
+          }
+
+          ${
+            item.example
+              ? `<img class="example-image"
+                      src="${esc(item.example)}"
+                      alt="${esc(item.name)} example">`
+              : `<div></div>`
+          }
+
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+loadModelSeries();
+</script>
+
+</body>
+</html>

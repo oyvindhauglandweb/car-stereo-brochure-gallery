@@ -54,7 +54,7 @@ body{
 .wide-button{
   width:100%;
 }
-  
+
 .button-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -129,7 +129,7 @@ body{
   box-sizing:border-box;
   text-align:center;
 }
-  
+
 .admin-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -168,7 +168,7 @@ body{
     grid-template-columns:1fr;
   }
 }
-  
+
 .admin-button{
   display:flex;
   align-items:center;
@@ -406,7 +406,7 @@ async function loadFacebookLinks(){
   );
 
   const data = await res.json();
-  console.log("Facebook rows:", data.results);
+
 function getFacebookSelectId(group){
   const g = String(group || "").toLowerCase();
 
@@ -466,7 +466,7 @@ const url =
     });
 
   ["classicSelect", "buySellSelect", "alpineSelect", "pioneerSelect", "otherSelect", "spareSelect"].forEach(selectId => {
-    
+
 
     const select = document.getElementById(selectId);
 
@@ -481,7 +481,7 @@ const url =
   });
 
 }
-  
+
 loadBrandGuides();
 loadFacebookLinks();
 

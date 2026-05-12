@@ -362,6 +362,14 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
     <span class="theme-icon">☾</span>
   </button>
 
+  <a class="top-button"
+     id="resetFilterButton"
+     href="gallery.html"
+     title="Reset filters"
+     style="display:none;">
+     ×
+  </a>
+  
   <button type="button"
           class="top-button view-toggle"
           onclick="toggleView()"
@@ -520,6 +528,9 @@ async function loadBrochures() {
     backButton.href = PORTAL_URL;
   }
 
+  document.getElementById("resetFilterButton").style.display =
+  hasFilter ? "flex" : "none";
+  
   let allRows = [];
   let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
 

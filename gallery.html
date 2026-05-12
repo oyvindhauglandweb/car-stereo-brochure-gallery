@@ -306,7 +306,9 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
 <header class="site-header" id="siteHeader">
 
   <a href="https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/" target="_top">
-    <img src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+    <img id="siteLogo"
+     src="CarStereoBrochures2.png"
+     alt="Car Stereo Brochures">
   </a>
 
   <div class="filter-row">
@@ -437,10 +439,12 @@ function applySavedTheme(){
 
   if(savedTheme === "dark"){
     document.body.classList.add("dark-mode");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2 Sort BG.png";
     button.innerHTML = '<span class="theme-icon">☀</span>';
     button.title = "Toggle light mode";
   } else {
     document.body.classList.remove("dark-mode");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2.png";
     button.innerHTML = '<span class="theme-icon">☾</span>';
     button.title = "Toggle dark mode";
   }
@@ -452,10 +456,12 @@ function toggleTheme(){
 
   if(isDark){
     localStorage.setItem("brochureTheme", "dark");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2 Sort BG.png";
     button.innerHTML = '<span class="theme-icon">☀</span>';
     button.title = "Toggle light mode";
   } else {
     localStorage.setItem("brochureTheme", "light");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2.png";
     button.innerHTML = '<span class="theme-icon">☾</span>';
     button.title = "Toggle dark mode";
   }

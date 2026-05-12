@@ -463,7 +463,14 @@ function getLookupValue(value){
   }
 
   if (typeof value === "object") {
-    return value.value || value.name || value.text || "";
+    return (
+      value.value?.value ||
+      value.value?.name ||
+      value.value ||
+      value.name ||
+      value.text ||
+      ""
+    );
   }
 
   return "";

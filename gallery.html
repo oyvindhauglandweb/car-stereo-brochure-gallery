@@ -627,7 +627,8 @@ setupFilters(allRows, {
       claim_ownership_url: item.field_8384825?.url || "",
       model_series_guide_url: getUrl(item.field_8460146),
 model_series_guide_present: getLookupValue(item.field_8497529),
-      image:
+debug_present_raw: item.field_8497529,
+image:
         item.field_8379592?.[0]?.url ||
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
         ""
@@ -696,7 +697,11 @@ model_series_guide_present: getLookupValue(item.field_8497529),
 
 function openModal(index, card){
   const b = brochureData[index];
-
+  
+console.log("Guide present raw:", b.debug_present_raw);
+console.log("Guide present parsed:", b.model_series_guide_present);
+console.log("Guide URL:", b.model_series_guide_url);
+  
   const modal = document.getElementById("modal");
   modal.style.top = Math.max(0, card.offsetTop - 20) + "px";
   modal.style.display = "flex";

@@ -552,19 +552,43 @@ const url =
   });
 
 }
-const adminMode =
-  new URLSearchParams(window.location.search).get("admin");
+const adminSection =
+  document.getElementById("adminSection");
 
-if(adminMode === "1"){
-  document.getElementById("adminSection").style.display = "block";
+const adminHotspot =
+  document.getElementById("adminHotspot");
+
+function applyAdminVisibility(){
+
+  const adminVisible =
+    localStorage.getItem("adminVisible") === "true";
+
+  adminSection.style.display =
+    adminVisible ? "block" : "none";
 }
+
+adminHotspot.addEventListener("click", () => {
+
+  const current =
+    localStorage.getItem("adminVisible") === "true";
+
+  localStorage.setItem(
+    "adminVisible",
+    (!current).toString()
+  );
+
+  applyAdminVisibility();
+
+});
+
+applyAdminVisibility();
 loadBrandGuides();
 loadFacebookLinks();
 
 </script>
-<a id="adminHotspot"
-   href="index.html?admin=1"
-   title="Admin">
+<div id="adminHotspot"
+     title="Admin toggle">
+</div>
 </a>
 </body>
 </html>

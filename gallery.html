@@ -331,6 +331,10 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
     <select id="ownerSelect" class="filter-select" onchange="changeOwner(this.value)">
       <option value="">All owners</option>
     </select>
+
+    <select id="modelSeriesSelect" class="filter-select" onchange="changeModelSeries(this.value)">
+      <option value="">All model series</option>
+    </select>
   </div>
 
 <div class="top-buttons">
@@ -532,12 +536,13 @@ async function loadBrochures() {
     nextUrl = data.next;
   }
 
-  setupFilters(allRows, {
-    brand: brandFilter,
-    year: yearFilter,
-    language: languageFilter,
-    owner: ownerFilter
-  });
+setupFilters(allRows, {
+  brand: brandFilter,
+  year: yearFilter,
+  language: languageFilter,
+  owner: ownerFilter,
+  model_series: modelSeriesFilter
+});
 
   const brochures = allRows
     .filter(item => item.field_8379597?.value !== "Rejected")
@@ -844,11 +849,13 @@ function setupFilters(items, selected){
   const years = [...new Set(items.map(item => item.field_8379588).filter(Boolean))].sort();
   const languages = [...new Set(items.map(item => item.field_8379590?.[0]?.value).filter(Boolean))].sort();
   const owners = [...new Set(items.flatMap(item => item.field_8379595?.map(x => x.value) || []))].sort();
-
+  const modelSeries = [...new Set(items.flatMap(item => item.field_8384650?.map(x => x.value) || []))].sort();
+  
   fillSelect("brandSelect", brands, selected.brand);
   fillSelect("yearSelect", years, selected.year);
   fillSelect("languageSelect", languages, selected.language);
   fillSelect("ownerSelect", owners, selected.owner);
+  fillSelect("modelSeriesSelect", modelSeries, selected.model_series);
 }
 
 function goWithFilters(overrides){
@@ -871,7 +878,8 @@ function changeBrand(value){ goWithFilters({brand:value}); }
 function changeYear(value){ goWithFilters({year:value}); }
 function changeLanguage(value){ goWithFilters({language:value}); }
 function changeOwner(value){ goWithFilters({owner:value}); }
-
+function changeModelSeries(value){ goWithFilters({model_series:value}); }
+  
 loadBrochures();
 </script>
 </body>

@@ -334,6 +334,7 @@ async function loadModelSeries(){
       name: item.field_8501352 || "",
       brand: getLinkedValue(item.field_8501353),
       logo: getFileUrl(item.field_8503005),
+      logo_dark: getFileUrl(item.field_8509524),
       example: getFileUrl(item.field_8503078),
       description: item.field_8503087 || "",
       active:
@@ -356,43 +357,52 @@ async function loadModelSeries(){
     return;
   }
 
-  guides.forEach(item => {
-    guideList.innerHTML += `
-      <div class="guide-card">
+ guides.forEach(item => {
 
-        <div class="guide-title">
-          ${esc(item.name)}
-        </div>
+  const savedTheme =
+    localStorage.getItem("brochureTheme") || "light";
+
+  const logoToUse =
+    savedTheme === "dark" && item.logo_dark
+      ? item.logo_dark
+      : item.logo;
+
+  guideList.innerHTML += `
+    <div class="guide-card">
+
+      <div class="guide-title">
+        ${esc(item.name)}
+      </div>
+
+      ${
+        item.description
+          ? `<div class="guide-description">${esc(item.description)}</div>`
+          : ``
+      }
+
+      <div class="image-row">
 
         ${
-          item.description
-            ? `<div class="guide-description">${esc(item.description)}</div>`
-            : ``
+          logoToUse
+            ? `<img class="logo-image"
+                    src="${esc(logoToUse)}"
+                    alt="${esc(item.name)} logo">`
+            : `<div></div>`
         }
 
-        <div class="image-row">
-
-          ${
-            item.logo
-              ? `<img class="logo-image"
-                      src="${esc(item.logo)}"
-                      alt="${esc(item.name)} logo">`
-              : `<div></div>`
-          }
-
-          ${
-            item.example
-              ? `<img class="example-image"
-                      src="${esc(item.example)}"
-                      alt="${esc(item.name)} example">`
-              : `<div></div>`
-          }
-
-        </div>
+        ${
+          item.example
+            ? `<img class="example-image"
+                    src="${esc(item.example)}"
+                    alt="${esc(item.name)} example">`
+            : `<div></div>`
+        }
 
       </div>
-    `;
-  });
+
+    </div>
+  `;
+});
 }
 
 loadModelSeries();

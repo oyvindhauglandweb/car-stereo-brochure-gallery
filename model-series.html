@@ -336,6 +336,7 @@ async function loadModelSeries(){
       logo: getFileUrl(item.field_8503005),
       logo_dark: getFileUrl(item.field_8509524),
       example: getFileUrl(item.field_8503078),
+      example_dark: getFileUrl(item.field_8509816),
       description: item.field_8503087 || "",
       active:
         item.field_8501354?.value ||
@@ -366,7 +367,11 @@ async function loadModelSeries(){
     savedTheme === "dark" && item.logo_dark
       ? item.logo_dark
       : item.logo;
-
+const exampleToUse =
+  savedTheme === "dark" && item.example_dark
+    ? item.example_dark
+    : item.example;
+   
   guideList.innerHTML += `
     <div class="guide-card">
 
@@ -391,11 +396,11 @@ async function loadModelSeries(){
         }
 
         ${
-          item.example
-            ? `<img class="example-image"
-                    src="${esc(item.example)}"
-                    alt="${esc(item.name)} example">`
-            : `<div></div>`
+          exampleToUse
+          ? `<img class="example-image"
+          src="${esc(exampleToUse)}"
+          alt="${esc(item.name)} example">`
+          : `<div></div>`
         }
 
       </div>

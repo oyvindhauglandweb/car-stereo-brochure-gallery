@@ -893,12 +893,63 @@ function fillSelect(selectId, values, selectedValue){
 }
 
 function setupFilters(items, selected){
-  const brands = [...new Set(items.map(item => item.field_8379585?.[0]?.value).filter(Boolean))].sort();
-  const years = [...new Set(items.map(item => item.field_8379588).filter(Boolean))].sort();
-  const languages = [...new Set(items.map(item => item.field_8379590?.[0]?.value).filter(Boolean))].sort();
-  const owners = [...new Set(items.flatMap(item => item.field_8379595?.map(x => x.value) || []))].sort();
-  const modelSeries = [...new Set(items.flatMap(item => item.field_8384650?.map(x => x.value) || []))].sort();
-  
+
+  const validRows = items
+    .filter(item => item.field_8379597?.value !== "Rejected")
+    .filter(item => item.field_8379592?.length > 0);
+
+  function rowMatches(item, filterName){
+
+    const brand = item.field_8379585?.[0]?.value || "";
+    const year = item.field_8379588 || "";
+    const language = item.field_8379590?.[0]?.value || "";
+    const owners = item.field_8379595?.map(x => x.value) || [];
+    const modelSeries = item.field_8384650?.map(x => x.value) || [];
+
+    if(filterName !== "brand" && selected.brand && brand !== selected.brand) return false;
+    if(filterName !== "year" && selected.year && year !== selected.year) return false;
+    if(filterName !== "language" && selected.language && language !== selected.language) return false;
+    if(filterName !== "owner" && selected.owner && !owners.includes(selected.owner)) return false;
+    if(filterName !== "model_series" && selected.model_series && !modelSeries.includes(selected.model_series)) return false;
+
+    return true;
+  }
+
+  const brands = [...new Set(
+    validRows
+      .filter(item => rowMatches(item, "brand"))
+      .map(item => item.field_8379585?.[0]?.value)
+      .filter(Boolean)
+  )].sort();
+
+  const years = [...new Set(
+    validRows
+      .filter(item => rowMatches(item, "year"))
+      .map(item => item.field_8379588)
+      .filter(Boolean)
+  )].sort();
+
+  const languages = [...new Set(
+    validRows
+      .filter(item => rowMatches(item, "language"))
+      .map(item => item.field_8379590?.[0]?.value)
+      .filter(Boolean)
+  )].sort();
+
+  const owners = [...new Set(
+    validRows
+      .filter(item => rowMatches(item, "owner"))
+      .flatMap(item => item.field_8379595?.map(x => x.value) || [])
+      .filter(Boolean)
+  )].sort();
+
+  const modelSeries = [...new Set(
+    validRows
+      .filter(item => rowMatches(item, "model_series"))
+      .flatMap(item => item.field_8384650?.map(x => x.value) || [])
+      .filter(Boolean)
+  )].sort();
+
   fillSelect("brandSelect", brands, selected.brand);
   fillSelect("yearSelect", years, selected.year);
   fillSelect("languageSelect", languages, selected.language);

@@ -89,6 +89,10 @@ body{
   font-size:30px;
 }
 
+.theme-icon{
+  font-size:22px;
+  font-weight:700;
+}
 .page-title{
   text-align:center;
   margin-bottom:28px;
@@ -218,6 +222,14 @@ body{
          title="Home">
         <span class="icon-home">⌂</span>
       </a>
+      <button type="button"
+        class="top-button"
+        onclick="toggleTheme()"
+        id="themeToggle"
+        title="Toggle dark mode">
+  <span class="theme-icon">◐</span>
+</button>
+      
     </div>
   </div>
 
@@ -250,6 +262,36 @@ function applySavedTheme(){
   }
 }
 
+function toggleTheme(){
+
+  const isDark =
+    document.body.classList.toggle("dark-mode");
+
+  const button =
+    document.getElementById("themeToggle");
+
+  if(isDark){
+
+    localStorage.setItem("brochureTheme", "dark");
+
+    document.getElementById("siteLogo").src =
+      "CarStereoBrochures2 Sort BG.png";
+
+    button.title = "Toggle light mode";
+
+  } else {
+
+    localStorage.setItem("brochureTheme", "light");
+
+    document.getElementById("siteLogo").src =
+      "CarStereoBrochures2.png";
+
+    button.title = "Toggle dark mode";
+
+  }
+
+}
+  
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g, function(char){
     return {

@@ -450,6 +450,25 @@ function getUrl(value){
   return "";
 }
 
+function getLookupValue(value){
+  if (!value) return "";
+
+  if (typeof value === "string") return value;
+
+  if (Array.isArray(value)) {
+    return value
+      .map(item => getLookupValue(item))
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (typeof value === "object") {
+    return value.value || value.name || value.text || "";
+  }
+
+  return "";
+}
+  
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "light";
   const button = document.getElementById("themeToggle");
@@ -607,12 +626,7 @@ setupFilters(allRows, {
       notes: item.field_8379601 || "",
       claim_ownership_url: item.field_8384825?.url || "",
       model_series_guide_url: getUrl(item.field_8460146),
-      model_series_guide_present:
-        item.field_8497529?.[0]?.value ||
-        item.field_8497529?.[0] ||
-        item.field_8497529?.value ||
-        item.field_8497529 ||
-        "",
+model_series_guide_present: getLookupValue(item.field_8497529),
       image:
         item.field_8379592?.[0]?.url ||
         item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
@@ -774,7 +788,7 @@ function openModal(index, card){
     <div class="detail-row">
 <span class="detail-label">
   ${
-    b.model_series_guide_present === "Present"
+    String(b.model_series_guide_present).includes("Present")
       ? `<a href="${esc(b.model_series_guide_url)}"
             target="_blank"
             style="text-decoration:none;color:var(--link);"

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help - Car Stereo Brochures</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.logo{
+  max-width:320px;
+  width:100%;
+  height:auto;
+}
+
+.top-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--card);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  box-sizing:border-box;
+}
+
+.icon-back{
+  position:relative;
+  top:-1px;
+  font-size:28px;
+}
+
+.icon-home{
+  position:relative;
+  top:-2px;
+  font-size:30px;
+}
+
+.page-title{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.sub-header{
+  text-align:center;
+  color:var(--muted);
+  font-size:18px;
+  margin-bottom:12px;
+}
+
+.description{
+  text-align:center;
+  color:var(--muted);
+  line-height:1.5;
+  margin:0 auto 32px;
+  max-width:760px;
+}
+
+.help-list{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.help-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+.paragraph-number{
+  color:var(--muted);
+  font-size:14px;
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+.paragraph-title{
+  font-size:24px;
+  font-weight:bold;
+  margin-bottom:14px;
+}
+
+.paragraph-text{
+  font-size:16px;
+  line-height:1.6;
+  white-space:pre-line;
+}
+
+.paragraph-image{
+  display:block;
+  max-width:100%;
+  max-height:520px;
+  object-fit:contain;
+  margin:20px auto 0;
+  background:var(--soft);
+  border-radius:8px;
+}
+
+.loading{
+  text-align:center;
+  color:var(--muted);
+  font-size:18px;
+}
+
+@media(max-width:800px){
+  body{
+    padding:14px;
+  }
+
+  .page-title{
+    font-size:24px;
+  }
+
+  .help-card{
+    padding:18px;
+  }
+
+  .paragraph-title{
+    font-size:21px;
+  }
+}
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <img class="logo"
+         id="siteLogo"
+         src="CarStereoBrochures2.png"
+         alt="Car Stereo Brochures">
+
+    <div class="top-buttons">
+      <a class="top-button"
+         href="index.html"
+         title="Back">
+        <span class="icon-back">←</span>
+      </a>
+
+      <a class="top-button"
+         href="index.html"
+         title="Home">
+        <span class="icon-home">⌂</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="page-title" id="pageTitle">Help</div>
+  <div class="sub-header" id="subHeader"></div>
+  <div class="description" id="caseDescription"></div>
+
+  <div class="help-list" id="helpList">
+    <div class="loading">Loading help page...</div>
+  </div>
+
+</div>
+
+<script>
+const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
+
+const HELP_TABLE_ID = "972409";
+const HELP_CASES_TABLE_ID = "973091";
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "light";
+  const logo = document.getElementById("siteLogo");
+
+  if(savedTheme === "dark"){
+    document.body.classList.add("dark-mode");
+    logo.src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    document.body.classList.remove("dark-mode");
+    logo.src = "CarStereoBrochures2.png";
+  }
+}
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char];
+  });
+}
+
+function getLinkedValue(value){
+  if (!value) return "";
+
+  if (Array.isArray(value)) {
+    return value
+      .map(x => x.value || x.name || "")
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (typeof value === "object") {
+    return value.value || value.name || "";
+  }
+
+  return value;
+}
+
+function getActiveValue(value){
+  return value?.value || value?.[0]?.value || value || "";
+}
+
+function getFileUrl(value){
+  if (!value) return "";
+
+  if (Array.isArray(value)) {
+    return (
+      value[0]?.url ||
+      value[0]?.thumbnails?.card_cover?.url ||
+      value[0]?.thumbnails?.small?.url ||
+      ""
+    );
+  }
+
+  if (typeof value === "object") {
+    return value.url || "";
+  }
+
+  return "";
+}
+
+async function fetchAllRows(tableId){
+  let allRows = [];
+  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=false&size=200`;
+
+  while(nextUrl){
+    const res = await fetch(nextUrl, {
+      headers:{
+        Authorization:`Token ${BASEROW_TOKEN}`
+      }
+    });
+
+    const data = await res.json();
+
+    allRows = allRows.concat(data.results || []);
+    nextUrl = data.next;
+  }
+
+  return allRows;
+}
+
+async function loadHelp(){
+  applySavedTheme();
+
+  const params = new URLSearchParams(window.location.search);
+  const caseName = params.get("case") || "User manual";
+
+  const pageTitle = document.getElementById("pageTitle");
+  const subHeader = document.getElementById("subHeader");
+  const caseDescription = document.getElementById("caseDescription");
+  const helpList = document.getElementById("helpList");
+
+  const cases = await fetchAllRows(HELP_CASES_TABLE_ID);
+
+  const selectedCase = cases
+    .map(item => ({
+      name: item.field_8510160 || "",
+      main_header: item.field_8510354 || "",
+      sub_header: item.field_8510358 || "",
+      description: item.field_8510164 || "",
+      active: getActiveValue(item.field_8510162),
+      sort_order: Number(item.field_8510161 || 0)
+    }))
+    .find(item => item.name === caseName && item.active === "Active");
+
+  if(!selectedCase){
+    pageTitle.innerText = "Help page not found";
+    subHeader.innerText = "";
+    caseDescription.innerText = "";
+    helpList.innerHTML = `<div class="loading">No active help case found for: ${esc(caseName)}</div>`;
+    return;
+  }
+
+  pageTitle.innerText = selectedCase.main_header || selectedCase.name;
+  subHeader.innerText = selectedCase.sub_header || "";
+  caseDescription.innerText = selectedCase.description || "";
+
+  const helpRows = await fetchAllRows(HELP_TABLE_ID);
+
+  const paragraphs = helpRows
+    .map(item => ({
+      help_case: getLinkedValue(item.field_8503868),
+      number: Number(item.field_8503796 || 0),
+      header: item.field_8503757 || "",
+      subject: item.field_8503872 || "",
+      image: getFileUrl(item.field_8503890),
+      active: getActiveValue(item.field_8503759)
+    }))
+    .filter(item => item.active === "Active")
+    .filter(item => item.help_case.includes(selectedCase.name))
+    .sort((a,b) => a.number - b.number);
+
+  helpList.innerHTML = "";
+
+  if(paragraphs.length === 0){
+    helpList.innerHTML = `<div class="loading">No active help paragraphs found.</div>`;
+    return;
+  }
+
+  paragraphs.forEach(item => {
+    helpList.innerHTML += `
+      <div class="help-card">
+
+        ${
+          item.number
+            ? `<div class="paragraph-number">Section ${esc(item.number)}</div>`
+            : ``
+        }
+
+        ${
+          item.header
+            ? `<div class="paragraph-title">${esc(item.header)}</div>`
+            : ``
+        }
+
+        ${
+          item.subject
+            ? `<div class="paragraph-text">${esc(item.subject)}</div>`
+            : ``
+        }
+
+        ${
+          item.image
+            ? `<img class="paragraph-image"
+                    src="${esc(item.image)}"
+                    alt="${esc(item.header)}">`
+            : ``
+        }
+
+      </div>
+    `;
+  });
+}
+
+loadHelp();
+</script>
+
+</body>
+</html>

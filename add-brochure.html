@@ -407,9 +407,7 @@ async function fetchAllRowsNamed(tableId){
   const data = await res.json();
   return data.results || [];
 }
-
-  return allRows;
-}  
+ 
   
 async function fetchTableFields(tableId){
   const res = await fetch(`${API_BASE}/fields?table=${tableId}`);

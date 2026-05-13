@@ -477,7 +477,7 @@ function getLookupValue(value){
 }
   
 function applySavedTheme(){
-  const savedTheme = localStorage.getItem("brochureTheme") || "light";
+  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
   const button = document.getElementById("themeToggle");
 
   if(savedTheme === "dark"){

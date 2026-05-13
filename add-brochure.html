@@ -1,1 +1,610 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add New Brochure - Car Stereo Brochures</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+  --button:#ffffff;
+  --button-hover:#e9eef2;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+  --button:#242424;
+  --button-hover:#3a3a3a;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.logo{
+  max-width:320px;
+  width:100%;
+  height:auto;
+}
+
+.top-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--button);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  box-sizing:border-box;
+  cursor:pointer;
+}
+
+.top-button:hover{
+  background:var(--button-hover);
+}
+
+.icon-back{position:relative;top:-1px;font-size:28px;}
+.icon-home{position:relative;top:-2px;font-size:30px;}
+.theme-icon{font-size:22px;font-weight:700;}
+
+.page-title{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.intro{
+  text-align:center;
+  color:var(--muted);
+  line-height:1.5;
+  margin:0 auto 32px;
+  max-width:760px;
+}
+
+.form-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(220px, 1fr));
+  gap:18px;
+}
+
+.form-field{display:flex;flex-direction:column;gap:7px;}
+.form-field.full{grid-column:1 / -1;}
+label{font-weight:bold;font-size:15px;}
+.required{color:#c94;}
+
+input,select,textarea{
+  width:100%;
+  min-height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  box-sizing:border-box;
+}
+
+select[multiple]{min-height:150px;padding:10px 14px;}
+textarea{min-height:120px;padding:12px 14px;resize:vertical;}
+input[type="file"]{padding:10px 14px;}
+.help-text{color:var(--muted);font-size:13px;line-height:1.4;}
+
+.action-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-end;
+  margin-top:24px;
+  flex-wrap:wrap;
+}
+
+.submit-button,.secondary-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:160px;
+  height:44px;
+  padding:0 18px;
+  background:var(--button);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+  text-decoration:none;
+  font-size:16px;
+  font-weight:bold;
+  font-family:Arial,sans-serif;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.submit-button:hover,.secondary-button:hover{background:var(--button-hover);}
+.submit-button{background:#1f789d;color:#ffffff;border:none;}
+.submit-button:hover{background:#17627f;}
+
+.status-box{
+  display:none;
+  margin-top:20px;
+  padding:14px 16px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--soft);
+  line-height:1.5;
+}
+.status-box.success{display:block;border-color:#4f8f5f;}
+.status-box.error{display:block;border-color:#b85c5c;}
+.disabled{opacity:.55;pointer-events:none;}
+
+@media(max-width:800px){
+  body{padding:14px;}
+  .form-card{padding:18px;}
+  .form-grid{grid-template-columns:1fr;}
+  .page-title{font-size:24px;}
+  .action-row{justify-content:stretch;}
+  .submit-button,.secondary-button{width:100%;}
+}
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img class="logo" id="siteLogo" src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+
+    <div class="top-buttons">
+      <a class="top-button" href="index.html" title="Back"><span class="icon-back">←</span></a>
+      <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
+      <button type="button" class="top-button" onclick="toggleTheme()" id="themeToggle" title="Toggle light/dark mode">
+        <span class="theme-icon">◐</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="page-title">Add New Brochure</div>
+  <div class="intro">
+    Submit a brochure to the public catalog. Required fields are marked with *.
+    New submissions are added as Pending and can be reviewed later.
+  </div>
+
+  <div class="form-card">
+    <form id="brochureForm">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="brandSelect">Brand <span class="required">*</span></label>
+          <select id="brandSelect" required><option value="">Loading brands...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="titleInput">Title <span class="required">*</span></label>
+          <input id="titleInput" type="text" required placeholder="Example: Car Audio Sensor SK-800">
+        </div>
+
+        <div class="form-field">
+          <label for="yearInput">Year <span class="required">*</span></label>
+          <input id="yearInput" type="number" min="1900" max="2100" required placeholder="1979">
+        </div>
+
+        <div class="form-field">
+          <label for="monthSelect">Month <span class="required">*</span></label>
+          <select id="monthSelect" required><option value="">Loading months...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="languageSelect">Language <span class="required">*</span></label>
+          <select id="languageSelect" required><option value="">Loading languages...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="marketSelect">Market <span class="required">*</span></label>
+          <select id="marketSelect" required><option value="">Loading markets...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="typeSelect">Type <span class="required">*</span></label>
+          <select id="typeSelect" required><option value="">Loading types...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="pageCountInput">Page count <span class="required">*</span></label>
+          <input id="pageCountInput" type="number" min="1" required placeholder="6">
+        </div>
+
+        <div class="form-field full">
+          <label for="submittedBySelect">Submitted by <span class="required">*</span></label>
+          <select id="submittedBySelect" required><option value="">Loading registered users...</option></select>
+          <div class="help-text">The selected user will also be added as owner of this brochure.</div>
+        </div>
+
+        <div class="form-field full">
+          <label for="modelSeriesSelect">Model series</label>
+          <select id="modelSeriesSelect" multiple></select>
+          <div class="help-text">Optional. Hold Ctrl / Cmd to select more than one model series. The list updates after choosing a brand.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="coverInput">Cover image <span class="required">*</span></label>
+          <input id="coverInput" type="file" accept="image/*" required>
+        </div>
+
+        <div class="form-field">
+          <label for="pdfInput">Full brochure PDF</label>
+          <input id="pdfInput" type="file" accept="application/pdf">
+        </div>
+
+        <div class="form-field full">
+          <label for="notesInput">Notes</label>
+          <textarea id="notesInput" placeholder="Optional notes about this brochure"></textarea>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <a class="secondary-button" href="gallery.html">Cancel</a>
+        <button class="submit-button" id="submitButton" type="submit">Submit brochure</button>
+      </div>
+
+      <div id="statusBox" class="status-box"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const BASEROW_TOKEN = "JSKwdkacSx14GysDRxSR490ZLUygwvVA";
+
+const TABLES = {
+  brochures: "959905",
+  brands: "957417",
+  modelSeries: "957421",
+  users: "957380"
+};
+
+const FIELDS = {
+  brand: "field_8379585",
+  title: "field_8379608",
+  year: "field_8379588",
+  month: "field_8379589",
+  language: "field_8379590",
+  market: "field_8379591",
+  type: "field_8379586",
+  coverImage: "field_8379592",
+  pageCount: "field_8379594",
+  submittedBy: "field_8379596",
+  owner: "field_8379595",
+  status: "field_8379597",
+  modelSeries: "field_8379587",
+  brochureFile: "field_8379593",
+  notes: "field_8379601"
+};
+
+let allModelSeries = [];
+let statusPendingOptionId = null;
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
+  const logo = document.getElementById("siteLogo");
+
+  if(savedTheme === "dark"){
+    document.body.classList.add("dark-mode");
+    logo.src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    document.body.classList.remove("dark-mode");
+    logo.src = "CarStereoBrochures2.png";
+  }
+}
+
+function toggleTheme(){
+  const isDark = document.body.classList.toggle("dark-mode");
+
+  if(isDark){
+    localStorage.setItem("brochureTheme", "dark");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    localStorage.setItem("brochureTheme", "light");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2.png";
+  }
+}
+
+function showStatus(message, type){
+  const box = document.getElementById("statusBox");
+  box.className = "status-box " + type;
+  box.innerHTML = message;
+}
+
+function setLoading(isLoading){
+  const button = document.getElementById("submitButton");
+  if(isLoading){
+    button.textContent = "Submitting...";
+    button.classList.add("disabled");
+  } else {
+    button.textContent = "Submit brochure";
+    button.classList.remove("disabled");
+  }
+}
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+  });
+}
+
+async function fetchAllRows(tableId){
+  let allRows = [];
+  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=false&size=200`;
+
+  while(nextUrl){
+    const res = await fetch(nextUrl, {headers:{Authorization:`Token ${BASEROW_TOKEN}`}});
+    if(!res.ok) throw new Error("Could not load table " + tableId);
+    const data = await res.json();
+    allRows = allRows.concat(data.results || []);
+    nextUrl = data.next;
+  }
+
+  return allRows;
+}
+
+async function fetchTableFields(tableId){
+  const res = await fetch(`https://api.baserow.io/api/database/fields/table/${tableId}/`, {
+    headers:{Authorization:`Token ${BASEROW_TOKEN}`}
+  });
+  if(!res.ok) throw new Error("Could not load field metadata for table " + tableId);
+  return await res.json();
+}
+
+function fillSelect(selectId, rows, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+
+  rows.forEach(row => {
+    const option = document.createElement("option");
+    option.value = row.id;
+    option.textContent = row.name;
+    select.appendChild(option);
+  });
+}
+
+function fillSingleSelectOptions(selectId, options, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+
+  options.forEach(optionData => {
+    const option = document.createElement("option");
+    option.value = optionData.id;
+    option.textContent = optionData.value;
+    select.appendChild(option);
+  });
+}
+
+function getLinkedValuesFromBrochures(rows, fieldName){
+  const map = new Map();
+  rows.forEach(row => {
+    const values = row[fieldName] || [];
+    values.forEach(item => {
+      if(item?.id && item?.value) map.set(item.id, item.value);
+    });
+  });
+  return [...map.entries()].map(([id, name]) => ({id, name})).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+function getModelSeriesBrandIds(row){
+  const brandLinks = row.field_8351556 || [];
+  return brandLinks.map(item => String(item.id));
+}
+
+function updateModelSeriesOptions(){
+  const brandId = document.getElementById("brandSelect").value;
+  const select = document.getElementById("modelSeriesSelect");
+  select.innerHTML = "";
+
+  const relevant = allModelSeries
+    .filter(row => {
+      if(!brandId) return true;
+      return getModelSeriesBrandIds(row).includes(String(brandId));
+    })
+    .map(row => ({id: row.id, name: row.field_8384572 || ""}))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  relevant.forEach(row => {
+    const option = document.createElement("option");
+    option.value = row.id;
+    option.textContent = row.name;
+    select.appendChild(option);
+  });
+}
+
+async function uploadFile(file){
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("https://api.baserow.io/api/user-files/upload-file/", {
+    method:"POST",
+    headers:{Authorization:`Token ${BASEROW_TOKEN}`},
+    body:formData
+  });
+
+  if(!res.ok){
+    const text = await res.text();
+    throw new Error("File upload failed: " + text);
+  }
+
+  return await res.json();
+}
+
+async function createBrochureRow(payload){
+  const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLES.brochures}/?user_field_names=false`, {
+    method:"POST",
+    headers:{Authorization:`Token ${BASEROW_TOKEN}`, "Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+
+  if(!res.ok){
+    const text = await res.text();
+    throw new Error("Could not create brochure row: " + text);
+  }
+
+  return await res.json();
+}
+
+async function loadFormData(){
+  applySavedTheme();
+
+  const [brands, users, modelSeries, brochures, fields] = await Promise.all([
+    fetchAllRows(TABLES.brands),
+    fetchAllRows(TABLES.users),
+    fetchAllRows(TABLES.modelSeries),
+    fetchAllRows(TABLES.brochures),
+    fetchTableFields(TABLES.brochures)
+  ]);
+
+  const brandOptions = brands.map(row => ({id: row.id, name: row.field_8351135 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
+  const userOptions = users.map(row => ({id: row.id, name: row.field_8350919 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
+
+  fillSelect("brandSelect", brandOptions, "Choose brand...");
+  fillSelect("submittedBySelect", userOptions, "Choose registered user...");
+
+  allModelSeries = modelSeries;
+  updateModelSeriesOptions();
+
+  const monthField = fields.find(field => field.id === 8379589);
+  const statusField = fields.find(field => field.id === 8379597);
+
+  fillSingleSelectOptions("monthSelect", monthField?.select_options || [], "Choose month...");
+
+  statusPendingOptionId = (statusField?.select_options || []).find(option => option.value === "Pending")?.id || null;
+
+  fillSelect("languageSelect", getLinkedValuesFromBrochures(brochures, FIELDS.language), "Choose language...");
+  fillSelect("marketSelect", getLinkedValuesFromBrochures(brochures, FIELDS.market), "Choose market...");
+  fillSelect("typeSelect", getLinkedValuesFromBrochures(brochures, FIELDS.type), "Choose type...");
+
+  document.getElementById("brandSelect").addEventListener("change", updateModelSeriesOptions);
+}
+
+document.getElementById("brochureForm").addEventListener("submit", async function(event){
+  event.preventDefault();
+
+  const brandId = document.getElementById("brandSelect").value;
+  const title = document.getElementById("titleInput").value.trim();
+  const year = document.getElementById("yearInput").value;
+  const monthOptionId = document.getElementById("monthSelect").value;
+  const languageId = document.getElementById("languageSelect").value;
+  const marketId = document.getElementById("marketSelect").value;
+  const typeId = document.getElementById("typeSelect").value;
+  const pageCount = document.getElementById("pageCountInput").value;
+  const submittedById = document.getElementById("submittedBySelect").value;
+  const modelSeriesIds = Array.from(document.getElementById("modelSeriesSelect").selectedOptions).map(option => Number(option.value));
+  const coverFile = document.getElementById("coverInput").files[0];
+  const pdfFile = document.getElementById("pdfInput").files[0];
+  const notes = document.getElementById("notesInput").value.trim();
+
+  if(!statusPendingOptionId){
+    showStatus("Could not find the Pending status option in Baserow.", "error");
+    return;
+  }
+  if(!coverFile){
+    showStatus("Cover image is required.", "error");
+    return;
+  }
+
+  try{
+    setLoading(true);
+    showStatus("Uploading files...", "success");
+
+    const uploadedCover = await uploadFile(coverFile);
+    let uploadedPdf = null;
+    if(pdfFile) uploadedPdf = await uploadFile(pdfFile);
+
+    const payload = {};
+    payload[FIELDS.brand] = [Number(brandId)];
+    payload[FIELDS.title] = title;
+    payload[FIELDS.year] = Number(year);
+    payload[FIELDS.month] = Number(monthOptionId);
+    payload[FIELDS.language] = [Number(languageId)];
+    payload[FIELDS.market] = [Number(marketId)];
+    payload[FIELDS.type] = [Number(typeId)];
+    payload[FIELDS.coverImage] = [uploadedCover];
+    payload[FIELDS.pageCount] = Number(pageCount);
+    payload[FIELDS.submittedBy] = [Number(submittedById)];
+    payload[FIELDS.owner] = [Number(submittedById)];
+    payload[FIELDS.status] = Number(statusPendingOptionId);
+    payload[FIELDS.modelSeries] = modelSeriesIds;
+    payload[FIELDS.notes] = notes;
+    if(uploadedPdf) payload[FIELDS.brochureFile] = [uploadedPdf];
+
+    showStatus("Creating brochure entry...", "success");
+    await createBrochureRow(payload);
+
+    showStatus(`Brochure submitted successfully. It is now listed as Pending.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`, "success");
+    document.getElementById("brochureForm").reset();
+    updateModelSeriesOptions();
+  } catch(error){
+    console.error(error);
+    showStatus("Submission failed.<br><br>" + esc(error.message), "error");
+  } finally{
+    setLoading(false);
+  }
+});
+
+loadFormData().catch(error => {
+  console.error(error);
+  showStatus("Could not load form data.<br><br>" + esc(error.message), "error");
+});
+</script>
+
+</body>
+</html>

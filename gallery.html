@@ -451,11 +451,13 @@ function getUrl(value){
 }
 
 function getLookupValue(value){
+
   if (!value) return "";
 
   if (typeof value === "string") return value;
 
   if (Array.isArray(value)) {
+
     return value
       .map(item => getLookupValue(item))
       .filter(Boolean)
@@ -463,10 +465,9 @@ function getLookupValue(value){
   }
 
   if (typeof value === "object") {
+
     return (
-      value.value?.value ||
-      value.value?.name ||
-      value.value ||
+      getLookupValue(value.value) ||
       value.name ||
       value.text ||
       ""

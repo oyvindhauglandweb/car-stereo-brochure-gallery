@@ -577,9 +577,13 @@ fillSelect(
 fillSelect(
   "typeSelect",
   types
-    .map(row => ({id: row.id, name: row.Name || row.name || ""}))
+    .map(row => ({
+      id: row.id,
+      name: row.Name || row.name || "",
+      priority: Number(row.Priority || row.priority || row.field_8522717 || 9999)
+    }))
     .filter(row => row.name)
-    .sort((a,b) => a.name.localeCompare(b.name)),
+    .sort((a,b) => a.priority - b.priority || a.name.localeCompare(b.name)),
   "Choose type..."
 );
 

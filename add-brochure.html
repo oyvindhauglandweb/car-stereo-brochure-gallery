@@ -311,7 +311,10 @@ const TABLES = {
   brochures: "959905",
   brands: "957417",
   modelSeries: "957421",
-  users: "957380"
+  users: "957380",
+  languages: "957475",
+  markets: "957422",
+  types: "957419"
 };
 
 const FIELDS = {
@@ -398,6 +401,29 @@ async function fetchAllRows(tableId){
   return allRows;
 }
 
+async function fetchAllRowsNamed(tableId){
+  let allRows = [];
+  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=true&size=200`;
+
+  while(nextUrl){
+    const res = await fetch(nextUrl, {
+      headers:{
+        Authorization:`Token ${BASEROW_TOKEN}`
+      }
+    });
+
+    if(!res.ok){
+      throw new Error("Could not load table " + tableId);
+    }
+
+    const data = await res.json();
+    allRows = allRows.concat(data.results || []);
+    nextUrl = data.next;
+  }
+
+  return allRows;
+}  
+  
 async function fetchTableFields(tableId){
   const res = await fetch(`https://api.baserow.io/api/database/fields/table/${tableId}/`, {
     headers:{Authorization:`Token ${BASEROW_TOKEN}`}
@@ -504,13 +530,15 @@ async function createBrochureRow(payload){
 async function loadFormData(){
   applySavedTheme();
 
-  const [brands, users, modelSeries, brochures, fields] = await Promise.all([
-    fetchAllRows(TABLES.brands),
-    fetchAllRows(TABLES.users),
-    fetchAllRows(TABLES.modelSeries),
-    fetchAllRows(TABLES.brochures),
-    fetchTableFields(TABLES.brochures)
-  ]);
+const [brands, users, modelSeries, languages, markets, types, fields] = await Promise.all([
+  fetchAllRows(TABLES.brands),
+  fetchAllRows(TABLES.users),
+  fetchAllRows(TABLES.modelSeries),
+  fetchAllRowsNamed(TABLES.languages),
+  fetchAllRowsNamed(TABLES.markets),
+  fetchAllRowsNamed(TABLES.types),
+  fetchTableFields(TABLES.brochures)
+]);
 
   const brandOptions = brands.map(row => ({id: row.id, name: row.field_8351135 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
   const userOptions = users.map(row => ({id: row.id, name: row.field_8350919 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
@@ -528,9 +556,32 @@ async function loadFormData(){
 
   statusPendingOptionId = (statusField?.select_options || []).find(option => option.value === "Pending")?.id || null;
 
-  fillSelect("languageSelect", getLinkedValuesFromBrochures(brochures, FIELDS.language), "Choose language...");
-  fillSelect("marketSelect", getLinkedValuesFromBrochures(brochures, FIELDS.market), "Choose market...");
-  fillSelect("typeSelect", getLinkedValuesFromBrochures(brochures, FIELDS.type), "Choose type...");
+fillSelect(
+  "languageSelect",
+  languages
+    .map(row => ({id: row.id, name: row.Name || row.name || ""}))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name)),
+  "Choose language..."
+);
+
+fillSelect(
+  "marketSelect",
+  markets
+    .map(row => ({id: row.id, name: row.Name || row.name || ""}))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name)),
+  "Choose market..."
+);
+
+fillSelect(
+  "typeSelect",
+  types
+    .map(row => ({id: row.id, name: row.Name || row.name || ""}))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name)),
+  "Choose type..."
+);
 
   document.getElementById("brandSelect").addEventListener("change", updateModelSeriesOptions);
 }

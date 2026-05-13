@@ -472,9 +472,16 @@ async function loadBrandGuides(){
 
   select.addEventListener("change", e => {
 
-    if(e.target.value){
-      window.location.href = e.target.value;
-    }
+if(e.target.value){
+
+  const brand =
+    encodeURIComponent(
+      e.target.options[e.target.selectedIndex].text
+    );
+
+  window.location.href =
+    `model-series.html?brand=${brand}`;
+}
 
   });
 

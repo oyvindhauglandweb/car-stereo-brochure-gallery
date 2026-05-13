@@ -390,6 +390,7 @@ async function loadHelp(){
       header: item.field_8503757 || "",
       subject: item.field_8503872 || "",
       image: getFileUrl(item.field_8503890),
+      image_dark: getFileUrl(item.field_8510796),
       active: getActiveValue(item.field_8503759)
     }))
     .filter(item => item.active === true || item.active === "true" || item.active === "Active")
@@ -408,6 +409,13 @@ async function loadHelp(){
   }
 
   paragraphs.forEach(item => {
+    const savedTheme =
+  localStorage.getItem("brochureTheme") || "light";
+
+  const imageToUse =
+  savedTheme === "dark" && item.image_dark
+    ? item.image_dark
+    : item.image;
     helpList.innerHTML += `
       <div class="help-card">
 
@@ -423,13 +431,13 @@ async function loadHelp(){
             : ``
         }
 
-        ${
-          item.image
-            ? `<img class="paragraph-image"
-                    src="${esc(item.image)}"
-                    alt="${esc(item.header)}">`
-            : ``
-        }
+     ${
+  imageToUse
+    ? `<img class="paragraph-image"
+            src="${esc(imageToUse)}"
+            alt="${esc(item.header)}">`
+    : ``
+}
 
       </div>
     `;

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Access - Car Stereo Brochures</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+  --button:#ffffff;
+  --button-hover:#e9eef2;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+  --button:#242424;
+  --button-hover:#3a3a3a;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.container{
+  max-width:800px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.logo{
+  max-width:320px;
+  width:100%;
+  height:auto;
+}
+
+.top-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--button);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  box-sizing:border-box;
+  cursor:pointer;
+}
+
+.top-button:hover{
+  background:var(--button-hover);
+}
+
+.icon-back{ position:relative; top:-1px; font-size:28px; }
+.icon-home{ position:relative; top:-2px; font-size:30px; }
+.theme-icon{ font-size:22px; font-weight:700; }
+
+.page-title{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.intro{
+  text-align:center;
+  color:var(--muted);
+  line-height:1.5;
+  margin:0 auto 32px;
+  max-width:700px;
+}
+
+.form-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+}
+
+.form-field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+label{ font-weight:bold; font-size:15px; }
+.required{ color:#c94; }
+
+input, select, textarea{
+  width:100%;
+  min-height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  box-sizing:border-box;
+}
+
+textarea{
+  min-height:120px;
+  padding:12px 14px;
+  resize:vertical;
+}
+
+.action-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-end;
+  margin-top:24px;
+  flex-wrap:wrap;
+}
+
+.submit-button,
+.secondary-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:160px;
+  height:44px;
+  padding:0 18px;
+  background:var(--button);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+  text-decoration:none;
+  font-size:16px;
+  font-weight:bold;
+  font-family:Arial,sans-serif;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.submit-button:hover,
+.secondary-button:hover{ background:var(--button-hover); }
+
+.submit-button{
+  background:#1f789d;
+  color:#ffffff;
+  border:none;
+}
+
+.submit-button:hover{ background:#17627f; }
+
+.status-box{
+  display:none;
+  margin-top:20px;
+  padding:14px 16px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--soft);
+  line-height:1.5;
+}
+
+.status-box.success{ display:block; border-color:#4f8f5f; }
+.status-box.error{ display:block; border-color:#b85c5c; }
+
+.disabled{
+  opacity:.55;
+  pointer-events:none;
+}
+
+@media(max-width:800px){
+  body{ padding:14px; }
+  .form-card{ padding:18px; }
+  .page-title{ font-size:24px; }
+  .action-row{ justify-content:stretch; }
+  .submit-button, .secondary-button{ width:100%; }
+}
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <img class="logo" id="siteLogo" src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+
+    <div class="top-buttons">
+      <a class="top-button" href="index.html" title="Back"><span class="icon-back">←</span></a>
+      <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
+      <button type="button" class="top-button" onclick="toggleTheme()" id="themeToggle" title="Toggle light/dark mode">
+        <span class="theme-icon">◐</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="page-title">Join the Car Stereo Brochure community</div>
+
+  <div class="intro">
+    Fill in your details and click Submit to request access to the community.
+    You will be approved shortly.
+  </div>
+
+  <div class="form-card">
+    <form id="accessForm">
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label for="nameInput">Name <span class="required">*</span></label>
+          <input id="nameInput" type="text" required autocomplete="name">
+        </div>
+
+        <div class="form-field">
+          <label for="emailInput">Email <span class="required">*</span></label>
+          <input id="emailInput" type="email" required autocomplete="email">
+        </div>
+
+        <div class="form-field">
+          <label for="countrySelect">Which country are you from? <span class="required">*</span></label>
+          <select id="countrySelect" required>
+            <option value="">Loading countries...</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="interestSelect">What interests you about classic car audio? <span class="required">*</span></label>
+          <select id="interestSelect" required>
+            <option value="">Loading options...</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="foundSelect">How did you hear about us? <span class="required">*</span></label>
+          <select id="foundSelect" required>
+            <option value="">Loading options...</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="otherInput">If you selected “Other”, please specify</label>
+          <textarea id="otherInput"></textarea>
+        </div>
+
+      </div>
+
+      <div class="action-row">
+        <a class="secondary-button" href="index.html">Cancel</a>
+        <button class="submit-button" id="submitButton" type="submit">Submit</button>
+      </div>
+
+      <div id="statusBox" class="status-box"></div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
+
+const TABLES = {
+  users: "957380",
+  countries: "957423"
+};
+
+const FIELDS = {
+  name: "field_8350919",
+  email: "field_8350941",
+  role: "field_8350946",
+  status: "field_8350947",
+  country: "field_8350948",
+  interest: "field_8350949",
+  found: "field_8350950",
+  other: "field_8351185"
+};
+
+let roleStandardOptionId = null;
+let statusPendingOptionId = null;
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
+  const logo = document.getElementById("siteLogo");
+
+  if(savedTheme === "dark"){
+    document.body.classList.add("dark-mode");
+    logo.src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    document.body.classList.remove("dark-mode");
+    logo.src = "CarStereoBrochures2.png";
+  }
+}
+
+function toggleTheme(){
+  const isDark = document.body.classList.toggle("dark-mode");
+
+  if(isDark){
+    localStorage.setItem("brochureTheme", "dark");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2 Sort BG.png";
+  } else {
+    localStorage.setItem("brochureTheme", "light");
+    document.getElementById("siteLogo").src = "CarStereoBrochures2.png";
+  }
+}
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+  });
+}
+
+function showStatus(message, type){
+  const box = document.getElementById("statusBox");
+  box.className = "status-box " + type;
+  box.innerHTML = message;
+}
+
+function setLoading(isLoading){
+  const button = document.getElementById("submitButton");
+  if(isLoading){
+    button.textContent = "Submitting...";
+    button.classList.add("disabled");
+  } else {
+    button.textContent = "Submit";
+    button.classList.remove("disabled");
+  }
+}
+
+async function fetchAllRows(tableId, userFieldNames = false){
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames ? "true" : "false"}`);
+
+  if(!res.ok){
+    throw new Error("Could not load table " + tableId);
+  }
+
+  const data = await res.json();
+  return data.results || [];
+}
+
+async function fetchTableFields(tableId){
+  const res = await fetch(`${API_BASE}/fields?table=${tableId}`);
+
+  if(!res.ok){
+    throw new Error("Could not load field metadata for table " + tableId);
+  }
+
+  return await res.json();
+}
+
+function fillSelect(selectId, rows, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+
+  rows.forEach(row => {
+    const option = document.createElement("option");
+    option.value = row.id;
+    option.textContent = row.name;
+    select.appendChild(option);
+  });
+}
+
+function fillSingleSelectOptions(selectId, options, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+
+  options.forEach(optionData => {
+    const option = document.createElement("option");
+    option.value = optionData.id;
+    option.textContent = optionData.value;
+    select.appendChild(option);
+  });
+}
+
+async function createUserRow(payload){
+  const res = await fetch(`${API_BASE}/create-user`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
+  });
+
+  if(!res.ok){
+    const text = await res.text();
+    throw new Error("Could not submit request: " + text);
+  }
+
+  return await res.json();
+}
+
+async function loadFormData(){
+  applySavedTheme();
+
+  const [countries, fields] = await Promise.all([
+    fetchAllRows(TABLES.countries, true),
+    fetchTableFields(TABLES.users)
+  ]);
+
+  fillSelect(
+    "countrySelect",
+    countries
+      .map(row => ({id: row.id, name: row.Name || row.name || ""}))
+      .filter(row => row.name)
+      .sort((a,b) => a.name.localeCompare(b.name)),
+    "Choose country..."
+  );
+
+  const roleField = fields.find(field => field.id === 8350946);
+  const statusField = fields.find(field => field.id === 8350947);
+  const interestField = fields.find(field => field.id === 8350949);
+  const foundField = fields.find(field => field.id === 8350950);
+
+  roleStandardOptionId =
+    (roleField?.select_options || [])
+      .find(option => option.value === "Standard")
+      ?.id || null;
+
+  statusPendingOptionId =
+    (statusField?.select_options || [])
+      .find(option => option.value === "Pending")
+      ?.id || null;
+
+  fillSingleSelectOptions("interestSelect", interestField?.select_options || [], "Choose interest...");
+  fillSingleSelectOptions("foundSelect", foundField?.select_options || [], "Choose source...");
+}
+
+document.getElementById("accessForm").addEventListener("submit", async function(event){
+  event.preventDefault();
+
+  const name = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const countryId = document.getElementById("countrySelect").value;
+  const interestOptionId = document.getElementById("interestSelect").value;
+  const foundOptionId = document.getElementById("foundSelect").value;
+  const other = document.getElementById("otherInput").value.trim();
+
+  if(!roleStandardOptionId){
+    showStatus("Could not find the Standard role option in Baserow.", "error");
+    return;
+  }
+
+  if(!statusPendingOptionId){
+    showStatus("Could not find the Pending status option in Baserow.", "error");
+    return;
+  }
+
+  try{
+    setLoading(true);
+    showStatus("Submitting request...", "success");
+
+    const payload = {};
+    payload[FIELDS.name] = name;
+    payload[FIELDS.email] = email;
+    payload[FIELDS.role] = Number(roleStandardOptionId);
+    payload[FIELDS.status] = Number(statusPendingOptionId);
+    payload[FIELDS.country] = [Number(countryId)];
+    payload[FIELDS.interest] = Number(interestOptionId);
+    payload[FIELDS.found] = Number(foundOptionId);
+    payload[FIELDS.other] = other;
+
+    await createUserRow(payload);
+
+    showStatus("Request submitted successfully.<br><br>You will be approved shortly.", "success");
+    document.getElementById("accessForm").reset();
+
+  } catch(error){
+    console.error(error);
+    showStatus("Submission failed.<br><br>" + esc(error.message), "error");
+  } finally{
+    setLoading(false);
+  }
+});
+
+loadFormData().catch(error => {
+  console.error(error);
+  showStatus("Could not load form data.<br><br>" + esc(error.message), "error");
+});
+</script>
+</body>
+</html>

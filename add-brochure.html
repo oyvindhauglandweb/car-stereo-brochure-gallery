@@ -305,7 +305,7 @@ input[type="file"]{padding:10px 14px;}
 </div>
 
 <script>
-const BASEROW_TOKEN = "94cEl9PWs677mUhUn8DKK0UweX9hD5xf";
+const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
 
 const TABLES = {
   brochures: "959905",
@@ -387,48 +387,37 @@ function esc(value){
 }
 
 async function fetchAllRows(tableId){
-  let allRows = [];
-  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=false&size=200`;
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`);
 
-  while(nextUrl){
-    const res = await fetch(nextUrl, {headers:{Authorization:`Token ${BASEROW_TOKEN}`}});
-    if(!res.ok) throw new Error("Could not load table " + tableId);
-    const data = await res.json();
-    allRows = allRows.concat(data.results || []);
-    nextUrl = data.next;
+  if(!res.ok){
+    throw new Error("Could not load table " + tableId);
   }
 
-  return allRows;
+  const data = await res.json();
+  return data.results || [];
 }
 
 async function fetchAllRowsNamed(tableId){
-  let allRows = [];
-  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=true&size=200`;
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=true`);
 
-  while(nextUrl){
-    const res = await fetch(nextUrl, {
-      headers:{
-        Authorization:`Token ${BASEROW_TOKEN}`
-      }
-    });
-
-    if(!res.ok){
-      throw new Error("Could not load table " + tableId);
-    }
-
-    const data = await res.json();
-    allRows = allRows.concat(data.results || []);
-    nextUrl = data.next;
+  if(!res.ok){
+    throw new Error("Could not load table " + tableId);
   }
+
+  const data = await res.json();
+  return data.results || [];
+}
 
   return allRows;
 }  
   
 async function fetchTableFields(tableId){
-  const res = await fetch(`https://api.baserow.io/api/database/fields/table/${tableId}/`, {
-    headers:{Authorization:`Token ${BASEROW_TOKEN}`}
-  });
-  if(!res.ok) throw new Error("Could not load field metadata for table " + tableId);
+  const res = await fetch(`${API_BASE}/fields?table=${tableId}`);
+
+  if(!res.ok){
+    throw new Error("Could not load field metadata for table " + tableId);
+  }
+
   return await res.json();
 }
 
@@ -498,9 +487,8 @@ async function uploadFile(file){
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("https://api.baserow.io/api/user-files/upload-file/", {
+  const res = await fetch(`${API_BASE}/upload-file`, {
     method:"POST",
-    headers:{Authorization:`Token ${BASEROW_TOKEN}`},
     body:formData
   });
 
@@ -513,9 +501,11 @@ async function uploadFile(file){
 }
 
 async function createBrochureRow(payload){
-  const res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLES.brochures}/?user_field_names=false`, {
+  const res = await fetch(`${API_BASE}/create-brochure`, {
     method:"POST",
-    headers:{Authorization:`Token ${BASEROW_TOKEN}`, "Content-Type":"application/json"},
+    headers:{
+      "Content-Type":"application/json"
+    },
     body:JSON.stringify(payload)
   });
 

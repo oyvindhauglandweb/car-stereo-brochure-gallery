@@ -35,11 +35,14 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
   <div class="form-card">
     <form id="claimForm">
       <div class="form-grid">
-        <div class="form-field">
-          <label for="brochureSelect">Brochure <span class="required">*</span></label>
-          <select id="brochureSelect" required><option value="">Loading brochures...</option></select>
-          <div class="help-text">Choose the exact brochure. Check brand, year, title and language carefully.</div>
-        </div>
+       <div class="form-field">
+  <label>Brochure</label>
+
+  <div id="selectedBrochureLabel"
+       style="padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);">
+    Loading selected brochure...
+  </div>
+</div>
         <div class="form-field">
           <label for="userSelect">Your name <span class="required">*</span></label>
           <select id="userSelect" required><option value="">Loading registered users...</option></select>
@@ -80,6 +83,16 @@ async function loadFormData(){
     fetchTableFields(TABLES.ownershipClaims)
   ]);
   allBrochures=brochures;
+  const params = new URLSearchParams(window.location.search);
+const prefillBrochureId = Number(params.get("brochure_id"));
+
+const selectedBrochure =
+  brochures.find(row => Number(row.id) === prefillBrochureId);
+
+if(selectedBrochure){
+  document.getElementById("selectedBrochureLabel").innerText =
+    getBrochureLabel(selectedBrochure);
+}
   const brochureOptions=brochures
     .filter(row=>row.field_8379597?.value!=="Rejected")
     .map(row=>({id:row.id,name:getBrochureLabel(row)}))
@@ -104,7 +117,8 @@ async function loadFormData(){
 
 document.getElementById("claimForm").addEventListener("submit",async function(event){
   event.preventDefault();
-  const brochureId=Number(document.getElementById("brochureSelect").value);
+  const params = new URLSearchParams(window.location.search);
+  const brochureId = Number(params.get("brochure_id"));
   const userId=Number(document.getElementById("userSelect").value);
   if(!claimStatusApprovedOptionId){showStatus("Could not find the Approved status option in Baserow.","error");return}
   const brochure=allBrochures.find(row=>Number(row.id)===brochureId);
@@ -119,7 +133,14 @@ document.getElementById("claimForm").addEventListener("submit",async function(ev
     claim[CLAIM_FIELDS.user]=[userId];
     claim[CLAIM_FIELDS.status]=Number(claimStatusApprovedOptionId);
     await claimOwnership({claim,brochure_id:brochureId,owner_ids:ownerIds});
-    showStatus(`Ownership added successfully.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`,"success");
+    const returnUrl =
+  new URLSearchParams(window.location.search).get("returnUrl") || "gallery.html";
+
+showStatus(
+  `Ownership added successfully.<br><br>
+   <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
+  "success"
+);
     document.getElementById("claimForm").reset();
   }catch(error){
     console.error(error);

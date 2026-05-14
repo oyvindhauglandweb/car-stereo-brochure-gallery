@@ -93,26 +93,14 @@ if(selectedBrochure){
   document.getElementById("selectedBrochureLabel").innerText =
     getBrochureLabel(selectedBrochure);
 }
-  const brochureOptions=brochures
-    .filter(row=>row.field_8379597?.value!=="Rejected")
-    .map(row=>({id:row.id,name:getBrochureLabel(row)}))
-    .filter(row=>row.name)
-    .sort((a,b)=>a.name.localeCompare(b.name));
   const userOptions=users
     .filter(row=>row.field_8350947?.value==="Approved")
     .map(row=>({id:row.id,name:row.field_8350919||""}))
     .filter(row=>row.name)
     .sort((a,b)=>a.name.localeCompare(b.name));
-  fillSelect("brochureSelect",brochureOptions,"Choose brochure...");
   fillSelect("userSelect",userOptions,"Choose your name...");
   const statusField=claimFields.find(field=>field.id===8415667);
   claimStatusApprovedOptionId=(statusField?.select_options||[]).find(option=>option.value==="Approved")?.id||null;
-  const params=new URLSearchParams(window.location.search);
-  const prefillBrochure=params.get("brochure")||params.get("prefill_Brochure")||"";
-  if(prefillBrochure){
-    const match=brochureOptions.find(item=>item.name.toLowerCase().includes(prefillBrochure.toLowerCase()));
-    if(match){document.getElementById("brochureSelect").value=match.id}
-  }
 }
 
 document.getElementById("claimForm").addEventListener("submit",async function(event){

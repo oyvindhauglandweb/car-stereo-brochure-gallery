@@ -17,19 +17,30 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
 .action-row{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}.submit-button,.secondary-button{display:flex;align-items:center;justify-content:center;min-width:160px;height:44px;padding:0 18px;background:var(--button);border:1px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;cursor:pointer;box-sizing:border-box}.submit-button:hover,.secondary-button:hover{background:var(--button-hover)}.submit-button{background:#1f789d;color:#fff;border:none}.submit-button:hover{background:#17627f}
 .status-box{display:none;margin-top:20px;padding:14px 16px;border-radius:8px;border:1px solid var(--border);background:var(--soft);line-height:1.5}.status-box.success{display:block;border-color:#4f8f5f}.status-box.error{display:block;border-color:#b85c5c}.disabled{opacity:.55;pointer-events:none}
 @media(max-width:800px){body{padding:14px}.form-card{padding:18px}.page-title{font-size:24px}.action-row{justify-content:stretch}.submit-button,.secondary-button{width:100%}}
+
 .claim-brochure-preview{
   display:grid;
-  grid-template-columns:160px 1fr;
+  grid-template-columns:180px 1fr;
   gap:18px;
-  align-items:center;
+  align-items:stretch;
 }
 
 .claim-brochure-image{
-  width:160px;
-  max-height:220px;
+  width:180px;
+  height:240px;
   object-fit:contain;
   background:var(--soft);
   border-radius:8px;
+}
+
+.claim-brochure-title{
+  display:flex;
+  align-items:center;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  font-weight:bold;
 }
 
 @media(max-width:800px){
@@ -39,8 +50,10 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
 
   .claim-brochure-image{
     width:100%;
+    height:auto;
     max-height:320px;
   }
+}
 }
 
 
@@ -139,19 +152,19 @@ if(selectedBrochure){
   const imageUrl =
     getFileUrl(selectedBrochure.field_8379592);
 
-  document.getElementById("selectedBrochureDisplay").innerHTML = `
-    ${
-      imageUrl
-        ? `<img class="claim-brochure-image"
-                src="${esc(imageUrl)}"
-                alt="${esc(getBrochureLabel(selectedBrochure))}">`
-        : ``
-    }
+document.getElementById("selectedBrochureDisplay").innerHTML = `
+  ${
+    imageUrl
+      ? `<img class="claim-brochure-image"
+              src="${esc(imageUrl)}"
+              alt="${esc(getBrochureLabel(selectedBrochure))}">`
+      : ``
+  }
 
-    <div>
-      <strong>${esc(getBrochureLabel(selectedBrochure))}</strong>
-    </div>
-  `;
+  <div class="claim-brochure-title">
+    ${esc(getBrochureLabel(selectedBrochure))}
+  </div>
+`;
 }
 const existingOwnerIds =
   selectedBrochure ? getOwnerIds(selectedBrochure) : [];

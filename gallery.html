@@ -830,7 +830,7 @@ ${modelSeriesLinks}
   const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 
 document.getElementById("claimButton").href =
-  `claim-ownership.html?brochure=${encodeURIComponent(b.brochure)}`;
+  `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
 }
 
 function closeModal(){

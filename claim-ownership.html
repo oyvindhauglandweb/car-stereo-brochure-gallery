@@ -198,23 +198,18 @@ function renderBrochure(ownerNames){
         : ``
     }
 
-    <div class="claim-brochure-title">
-      <div>
-        <div style="font-weight:bold;margin-bottom:14px;">
-          ${esc(getBrochureLabel(brochure))}
-        </div>
-
-        <div style="color:var(--muted);line-height:1.5;font-size:15px;">
-          <strong>Registered owners:</strong><br>
-          ${esc(ownerNames)}
-        </div>
-
-        <div style="color:var(--muted);line-height:1.5;font-size:15px;margin-top:14px;">
-          <strong>Remove owner:</strong><br>
-          ${esc(ownerName)}
-        </div>
-      </div>
+<div class="claim-brochure-title">
+  <div>
+    <div style="font-weight:bold;margin-bottom:14px;">
+      ${esc(getBrochureLabel(selectedBrochure))}
     </div>
+
+    <div style="color:var(--muted);line-height:1.5;font-size:15px;">
+      <strong>Registered owners:</strong><br>
+      ${esc(ownerNames)}
+    </div>
+  </div>
+</div>
   `;
 }
 

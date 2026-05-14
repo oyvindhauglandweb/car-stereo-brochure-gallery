@@ -197,17 +197,23 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   box-sizing:border-box;
 }
 
-.claim-button{
-  background:#1f789d;
-  color:white;
+.claim-button,
+.close-button{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
   text-decoration:none;
+  cursor:pointer;
 }
 
-.close-button{
-  background:#667;
-  color:white;
-  border:none;
-  cursor:pointer;
+.claim-button:hover,
+.close-button:hover{
+  background:#3a3a3a;
+}
+
+body:not(.dark-mode) .claim-button:hover,
+body:not(.dark-mode) .close-button:hover{
+  background:#e9eef2;
 }
 
 .owner-link,
@@ -823,11 +829,8 @@ ${modelSeriesLinks}
 
   const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 
-  document.getElementById("claimButton").href =
-    b.claim_ownership_url +
-    separator +
-    "prefill_Brochure=" +
-    encodeURIComponent(b.brochure);
+document.getElementById("claimButton").href =
+  `claim-ownership.html?brochure=${encodeURIComponent(b.brochure)}`;
 }
 
 function closeModal(){

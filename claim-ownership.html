@@ -171,23 +171,19 @@ document.getElementById("selectedBrochureDisplay").innerHTML = `
       ${esc(getBrochureLabel(selectedBrochure))}
     </div>
 
-    ${
-      ownerNames
-        ? `<div style="color:var(--muted);line-height:1.5;font-size:15px;">
+<div style="color:var(--muted);line-height:1.5;font-size:15px;">
   <strong>Registered owners:</strong><br>
-
   ${
     (selectedBrochure.field_8379595 || [])
-      .map(item => `
-        <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
-           style="color:var(--link);text-decoration:none;margin-right:8px;">
-           ${esc(item.value || item.name || "")}
-        </a>
-      `)
+      .map(item =>
+        `<a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
+            style="color:var(--link);text-decoration:none;margin-right:8px;">
+            ${esc(item.value || item.name || "")}
+         </a>`
+      )
       .join("")
   }
-
-</div>`
+</div>    
         : ``
     }
   </div>

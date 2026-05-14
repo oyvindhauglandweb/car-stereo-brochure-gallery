@@ -176,9 +176,9 @@ document.getElementById("selectedBrochureDisplay").innerHTML = `
   <strong>Registered owners:</strong><br>
 
   ${
-    (brochure.field_8379595 || [])
+    (selectedBrochure.field_8379595 || [])
       .map(item => `
-        <a href="remove-ownership.html?brochure_id=${encodeURIComponent(brochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
+        <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
            style="color:var(--link);text-decoration:none;margin-right:8px;">
            ${esc(item.value || item.name || "")}
         </a>
@@ -213,6 +213,7 @@ const userOptions=users
 document.getElementById("claimForm").addEventListener("submit",async function(event){
   event.preventDefault();
   const params = new URLSearchParams(window.location.search);
+  const returnUrl = params.get("returnUrl") || "gallery.html";
   const brochureId = Number(params.get("brochure_id"));
   const userId=Number(document.getElementById("userSelect").value);
   if(!claimStatusApprovedOptionId){showStatus("Could not find the Approved status option in Baserow.","error");return}

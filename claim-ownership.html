@@ -248,12 +248,14 @@ document.querySelector(".claim-brochure-title").innerHTML = `
 `;
     
 showStatus(
-  `Ownership added successfully.<br><br>
+  `<strong>Ownership added successfully.</strong><br><br>
 
-   <strong>Registered owners:</strong><br>
-   ${esc(updatedOwnerNames)}
+   <div style="color:var(--muted);line-height:1.5;font-size:15px;">
+     <strong>Registered owners:</strong><br>
+     ${esc(updatedOwnerNames)}
+   </div>
 
-   <br><br>
+   <br>
 
    <a href="${esc(returnUrl)}"
       style="color:var(--link);font-weight:bold;">

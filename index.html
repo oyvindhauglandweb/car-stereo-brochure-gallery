@@ -273,8 +273,8 @@ body.dark-mode .portal-button:hover{
   <div class="header">
 <img class="logo"
      id="siteLogo"
-     src="CarStereoBrochures2.png"
-     alt="Car Stereo Brochures">
+     src="Car Stereo Garage2_3.png"
+     alt="Car Stereo Garage">
 
     <div class="tagline">
       Explore • Preserve • Share
@@ -434,15 +434,13 @@ body.dark-mode .portal-button:hover{
 <script>
   
 function applySavedTheme(){
-  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
-  const logo = document.getElementById("siteLogo");
+  const savedTheme =
+    localStorage.getItem("brochureTheme") || "dark";
 
   if(savedTheme === "dark"){
     document.body.classList.add("dark-mode");
-    logo.src = "CarStereoBrochures2 Sort BG.png";
   } else {
     document.body.classList.remove("dark-mode");
-    logo.src = "CarStereoBrochures2.png";
   }
 }
 

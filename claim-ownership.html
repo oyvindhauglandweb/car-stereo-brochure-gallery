@@ -17,6 +17,33 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
 .action-row{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}.submit-button,.secondary-button{display:flex;align-items:center;justify-content:center;min-width:160px;height:44px;padding:0 18px;background:var(--button);border:1px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;cursor:pointer;box-sizing:border-box}.submit-button:hover,.secondary-button:hover{background:var(--button-hover)}.submit-button{background:#1f789d;color:#fff;border:none}.submit-button:hover{background:#17627f}
 .status-box{display:none;margin-top:20px;padding:14px 16px;border-radius:8px;border:1px solid var(--border);background:var(--soft);line-height:1.5}.status-box.success{display:block;border-color:#4f8f5f}.status-box.error{display:block;border-color:#b85c5c}.disabled{opacity:.55;pointer-events:none}
 @media(max-width:800px){body{padding:14px}.form-card{padding:18px}.page-title{font-size:24px}.action-row{justify-content:stretch}.submit-button,.secondary-button{width:100%}}
+.claim-brochure-preview{
+  display:grid;
+  grid-template-columns:160px 1fr;
+  gap:18px;
+  align-items:center;
+}
+
+.claim-brochure-image{
+  width:160px;
+  max-height:220px;
+  object-fit:contain;
+  background:var(--soft);
+  border-radius:8px;
+}
+
+@media(max-width:800px){
+  .claim-brochure-preview{
+    grid-template-columns:1fr;
+  }
+
+  .claim-brochure-image{
+    width:100%;
+    max-height:320px;
+  }
+}
+
+
 </style>
 <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -38,10 +65,11 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
        <div class="form-field">
   <label>Brochure</label>
 
-  <div id="selectedBrochureLabel"
-       style="padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);">
-    Loading selected brochure...
-  </div>
+<div id="selectedBrochureDisplay"
+     class="claim-brochure-preview"
+     style="padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);">
+  Loading selected brochure...
+</div>
 </div>
         <div class="form-field">
           <label for="userSelect">Your name <span class="required">*</span></label>
@@ -74,7 +102,24 @@ function getLinkedNames(value){if(!value)return "";if(Array.isArray(value)){retu
 function getOwnerIds(row){return (row.field_8379595||[]).map(item=>Number(item.id)).filter(Boolean)}
 function getBrochureLabel(row){const brand=getLinkedNames(row.field_8379585);const year=row.field_8379588||"";const title=row.field_8379608||"";const language=getLinkedNames(row.field_8379590);return [brand,year,title,language].filter(Boolean).join(" - ")}
 async function claimOwnership(payload){const res=await fetch(`${API_BASE}/claim-ownership`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok){const text=await res.text();throw new Error("Could not claim ownership: "+text)}return await res.json()}
+function getFileUrl(value){
+  if(!value) return "";
 
+  if(Array.isArray(value)){
+    return (
+      value[0]?.url ||
+      value[0]?.thumbnails?.card_cover?.url ||
+      value[0]?.thumbnails?.small?.url ||
+      ""
+    );
+  }
+
+  if(typeof value === "object"){
+    return value.url || "";
+  }
+
+  return "";
+}
 async function loadFormData(){
   applySavedTheme();
   const [brochures,users,claimFields]=await Promise.all([
@@ -90,14 +135,36 @@ const selectedBrochure =
   brochures.find(row => Number(row.id) === prefillBrochureId);
 
 if(selectedBrochure){
-  document.getElementById("selectedBrochureLabel").innerText =
-    getBrochureLabel(selectedBrochure);
+
+  const imageUrl =
+    getFileUrl(selectedBrochure.field_8379592);
+
+  document.getElementById("selectedBrochureDisplay").innerHTML = `
+    ${
+      imageUrl
+        ? `<img class="claim-brochure-image"
+                src="${esc(imageUrl)}"
+                alt="${esc(getBrochureLabel(selectedBrochure))}">`
+        : ``
+    }
+
+    <div>
+      <strong>${esc(getBrochureLabel(selectedBrochure))}</strong>
+    </div>
+  `;
 }
-  const userOptions=users
-    .filter(row=>row.field_8350947?.value==="Approved")
-    .map(row=>({id:row.id,name:row.field_8350919||""}))
-    .filter(row=>row.name)
-    .sort((a,b)=>a.name.localeCompare(b.name));
+const existingOwnerIds =
+  selectedBrochure ? getOwnerIds(selectedBrochure) : [];
+
+const userOptions=users
+  .filter(row=>row.field_8350947?.value==="Approved")
+  .filter(row=>!existingOwnerIds.includes(Number(row.id)))
+  .map(row=>({
+    id:row.id,
+    name:row.field_8350919||""
+  }))
+  .filter(row=>row.name)
+  .sort((a,b)=>a.name.localeCompare(b.name));
   fillSelect("userSelect",userOptions,"Choose your name...");
   const statusField=claimFields.find(field=>field.id===8415667);
   claimStatusApprovedOptionId=(statusField?.select_options||[]).find(option=>option.value==="Approved")?.id||null;

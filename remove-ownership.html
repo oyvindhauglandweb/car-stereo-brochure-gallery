@@ -1,1 +1,72 @@
+<!DOCTYPE html>
+      <div>
+        <div style="font-weight:bold;margin-bottom:14px;">
+          ${esc(getBrochureLabel(brochure))}
+        </div>
 
+        <div style="color:var(--muted);line-height:1.5;font-size:15px;">
+          <strong>Registered owners:</strong><br>
+          ${esc(ownerNames)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("removeButton")
+    .addEventListener("click", async () => {
+
+      try{
+
+        const ownerIds =
+          (brochure.field_8379595 || [])
+            .map(item => Number(item.id))
+            .filter(id => id !== ownerId);
+
+        await removeOwnership({
+          brochure_id: brochureId,
+          owner_ids: ownerIds
+        });
+
+        const updatedOwnerNames =
+          getLinkedNames(
+            (brochure.field_8379595 || [])
+              .filter(item => Number(item.id) !== ownerId)
+          );
+
+        document.querySelector(".claim-brochure-title").innerHTML = `
+          <div>
+            <div style="font-weight:bold;margin-bottom:14px;">
+              ${esc(getBrochureLabel(brochure))}
+            </div>
+
+            <div style="color:var(--muted);line-height:1.5;font-size:15px;">
+              <strong>Registered owners:</strong><br>
+              ${esc(updatedOwnerNames)}
+            </div>
+          </div>
+        `;
+
+        showStatus(
+          `<strong>Ownership removed successfully.</strong><br><br>
+
+           <a href="${esc(returnUrl)}"
+              style="color:var(--link);font-weight:bold;">
+              Return to gallery
+           </a>`,
+          "success"
+        );
+
+      } catch(error){
+        console.error(error);
+        showStatus(error.message, "error");
+      }
+    });
+}
+
+loadPage().catch(error => {
+  console.error(error);
+  showStatus(error.message, "error");
+});
+</script>
+</body>
+</html>

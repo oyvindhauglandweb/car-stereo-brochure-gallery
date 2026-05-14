@@ -234,6 +234,19 @@ const updatedOwnerNames = [
   ])
 ].join(", ");
 
+document.querySelector(".claim-brochure-title").innerHTML = `
+  <div>
+    <div style="font-weight:bold;margin-bottom:14px;">
+      ${esc(getBrochureLabel(brochure))}
+    </div>
+
+    <div style="color:var(--muted);line-height:1.5;">
+      <strong>Registered owners:</strong><br>
+      ${esc(updatedOwnerNames)}
+    </div>
+  </div>
+`;
+    
 showStatus(
   `Ownership added successfully.<br><br>
 

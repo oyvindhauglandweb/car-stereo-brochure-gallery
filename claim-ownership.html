@@ -141,7 +141,8 @@ async function loadFormData(){
     fetchTableFields(TABLES.ownershipClaims)
   ]);
   allBrochures=brochures;
-  const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
+const returnUrl = params.get("returnUrl") || "gallery.html";
 const prefillBrochureId = Number(params.get("brochure_id"));
 
 const selectedBrochure =
@@ -229,8 +230,6 @@ document.getElementById("claimForm").addEventListener("submit",async function(ev
     claim[CLAIM_FIELDS.user]=[userId];
     claim[CLAIM_FIELDS.status]=Number(claimStatusApprovedOptionId);
     await claimOwnership({claim,brochure_id:brochureId,owner_ids:ownerIds});
-    const returnUrl =
-  new URLSearchParams(window.location.search).get("returnUrl") || "gallery.html";
 
 const selectedUserName =
   document.getElementById("userSelect")

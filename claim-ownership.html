@@ -220,9 +220,32 @@ document.getElementById("claimForm").addEventListener("submit",async function(ev
     const returnUrl =
   new URLSearchParams(window.location.search).get("returnUrl") || "gallery.html";
 
+const selectedUserName =
+  document.getElementById("userSelect")
+    .selectedOptions[0]
+    ?.textContent || "";
+
+const updatedOwnerNames = [
+  ...new Set([
+    ...getLinkedNames(brochure.field_8379595)
+      .split(", ")
+      .filter(Boolean),
+    selectedUserName
+  ])
+].join(", ");
+
 showStatus(
   `Ownership added successfully.<br><br>
-   <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
+
+   <strong>Registered owners:</strong><br>
+   ${esc(updatedOwnerNames)}
+
+   <br><br>
+
+   <a href="${esc(returnUrl)}"
+      style="color:var(--link);font-weight:bold;">
+      Return to gallery
+   </a>`,
   "success"
 );
     document.getElementById("claimForm").reset();

@@ -161,9 +161,22 @@ document.getElementById("selectedBrochureDisplay").innerHTML = `
       : ``
   }
 
-  <div class="claim-brochure-title">
-    ${esc(getBrochureLabel(selectedBrochure))}
+<div class="claim-brochure-title">
+  <div>
+    <div style="font-weight:bold;margin-bottom:14px;">
+      ${esc(getBrochureLabel(selectedBrochure))}
+    </div>
+
+    ${
+      ownerNames
+        ? `<div style="color:var(--muted);line-height:1.5;">
+             <strong>Registered owners:</strong><br>
+             ${esc(ownerNames)}
+           </div>`
+        : ``
+    }
   </div>
+</div>
 `;
 }
 const existingOwnerIds =

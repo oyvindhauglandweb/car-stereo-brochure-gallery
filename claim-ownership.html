@@ -232,7 +232,9 @@ const updatedOwnerNames = [
       .filter(Boolean),
     selectedUserName
   ])
-].join(", ");
+]
+.sort((a,b) => a.localeCompare(b))
+.join(", ");
 
 document.querySelector(".claim-brochure-title").innerHTML = `
   <div>

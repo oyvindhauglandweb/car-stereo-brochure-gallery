@@ -70,7 +70,7 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
 <body>
 <div class="container">
   <div class="header">
-    <img class="logo" id="siteLogo" src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+    <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Brochures">
     <div class="top-buttons">
       <a class="top-button" href="gallery.html" title="Back"><span class="icon-back">←</span></a>
       <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
@@ -106,10 +106,10 @@ function applySavedTheme(){
   const logo = document.getElementById("siteLogo");
   if(savedTheme === "dark"){
     document.body.classList.add("dark-mode");
-    logo.src = "CarStereoBrochures2 Sort BG.png";
+    logo.src = "Car Stereo Garage2_3.png";
   } else {
     document.body.classList.remove("dark-mode");
-    logo.src = "CarStereoBrochures2.png";
+    logo.src = "Car Stereo Garage2_3.png";
   }
 }
 
@@ -117,10 +117,10 @@ function toggleTheme(){
   const isDark = document.body.classList.toggle("dark-mode");
   if(isDark){
     localStorage.setItem("brochureTheme", "dark");
-    document.getElementById("siteLogo").src = "CarStereoBrochures2 Sort BG.png";
+    document.getElementById("siteLogo").src = "Car Stereo Garage2_3.png";
   } else {
     localStorage.setItem("brochureTheme", "light");
-    document.getElementById("siteLogo").src = "CarStereoBrochures2.png";
+    document.getElementById("siteLogo").src = "Car Stereo Garage2_3.png";
   }
 }
 

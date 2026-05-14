@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim Ownership - Car Stereo Brochures</title>
+<style>
+:root{--bg:#f2f2f2;--card:#fff;--text:#333;--muted:#777;--border:#ccc;--soft:#eaeaea;--link:#1f789d;--button:#fff;--button-hover:#e9eef2}
+body.dark-mode{--bg:#151515;--card:#242424;--text:#eee;--muted:#bbb;--border:#555;--soft:#333;--link:#7cc7e8;--button:#242424;--button-hover:#3a3a3a}
+body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;color:var(--text)}
+.container{max-width:850px;margin:auto}.header{text-align:center;margin-bottom:34px}.logo{max-width:320px;width:100%;height:auto}
+.top-buttons{display:flex;justify-content:center;gap:10px;margin-top:18px}.top-button{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;padding:0;background:var(--button);color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:8px;font-size:26px;font-weight:900;font-family:Arial,sans-serif;line-height:44px;box-sizing:border-box;cursor:pointer}.top-button:hover{background:var(--button-hover)}
+.icon-back{position:relative;top:-1px;font-size:28px}.icon-home{position:relative;top:-2px;font-size:30px}.theme-icon{font-size:22px;font-weight:700}
+.page-title{text-align:center;margin-bottom:10px;font-size:28px;font-weight:bold}.intro{text-align:center;color:var(--muted);line-height:1.5;margin:0 auto 32px;max-width:700px}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;box-sizing:border-box}.form-grid{display:grid;grid-template-columns:1fr;gap:18px}.form-field{display:flex;flex-direction:column;gap:7px}
+label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:100%;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box}.help-text{color:var(--muted);font-size:13px;line-height:1.4}
+.action-row{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}.submit-button,.secondary-button{display:flex;align-items:center;justify-content:center;min-width:160px;height:44px;padding:0 18px;background:var(--button);border:1px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;cursor:pointer;box-sizing:border-box}.submit-button:hover,.secondary-button:hover{background:var(--button-hover)}.submit-button{background:#1f789d;color:#fff;border:none}.submit-button:hover{background:#17627f}
+.status-box{display:none;margin-top:20px;padding:14px 16px;border-radius:8px;border:1px solid var(--border);background:var(--soft);line-height:1.5}.status-box.success{display:block;border-color:#4f8f5f}.status-box.error{display:block;border-color:#b85c5c}.disabled{opacity:.55;pointer-events:none}
+@media(max-width:800px){body{padding:14px}.form-card{padding:18px}.page-title{font-size:24px}.action-row{justify-content:stretch}.submit-button,.secondary-button{width:100%}}
+</style>
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img class="logo" id="siteLogo" src="CarStereoBrochures2.png" alt="Car Stereo Brochures">
+    <div class="top-buttons">
+      <a class="top-button" href="gallery.html" title="Back"><span class="icon-back">←</span></a>
+      <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
+      <button type="button" class="top-button" onclick="toggleTheme()" id="themeToggle" title="Toggle light/dark mode"><span class="theme-icon">◐</span></button>
+    </div>
+  </div>
+  <div class="page-title">Claim Ownership</div>
+  <div class="intro">Select the brochure and your registered user name. Ownership will be added immediately.</div>
+  <div class="form-card">
+    <form id="claimForm">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="brochureSelect">Brochure <span class="required">*</span></label>
+          <select id="brochureSelect" required><option value="">Loading brochures...</option></select>
+          <div class="help-text">Choose the exact brochure. Check brand, year, title and language carefully.</div>
+        </div>
+        <div class="form-field">
+          <label for="userSelect">Your name <span class="required">*</span></label>
+          <select id="userSelect" required><option value="">Loading registered users...</option></select>
+        </div>
+      </div>
+      <div class="action-row">
+        <a class="secondary-button" href="gallery.html">Cancel</a>
+        <button class="submit-button" id="submitButton" type="submit">Claim ownership</button>
+      </div>
+      <div id="statusBox" class="status-box"></div>
+    </form>
+  </div>
+</div>
+<script>
+const API_BASE="https://shy-heart-4d13.oyvind-haugland.workers.dev";
+const TABLES={brochures:"959905",users:"957380",ownershipClaims:"959863"};
+const CLAIM_FIELDS={brochure:"field_8379571",user:"field_8379292",status:"field_8415667"};
+let allBrochures=[];let claimStatusApprovedOptionId=null;
+
+function applySavedTheme(){const savedTheme=localStorage.getItem("brochureTheme")||"dark";const logo=document.getElementById("siteLogo");if(savedTheme==="dark"){document.body.classList.add("dark-mode");logo.src="CarStereoBrochures2 Sort BG.png"}else{document.body.classList.remove("dark-mode");logo.src="CarStereoBrochures2.png"}}
+function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");if(isDark){localStorage.setItem("brochureTheme","dark");document.getElementById("siteLogo").src="CarStereoBrochures2 Sort BG.png"}else{localStorage.setItem("brochureTheme","light");document.getElementById("siteLogo").src="CarStereoBrochures2.png"}}
+function esc(value){return String(value??"").replace(/[&<>"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]})}
+function showStatus(message,type){const box=document.getElementById("statusBox");box.className="status-box "+type;box.innerHTML=message}
+function setLoading(isLoading){const button=document.getElementById("submitButton");if(isLoading){button.textContent="Saving...";button.classList.add("disabled")}else{button.textContent="Claim ownership";button.classList.remove("disabled")}}
+async function fetchAllRows(tableId,userFieldNames=false){const res=await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames?"true":"false"}`);if(!res.ok){throw new Error("Could not load table "+tableId)}const data=await res.json();return data.results||[]}
+async function fetchTableFields(tableId){const res=await fetch(`${API_BASE}/fields?table=${tableId}`);if(!res.ok){throw new Error("Could not load field metadata for table "+tableId)}return await res.json()}
+function fillSelect(selectId,rows,placeholder){const select=document.getElementById(selectId);select.innerHTML=`<option value="">${placeholder}</option>`;rows.forEach(row=>{const option=document.createElement("option");option.value=row.id;option.textContent=row.name;select.appendChild(option)})}
+function getLinkedNames(value){if(!value)return "";if(Array.isArray(value)){return value.map(item=>item.value||item.name||"").filter(Boolean).join(", ")}if(typeof value==="object"){return value.value||value.name||""}return String(value)}
+function getOwnerIds(row){return (row.field_8379595||[]).map(item=>Number(item.id)).filter(Boolean)}
+function getBrochureLabel(row){const brand=getLinkedNames(row.field_8379585);const year=row.field_8379588||"";const title=row.field_8379608||"";const language=getLinkedNames(row.field_8379590);return [brand,year,title,language].filter(Boolean).join(" - ")}
+async function claimOwnership(payload){const res=await fetch(`${API_BASE}/claim-ownership`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok){const text=await res.text();throw new Error("Could not claim ownership: "+text)}return await res.json()}
+
+async function loadFormData(){
+  applySavedTheme();
+  const [brochures,users,claimFields]=await Promise.all([
+    fetchAllRows(TABLES.brochures,false),
+    fetchAllRows(TABLES.users,false),
+    fetchTableFields(TABLES.ownershipClaims)
+  ]);
+  allBrochures=brochures;
+  const brochureOptions=brochures
+    .filter(row=>row.field_8379597?.value!=="Rejected")
+    .map(row=>({id:row.id,name:getBrochureLabel(row)}))
+    .filter(row=>row.name)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  const userOptions=users
+    .filter(row=>row.field_8350947?.value==="Approved")
+    .map(row=>({id:row.id,name:row.field_8350919||""}))
+    .filter(row=>row.name)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  fillSelect("brochureSelect",brochureOptions,"Choose brochure...");
+  fillSelect("userSelect",userOptions,"Choose your name...");
+  const statusField=claimFields.find(field=>field.id===8415667);
+  claimStatusApprovedOptionId=(statusField?.select_options||[]).find(option=>option.value==="Approved")?.id||null;
+  const params=new URLSearchParams(window.location.search);
+  const prefillBrochure=params.get("brochure")||params.get("prefill_Brochure")||"";
+  if(prefillBrochure){
+    const match=brochureOptions.find(item=>item.name.toLowerCase().includes(prefillBrochure.toLowerCase()));
+    if(match){document.getElementById("brochureSelect").value=match.id}
+  }
+}
+
+document.getElementById("claimForm").addEventListener("submit",async function(event){
+  event.preventDefault();
+  const brochureId=Number(document.getElementById("brochureSelect").value);
+  const userId=Number(document.getElementById("userSelect").value);
+  if(!claimStatusApprovedOptionId){showStatus("Could not find the Approved status option in Baserow.","error");return}
+  const brochure=allBrochures.find(row=>Number(row.id)===brochureId);
+  if(!brochure){showStatus("Could not find the selected brochure.","error");return}
+  const existingOwnerIds=getOwnerIds(brochure);
+  const ownerIds=[...new Set([...existingOwnerIds,userId])];
+  try{
+    setLoading(true);
+    showStatus("Saving ownership claim...","success");
+    const claim={};
+    claim[CLAIM_FIELDS.brochure]=[brochureId];
+    claim[CLAIM_FIELDS.user]=[userId];
+    claim[CLAIM_FIELDS.status]=Number(claimStatusApprovedOptionId);
+    await claimOwnership({claim,brochure_id:brochureId,owner_ids:ownerIds});
+    showStatus(`Ownership added successfully.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`,"success");
+    document.getElementById("claimForm").reset();
+  }catch(error){
+    console.error(error);
+    showStatus("Submission failed.<br><br>"+esc(error.message),"error");
+  }finally{setLoading(false)}
+});
+loadFormData().catch(error=>{console.error(error);showStatus("Could not load form data.<br><br>"+esc(error.message),"error")});
+</script>
+</body>
+</html>
 

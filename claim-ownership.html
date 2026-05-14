@@ -133,79 +133,92 @@ function getFileUrl(value){
 
   return "";
 }
+
 async function loadFormData(){
   applySavedTheme();
-  const [brochures,users,claimFields]=await Promise.all([
+
+  const [brochures, users, claimFields] = await Promise.all([
     fetchAllRows(TABLES.brochures,false),
     fetchAllRows(TABLES.users,false),
     fetchTableFields(TABLES.ownershipClaims)
   ]);
-  allBrochures=brochures;
-const params = new URLSearchParams(window.location.search);
-const returnUrl = params.get("returnUrl") || "gallery.html";
-const prefillBrochureId = Number(params.get("brochure_id"));
 
-const selectedBrochure =
-  brochures.find(row => Number(row.id) === prefillBrochureId);
+  allBrochures = brochures;
 
-if(selectedBrochure){
+  const params = new URLSearchParams(window.location.search);
+  const returnUrl = params.get("returnUrl") || "gallery.html";
+  const prefillBrochureId = Number(params.get("brochure_id"));
 
-  const imageUrl =
-    getFileUrl(selectedBrochure.field_8379592);
+  const selectedBrochure =
+    brochures.find(row => Number(row.id) === prefillBrochureId);
 
-  const ownerNames =
-    getLinkedNames(selectedBrochure.field_8379595);
- const ownerLinks =
-  (selectedBrochure.field_8379595 || [])
-    .map(item => `
-      <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
-         style="color:var(--link);text-decoration:none;margin-right:8px;">
-         ${esc(item.value || item.name || "")}
-      </a>
-    `)
-    .join(""); 
-document.getElementById("selectedBrochureDisplay").innerHTML = `
-  ${
-    imageUrl
-      ? `<img class="claim-brochure-image"
-              src="${esc(imageUrl)}"
-              alt="${esc(getBrochureLabel(selectedBrochure))}">`
-      : ``
+  if(selectedBrochure){
+
+    const imageUrl =
+      getFileUrl(selectedBrochure.field_8379592);
+
+    const ownerLinks =
+      (selectedBrochure.field_8379595 || [])
+        .slice()
+        .sort((a,b) =>
+          (a.value || a.name || "").localeCompare(b.value || b.name || "")
+        )
+        .map(item => `
+          <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
+             style="color:var(--link);text-decoration:none;margin-right:8px;">
+             ${esc(item.value || item.name || "")}
+          </a>
+        `)
+        .join("");
+
+    document.getElementById("selectedBrochureDisplay").innerHTML = `
+      ${
+        imageUrl
+          ? `<img class="claim-brochure-image"
+                  src="${esc(imageUrl)}"
+                  alt="${esc(getBrochureLabel(selectedBrochure))}">`
+          : ``
+      }
+
+      <div class="claim-brochure-title">
+        <div>
+          <div style="font-weight:bold;margin-bottom:14px;">
+            ${esc(getBrochureLabel(selectedBrochure))}
+          </div>
+
+          <div style="color:var(--muted);line-height:1.5;font-size:15px;">
+            <strong>Registered owners:</strong><br>
+            ${ownerLinks}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
-<div class="claim-brochure-title">
-  <div>
-    <div style="font-weight:bold;margin-bottom:14px;">
-      ${esc(getBrochureLabel(selectedBrochure))}
-    </div>
+  const existingOwnerIds =
+    selectedBrochure ? getOwnerIds(selectedBrochure) : [];
 
-<div style="color:var(--muted);line-height:1.5;font-size:15px;">
-  <strong>Registered owners:</strong><br>
-  ${ownerLinks}
-</div>
-        : ``
-    }
-  </div>
-</div>
-`;
+  const userOptions = users
+    .filter(row => row.field_8350947?.value === "Approved")
+    .filter(row => !existingOwnerIds.includes(Number(row.id)))
+    .map(row => ({
+      id: row.id,
+      name: row.field_8350919 || ""
+    }))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  fillSelect("userSelect", userOptions, "Choose your name...");
+
+  const statusField =
+    claimFields.find(field => field.id === 8415667);
+
+  claimStatusApprovedOptionId =
+    (statusField?.select_options || [])
+      .find(option => option.value === "Approved")
+      ?.id || null;
 }
-const existingOwnerIds =
-  selectedBrochure ? getOwnerIds(selectedBrochure) : [];
-
-const userOptions=users
-  .filter(row=>row.field_8350947?.value==="Approved")
-  .filter(row=>!existingOwnerIds.includes(Number(row.id)))
-  .map(row=>({
-    id:row.id,
-    name:row.field_8350919||""
-  }))
-  .filter(row=>row.name)
-  .sort((a,b)=>a.name.localeCompare(b.name));
-  fillSelect("userSelect",userOptions,"Choose your name...");
-  const statusField=claimFields.find(field=>field.id===8415667);
-  claimStatusApprovedOptionId=(statusField?.select_options||[]).find(option=>option.value==="Approved")?.id||null;
-}
-
+  
 document.getElementById("claimForm").addEventListener("submit",async function(event){
   event.preventDefault();
   const params = new URLSearchParams(window.location.search);

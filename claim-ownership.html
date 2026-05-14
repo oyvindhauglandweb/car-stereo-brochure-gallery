@@ -152,6 +152,9 @@ if(selectedBrochure){
   const imageUrl =
     getFileUrl(selectedBrochure.field_8379592);
 
+  const ownerNames =
+    getLinkedNames(selectedBrochure.field_8379595);
+  
 document.getElementById("selectedBrochureDisplay").innerHTML = `
   ${
     imageUrl

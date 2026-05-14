@@ -725,8 +725,11 @@ console.log("Guide URL:", b.model_series_guide_url);
   document.getElementById("modalImage").src = b.image;
   document.getElementById("modalBrochure").innerText = b.brochure;
 
-  const ownerLinks = b.owner
-    ? b.owner.split(", ").map(owner => `
+const ownerLinks = b.owner
+  ? b.owner
+      .split(", ")
+      .sort((a,b) => a.localeCompare(b))
+      .map(owner => `
         <a class="owner-link"
            href="${GALLERY_URL}?owner=${encodeURIComponent(owner)}"
            target="_blank"

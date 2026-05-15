@@ -304,7 +304,7 @@ input[type="file"]{padding:10px 14px;}
 </div>
 
 <script>
-const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
+const API_BASE = "https://api.carstereogarage.com";
 
 const TABLES = {
   brochures: "959905",
@@ -484,10 +484,11 @@ async function uploadFile(file){
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE}/upload-file`, {
-    method:"POST",
-    body:formData
-  });
+const res = await fetch(`${API_BASE}/upload-file`, {
+  method:"POST",
+  credentials:"include",
+  body:formData
+});
 
   if(!res.ok){
     const text = await res.text();
@@ -498,13 +499,14 @@ async function uploadFile(file){
 }
 
 async function createBrochureRow(payload){
-  const res = await fetch(`${API_BASE}/create-brochure`, {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify(payload)
-  });
+const res = await fetch(`${API_BASE}/create-brochure`, {
+  method:"POST",
+  credentials:"include",
+  headers:{
+    "Content-Type":"application/json"
+  },
+  body:JSON.stringify(payload)
+});
 
   if(!res.ok){
     const text = await res.text();

@@ -110,8 +110,27 @@ function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");
 function esc(value){return String(value??"").replace(/[&<>"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]})}
 function showStatus(message,type){const box=document.getElementById("statusBox");box.className="status-box "+type;box.innerHTML=message}
 function setLoading(isLoading){const button=document.getElementById("submitButton");if(isLoading){button.textContent="Saving...";button.classList.add("disabled")}else{button.textContent="Claim ownership";button.classList.remove("disabled")}}
-async function fetchAllRows(tableId,userFieldNames=false){const res=await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames?"true":"false"}`);if(!res.ok){throw new Error("Could not load table "+tableId)}const data=await res.json();return data.results||[]}
-async function fetchTableFields(tableId){const res=await fetch(`${API_BASE}/fields?table=${tableId}`);if(!res.ok){throw new Error("Could not load field metadata for table "+tableId)}return await res.json()}
+async function fetchAllRows(tableId,userFieldNames=false){
+  const res=await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames?"true":"false"}`, {
+    credentials:"include"
+  });
+  if(!res.ok){
+    throw new Error("Could not load table "+tableId)
+  }
+  const data=await res.json();
+  return data.results||[]
+}
+async function fetchTableFields(tableId){
+  const res = await fetch(`${API_BASE}/fields?table=${tableId}`, {
+    credentials:"include"
+  });
+
+  if(!res.ok){
+    throw new Error("Could not load field metadata for table "+tableId)
+  }
+
+  return await res.json()
+}
 function fillSelect(selectId,rows,placeholder){const select=document.getElementById(selectId);select.innerHTML=`<option value="">${placeholder}</option>`;rows.forEach(row=>{const option=document.createElement("option");option.value=row.id;option.textContent=row.name;select.appendChild(option)})}
 function getLinkedNames(value){if(!value)return "";if(Array.isArray(value)){return value.map(item=>item.value||item.name||"").filter(Boolean).join(", ")}if(typeof value==="object"){return value.value||value.name||""}return String(value)}
 function getOwnerIds(row){return (row.field_8379595||[]).map(item=>Number(item.id)).filter(Boolean)}

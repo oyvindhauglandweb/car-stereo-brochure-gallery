@@ -607,82 +607,55 @@ async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
   const addButton = document.getElementById("addBrochureButton");
   const loginStatus = document.getElementById("loginStatus");
-  const loginMenu = document.getElementById("loginMenu");
-  const loginMenuName = document.getElementById("loginMenuName");
-  const logoutLink = document.getElementById("logoutLink");
 
   const logoutUrl =
     "https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout";
 
-  const isMobile =
-    window.matchMedia("(max-width: 800px)").matches;
+  function openLogoutPopup(){
+    const popup = window.open(
+      logoutUrl,
+      "cloudflareLogout",
+      "width=520,height=720"
+    );
+
+    setTimeout(function(){
+      if(popup && !popup.closed){
+        popup.close();
+      }
+
+      window.location.reload();
+    }, 2500);
+  }
 
   if(currentUser){
-    const displayName =
-      currentUser.name || currentUser.email || "Signed in";
-
     if(addButton){
       addButton.style.display = "flex";
     }
 
-    loginStatus.textContent = isMobile
-      ? getInitials(displayName)
-      : `${displayName} · Sign out`;
+    loginStatus.textContent =
+      `${currentUser.name || currentUser.email || "Signed in"} · Sign out`;
 
-    loginStatus.classList.add("signed-in");
-    loginStatus.classList.remove("is-signin");
-    loginStatus.title = isMobile
-      ? displayName
-      : "Sign out";
-
-    loginMenuName.textContent = displayName;
-    logoutLink.href = logoutUrl;
-    logoutLink.target = "_blank";
-
-    logoutLink.onclick = function(){
-      setTimeout(function(){
-        window.location.reload();
-      }, 1500);
+    loginStatus.href = "#";
+    loginStatus.onclick = function(event){
+      event.preventDefault();
+      openLogoutPopup();
     };
 
-    if(isMobile){
-      loginStatus.href = "#";
-      loginStatus.removeAttribute("target");
-
-      loginStatus.onclick = function(event){
-        event.preventDefault();
-
-        loginMenu.style.display =
-          loginMenu.style.display === "block" ? "none" : "block";
-      };
-    }else{
-      loginStatus.href = logoutUrl;
-      loginStatus.target = "_blank";
-
-      loginStatus.onclick = function(){
-        setTimeout(function(){
-          window.location.reload();
-        }, 1500);
-      };
-
-      loginMenu.style.display = "none";
-    }
+    loginStatus.classList.add("signed-in");
+    loginStatus.title = "Sign out";
   }else{
     if(addButton){
       addButton.style.display = "none";
     }
 
     loginStatus.textContent = "Sign in";
+
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
-    loginStatus.removeAttribute("target");
 
-    loginStatus.classList.remove("signed-in");
-    loginStatus.classList.add("is-signin");
-    loginStatus.title = "Sign in";
     loginStatus.onclick = null;
-
-    loginMenu.style.display = "none";
+    loginStatus.classList.remove("signed-in");
+    loginStatus.title = "Sign in";
   }
 }
   

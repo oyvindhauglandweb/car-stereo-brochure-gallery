@@ -171,10 +171,14 @@ function showStatus(message, type){
 }
 
 async function fetchAllRows(tableId){
-  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`);
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`, {
+    credentials:"include"
+  });
+
   if(!res.ok){
     throw new Error("Could not load table " + tableId);
   }
+
   const data = await res.json();
   return data.results || [];
 }

@@ -110,7 +110,20 @@ function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");
 function esc(value){return String(value??"").replace(/[&<>"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]})}
 function showStatus(message,type){const box=document.getElementById("statusBox");box.className="status-box "+type;box.innerHTML=message}
 function setLoading(isLoading){const button=document.getElementById("submitButton");if(isLoading){button.textContent="Saving...";button.classList.add("disabled")}else{button.textContent="Claim ownership";button.classList.remove("disabled")}}
-async function fetchAllRows(tableId,userFieldNames=false){
+
+  async function fetchCurrentUser(){
+  const res = await fetch(`${API_BASE}/whoami`, {
+    credentials:"include"
+  });
+
+  if(!res.ok){
+    throw new Error("Could not load signed-in user");
+  }
+
+  return await res.json();
+}
+  
+  async function fetchAllRows(tableId,userFieldNames=false){
   const res=await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames?"true":"false"}`, {
     credentials:"include"
   });
@@ -174,6 +187,11 @@ function getFileUrl(value){
 }
 
 async function loadFormData(){
+  const currentUser = await fetchCurrentUser();
+
+document.getElementById("signedInText").textContent =
+  `You are signed in as ${currentUser.name}. Ownership to this brochure will be added to your account.`;
+  
   applySavedTheme();
 
   const [brochures, users, claimFields] = await Promise.all([

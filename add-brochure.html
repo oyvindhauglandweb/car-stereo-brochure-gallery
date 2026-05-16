@@ -386,7 +386,9 @@ function esc(value){
 }
 
 async function fetchAllRows(tableId){
-  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`);
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`, {
+    credentials:"include"
+  });
 
   if(!res.ok){
     throw new Error("Could not load table " + tableId);
@@ -397,7 +399,9 @@ async function fetchAllRows(tableId){
 }
 
 async function fetchAllRowsNamed(tableId){
-  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=true`);
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=true`, {
+    credentials:"include"
+  });
 
   if(!res.ok){
     throw new Error("Could not load table " + tableId);
@@ -409,7 +413,9 @@ async function fetchAllRowsNamed(tableId){
  
   
 async function fetchTableFields(tableId){
-  const res = await fetch(`${API_BASE}/fields?table=${tableId}`);
+  const res = await fetch(`${API_BASE}/fields?table=${tableId}`, {
+    credentials:"include"
+  });
 
   if(!res.ok){
     throw new Error("Could not load field metadata for table " + tableId);

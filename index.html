@@ -273,7 +273,6 @@ body.dark-mode .login-status:hover{
 
 .login-status.signed-in{
   color:var(--muted);
-  cursor:default;
 }
 
 @media(max-width:800px){
@@ -517,18 +516,24 @@ async function applyLoginVisibility(){
       addButton.style.display = "flex";
     }
 
-    loginStatus.textContent = currentUser.name || currentUser.email || "Signed in";
-    loginStatus.href = "#";
+    loginStatus.textContent =
+      `${currentUser.name || currentUser.email || "Signed in"} · Sign out`;
+
+    loginStatus.href =
+      `https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${encodeURIComponent(window.location.href)}`;
+
     loginStatus.classList.add("signed-in");
-    loginStatus.title = "Signed in";
+    loginStatus.title = "Sign out";
   }else{
     if(addButton){
       addButton.style.display = "none";
     }
 
     loginStatus.textContent = "Sign in";
+
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
+
     loginStatus.classList.remove("signed-in");
     loginStatus.title = "Sign in";
   }

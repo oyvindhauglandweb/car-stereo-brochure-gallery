@@ -401,12 +401,13 @@ body:not(.dark-mode) .close-button:hover{
       <div id="modalDetails"></div>
 
       <div class="button-row">
-        <a id="claimButton"
-           class="claim-button"
-           target="_blank"
-           title="Register yourself as owner of this brochure">
-           Claim ownership
-        </a>
+<a id="claimButton"
+   class="claim-button"
+   target="_blank"
+   style="display:none;"
+   title="Register yourself as owner of this brochure">
+  Claim ownership
+</a>
 
         <button type="button" class="close-button" onclick="closeModal()">
           Close
@@ -813,8 +814,12 @@ ${modelSeriesLinks}
 
   const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
 
-document.getElementById("claimButton").href =
+const claimButton = document.getElementById("claimButton");
+
+claimButton.href =
   `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
+
+claimButton.style.display = "none";
 }
 
 function closeModal(){

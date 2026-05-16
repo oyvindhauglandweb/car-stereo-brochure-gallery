@@ -245,11 +245,19 @@ body.dark-mode .portal-button:hover{
   font-weight:bold;
 }
 
-.login-status{
+.login-widget{
   position:fixed;
   top:14px;
   right:16px;
   z-index:9999;
+}
+
+.login-status{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:42px;
+  min-height:34px;
   padding:7px 11px;
   border:1px solid var(--border);
   border-radius:999px;
@@ -259,7 +267,8 @@ body.dark-mode .portal-button:hover{
   font-size:13px;
   font-weight:bold;
   line-height:1;
-  opacity:.82;
+  opacity:.86;
+  box-sizing:border-box;
 }
 
 .login-status:hover{
@@ -273,6 +282,60 @@ body.dark-mode .login-status:hover{
 
 .login-status.signed-in{
   color:var(--muted);
+}
+
+.login-menu{
+  position:absolute;
+  top:42px;
+  right:0;
+  min-width:190px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  box-sizing:border-box;
+}
+
+.login-menu-name{
+  font-weight:bold;
+  font-size:13px;
+  margin-bottom:8px;
+  color:var(--text);
+  white-space:nowrap;
+}
+
+.login-menu-link{
+  display:block;
+  color:var(--link);
+  text-decoration:none;
+  font-weight:bold;
+  font-size:13px;
+}
+
+@media(max-width:800px){
+  .login-widget{
+    top:10px;
+    right:10px;
+  }
+
+  .login-status{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    min-height:38px;
+    padding:0;
+    border-radius:50%;
+    font-size:13px;
+  }
+
+  .login-status.is-signin{
+    width:auto;
+    min-width:60px;
+    padding:0 11px;
+    border-radius:999px;
+  }
 }
 
 @media(max-width:800px){
@@ -306,11 +369,23 @@ body.dark-mode .login-status:hover{
 
 <body>
 
-<a id="loginStatus"
-   class="login-status"
-   href="https://api.carstereogarage.com/login?returnUrl=https%3A%2F%2Fcarstereogarage.com%2Findex.html">
-   Sign in
-</a>
+<div class="login-widget">
+  <a id="loginStatus"
+     class="login-status is-signin"
+     href="https://api.carstereogarage.com/login?returnUrl=https%3A%2F%2Fcarstereogarage.com%2Findex.html">
+     Sign in
+  </a>
+
+  <div id="loginMenu" class="login-menu" style="display:none;">
+    <div id="loginMenuName" class="login-menu-name"></div>
+    <a id="logoutLink"
+       class="login-menu-link"
+       href="https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout"
+       target="_blank">
+       Sign out
+    </a>
+  </div>
+</div>
   
 <div class="container">
 
@@ -506,36 +581,108 @@ async function fetchCurrentUser(){
   }
 }
 
+function getInitials(nameOrEmail){
+  const value = String(nameOrEmail || "").trim();
+
+  if(!value){
+    return "?";
+  }
+
+  const namePart = value.includes("@")
+    ? value.split("@")[0]
+    : value;
+
+  const parts = namePart
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if(parts.length >= 2){
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  return namePart.slice(0, 2).toUpperCase();
+}
+  
 async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
   const addButton = document.getElementById("addBrochureButton");
   const loginStatus = document.getElementById("loginStatus");
+  const loginMenu = document.getElementById("loginMenu");
+  const loginMenuName = document.getElementById("loginMenuName");
+  const logoutLink = document.getElementById("logoutLink");
+
+  const logoutUrl =
+    "https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout";
+
+  const isMobile =
+    window.matchMedia("(max-width: 800px)").matches;
 
   if(currentUser){
+    const displayName =
+      currentUser.name || currentUser.email || "Signed in";
+
     if(addButton){
       addButton.style.display = "flex";
     }
 
-    loginStatus.textContent =
-      `${currentUser.name || currentUser.email || "Signed in"} · Sign out`;
-
-    loginStatus.href =
-      `https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${encodeURIComponent(window.location.href)}`;
+    loginStatus.textContent = isMobile
+      ? getInitials(displayName)
+      : `${displayName} · Sign out`;
 
     loginStatus.classList.add("signed-in");
-    loginStatus.title = "Sign out";
+    loginStatus.classList.remove("is-signin");
+    loginStatus.title = isMobile
+      ? displayName
+      : "Sign out";
+
+    loginMenuName.textContent = displayName;
+    logoutLink.href = logoutUrl;
+    logoutLink.target = "_blank";
+
+    logoutLink.onclick = function(){
+      setTimeout(function(){
+        window.location.reload();
+      }, 1500);
+    };
+
+    if(isMobile){
+      loginStatus.href = "#";
+      loginStatus.removeAttribute("target");
+
+      loginStatus.onclick = function(event){
+        event.preventDefault();
+
+        loginMenu.style.display =
+          loginMenu.style.display === "block" ? "none" : "block";
+      };
+    }else{
+      loginStatus.href = logoutUrl;
+      loginStatus.target = "_blank";
+
+      loginStatus.onclick = function(){
+        setTimeout(function(){
+          window.location.reload();
+        }, 1500);
+      };
+
+      loginMenu.style.display = "none";
+    }
   }else{
     if(addButton){
       addButton.style.display = "none";
     }
 
     loginStatus.textContent = "Sign in";
-
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
+    loginStatus.removeAttribute("target");
 
     loginStatus.classList.remove("signed-in");
+    loginStatus.classList.add("is-signin");
     loginStatus.title = "Sign in";
+    loginStatus.onclick = null;
+
+    loginMenu.style.display = "none";
   }
 }
   
@@ -720,7 +867,14 @@ adminHotspot.addEventListener("click", () => {
     (!current).toString()
   );
 
-  applyAdminVisibility();
+  document.addEventListener("click", function(event){
+  const widget = document.querySelector(".login-widget");
+  const menu = document.getElementById("loginMenu");
+
+  if(widget && menu && !widget.contains(event.target)){
+    menu.style.display = "none";
+  }
+});
 
 });
 

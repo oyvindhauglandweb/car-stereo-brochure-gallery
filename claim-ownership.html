@@ -111,13 +111,29 @@ const TABLES={brochures:"959905",users:"957380",ownershipClaims:"959863"};
 const CLAIM_FIELDS={brochure:"field_8379571",user:"field_8379292",status:"field_8415667"};
 let allBrochures=[];
 let claimStatusApprovedOptionId=null;
+let ownershipComplete=false;
 let signedInUserName="";
 
 function applySavedTheme(){const savedTheme=localStorage.getItem("brochureTheme")||"dark";const logo=document.getElementById("siteLogo");if(savedTheme==="dark"){document.body.classList.add("dark-mode");logo.src="Car Stereo Garage2_3.png"}else{document.body.classList.remove("dark-mode");logo.src="Car Stereo Garage2_3.png"}}
 function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");if(isDark){localStorage.setItem("brochureTheme","dark");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}else{localStorage.setItem("brochureTheme","light");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}}
 function esc(value){return String(value??"").replace(/[&<>"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]})}
 function showStatus(message,type){const box=document.getElementById("statusBox");box.className="status-box "+type;box.innerHTML=message}
-function setLoading(isLoading){const button=document.getElementById("submitButton");if(isLoading){button.textContent="Saving...";button.classList.add("disabled")}else{button.textContent="Claim ownership";button.classList.remove("disabled")}}
+function setLoading(isLoading){
+  const button=document.getElementById("submitButton");
+
+  if(isLoading){
+    button.textContent="Saving...";
+    button.classList.add("disabled");
+  }else{
+    button.classList.remove("disabled");
+
+    if(ownershipComplete){
+      button.textContent="Close";
+    }else{
+      button.textContent="Claim ownership";
+    }
+  }
+}
 
   async function fetchCurrentUser(){
   const res = await fetch(`${API_BASE}/whoami`, {
@@ -341,6 +357,17 @@ document.querySelector(".claim-brochure-title").innerHTML = `
     </div>
   </div>
 `;
+
+const submitButton = document.getElementById("submitButton");
+submitButton.textContent = "Close";
+submitButton.classList.remove("submit-button");
+submitButton.classList.add("secondary-button");
+submitButton.type = "button";
+submitButton.onclick = function(){
+  window.location.href = returnUrl;
+};
+
+ownershipComplete=true;
 
 const submitButton = document.getElementById("submitButton");
 submitButton.textContent = "Close";

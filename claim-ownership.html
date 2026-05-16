@@ -86,8 +86,17 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
   Loading selected brochure...
 </div>
 </div>
-<div class="form-field" style="display:none;">
-      </div>
+<div class="form-field">
+  <label>Signed in user</label>
+
+  <div id="signedInText" style="width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);line-height:1.5;">
+    You are signed in. Ownership to this brochure will be added to your account.
+  </div>
+
+  <select id="userSelect" style="display:none;">
+    <option value="">Signed-in user</option>
+  </select>
+</div>
       <div class="action-row">
         <a class="secondary-button" href="gallery.html">Cancel</a>
         <button class="submit-button" id="submitButton" type="submit">Claim ownership</button>

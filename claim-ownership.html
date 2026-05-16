@@ -221,19 +221,32 @@ document.getElementById("signedInText").textContent =
     const imageUrl =
       getFileUrl(selectedBrochure.field_8379592);
 
-    const ownerLinks =
-      (selectedBrochure.field_8379595 || [])
-        .slice()
-        .sort((a,b) =>
-          (a.value || a.name || "").localeCompare(b.value || b.name || "")
-        )
-        .map(item => `
-          <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(item.id)}&owner_name=${encodeURIComponent(item.value || item.name || "")}&returnUrl=${encodeURIComponent(returnUrl)}"
+  const ownerLinks =
+  (selectedBrochure.field_8379595 || [])
+    .slice()
+    .sort((a,b) =>
+      (a.value || a.name || "").localeCompare(b.value || b.name || "")
+    )
+    .map(item => {
+      const ownerId = Number(item.id);
+      const ownerName = item.value || item.name || "";
+
+      if(ownerId === Number(currentUser.id)){
+        return `
+          <a href="remove-ownership.html?brochure_id=${encodeURIComponent(selectedBrochure.id)}&owner_id=${encodeURIComponent(ownerId)}&owner_name=${encodeURIComponent(ownerName)}&returnUrl=${encodeURIComponent(returnUrl)}"
              style="color:var(--link);text-decoration:none;margin-right:8px;">
-             ${esc(item.value || item.name || "")}
+             ${esc(ownerName)}
           </a>
-        `)
-        .join("");
+        `;
+      }
+
+      return `
+        <span style="margin-right:8px;">
+          ${esc(ownerName)}
+        </span>
+      `;
+    })
+    .join("");
 
     document.getElementById("selectedBrochureDisplay").innerHTML = `
       ${

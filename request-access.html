@@ -295,11 +295,6 @@ textarea{
 <script>
 const API_BASE = "https://api.carstereogarage.com";
 
-const TABLES = {
-  users: "957380",
-  countries: "957423"
-};
-
 const FIELDS = {
   name: "field_8350919",
   email: "field_8350941",
@@ -362,22 +357,11 @@ function setLoading(isLoading){
   }
 }
 
-async function fetchAllRows(tableId, userFieldNames = false){
-  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=${userFieldNames ? "true" : "false"}`);
+async function fetchRequestAccessOptions(){
+  const res = await fetch(`${API_BASE}/request-access-options`);
 
   if(!res.ok){
-    throw new Error("Could not load table " + tableId);
-  }
-
-  const data = await res.json();
-  return data.results || [];
-}
-
-async function fetchTableFields(tableId){
-  const res = await fetch(`${API_BASE}/fields?table=${tableId}`);
-
-  if(!res.ok){
-    throw new Error("Could not load field metadata for table " + tableId);
+    throw new Error("Could not load request access options");
   }
 
   return await res.json();
@@ -425,10 +409,9 @@ async function createUserRow(payload){
 async function loadFormData(){
   applySavedTheme();
 
-  const [countries, fields] = await Promise.all([
-    fetchAllRows(TABLES.countries, true),
-    fetchTableFields(TABLES.users)
-  ]);
+const optionsData = await fetchRequestAccessOptions();
+const countries = optionsData.countries || [];
+const fields = optionsData.fields || [];
 
   fillSelect(
     "countrySelect",

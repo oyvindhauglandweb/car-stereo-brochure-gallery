@@ -109,7 +109,9 @@ label{font-weight:bold;font-size:15px}.required{color:#c94}input,select{width:10
 const API_BASE = "https://api.carstereogarage.com";
 const TABLES={brochures:"959905",users:"957380",ownershipClaims:"959863"};
 const CLAIM_FIELDS={brochure:"field_8379571",user:"field_8379292",status:"field_8415667"};
-let allBrochures=[];let claimStatusApprovedOptionId=null;
+let allBrochures=[];
+let claimStatusApprovedOptionId=null;
+let signedInUserName="";
 
 function applySavedTheme(){const savedTheme=localStorage.getItem("brochureTheme")||"dark";const logo=document.getElementById("siteLogo");if(savedTheme==="dark"){document.body.classList.add("dark-mode");logo.src="Car Stereo Garage2_3.png"}else{document.body.classList.remove("dark-mode");logo.src="Car Stereo Garage2_3.png"}}
 function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");if(isDark){localStorage.setItem("brochureTheme","dark");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}else{localStorage.setItem("brochureTheme","light");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}}
@@ -194,10 +196,9 @@ function getFileUrl(value){
 
 async function loadFormData(){
   const currentUser = await fetchCurrentUser();
-
+signedInUserName = currentUser.name || currentUser.email || "signed-in user";
 document.getElementById("signedInText").textContent =
-  `You are signed in as ${currentUser.name}. Ownership to this brochure will be added to your account.`;
-  
+  `You are signed in as ${signedInUserName}. Ownership to this brochure will be added to your account.`;  
   applySavedTheme();
 
   const [brochures, users, claimFields] = await Promise.all([
@@ -302,10 +303,7 @@ document.getElementById("claimForm").addEventListener("submit",async function(ev
     claim[CLAIM_FIELDS.status]=Number(claimStatusApprovedOptionId);
     await claimOwnership({claim, brochure_id:brochureId});
 
-const selectedUserName =
-  document.getElementById("userSelect")
-    .selectedOptions[0]
-    ?.textContent || "";
+const selectedUserName = signedInUserName;
 
 const updatedOwnerNames = [
   ...new Set([

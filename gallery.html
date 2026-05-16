@@ -836,21 +836,6 @@ ${modelSeriesLinks}
     <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
   `;
 
-  const separator = b.claim_ownership_url.includes("?") ? "&" : "?";
-
-const claimButton = document.getElementById("claimButton");
-
-claimButton.href =
-  `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
-
-const ownerNames = b.owner
-  ? b.owner.split(", ").map(name => name.trim()).filter(Boolean)
-  : [];
-
-const isCurrentUserOwner =
-  currentUser && ownerNames.includes(currentUser.name);
-
-claimButton.style.display =
 const claimButton = document.getElementById("claimButton");
 
 const currentOwner = currentUser
@@ -873,6 +858,7 @@ if(currentUser && !currentOwner){
   claimButton.href =
     `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
   claimButton.style.display = "flex";
+}
 }
 
 function closeModal(){

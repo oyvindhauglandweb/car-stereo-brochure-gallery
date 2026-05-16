@@ -265,11 +265,17 @@ input[type="file"]{padding:10px 14px;}
           <input id="pageCountInput" type="number" min="1" required placeholder="6">
         </div>
 
-        <div class="form-field full">
-          <label for="submittedBySelect">Submitted by <span class="required">*</span></label>
-          <select id="submittedBySelect" required><option value="">Loading registered users...</option></select>
-          <div class="help-text">The selected user will also be added as owner of this brochure.</div>
-        </div>
+<div class="form-field full">
+  <label>Signed in user</label>
+
+  <div id="signedInText" style="width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);line-height:1.5;">
+    You are signed in. This brochure will be submitted under your account.
+  </div>
+
+  <select id="submittedBySelect" style="display:none;">
+    <option value="">Signed-in user</option>
+  </select>
+</div>
 
         <div class="form-field full">
           <label for="modelSeriesSelect">Model series</label>
@@ -336,6 +342,7 @@ const FIELDS = {
 
 let allModelSeries = [];
 let statusPendingOptionId = null;
+let signedInUserName = "";
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -385,6 +392,18 @@ function esc(value){
   });
 }
 
+async function fetchCurrentUser(){
+  const res = await fetch(`${API_BASE}/whoami`, {
+    credentials:"include"
+  });
+
+  if(!res.ok){
+    throw new Error("Could not load signed-in user");
+  }
+
+  return await res.json();
+}
+  
 async function fetchAllRows(tableId){
   const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`, {
     credentials:"include"
@@ -525,9 +544,14 @@ const res = await fetch(`${API_BASE}/create-brochure`, {
 async function loadFormData(){
   applySavedTheme();
 
-const [brands, users, modelSeries, languages, markets, types, fields] = await Promise.all([
+  const currentUser = await fetchCurrentUser();
+  signedInUserName = currentUser.name || currentUser.email || "signed-in user";
+
+  document.getElementById("signedInText").textContent =
+    `You are signed in as ${signedInUserName}. This brochure will be submitted under your account.`;
+
+const [brands, modelSeries, languages, markets, types, fields] = await Promise.all([
   fetchAllRows(TABLES.brands),
-  fetchAllRows(TABLES.users),
   fetchAllRows(TABLES.modelSeries),
   fetchAllRowsNamed(TABLES.languages),
   fetchAllRowsNamed(TABLES.markets),
@@ -536,10 +560,11 @@ const [brands, users, modelSeries, languages, markets, types, fields] = await Pr
 ]);
 
   const brandOptions = brands.map(row => ({id: row.id, name: row.field_8351135 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
-  const userOptions = users.map(row => ({id: row.id, name: row.field_8350919 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
+
 
   fillSelect("brandSelect", brandOptions, "Choose brand...");
-  fillSelect("submittedBySelect", userOptions, "Choose registered user...");
+  document.getElementById("submittedBySelect").innerHTML =
+  `<option value="">Signed-in user</option>`;
 
   allModelSeries = modelSeries;
   updateModelSeriesOptions();
@@ -596,7 +621,6 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   const marketId = document.getElementById("marketSelect").value;
   const typeId = document.getElementById("typeSelect").value;
   const pageCount = document.getElementById("pageCountInput").value;
-  const submittedById = document.getElementById("submittedBySelect").value;
   const modelSeriesIds = Array.from(document.getElementById("modelSeriesSelect").selectedOptions).map(option => Number(option.value));
   const coverFile = document.getElementById("coverInput").files[0];
   const pdfFile = document.getElementById("pdfInput").files[0];
@@ -629,8 +653,6 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
     payload[FIELDS.type] = [Number(typeId)];
     payload[FIELDS.coverImage] = [uploadedCover];
     payload[FIELDS.pageCount] = Number(pageCount);
-    payload[FIELDS.submittedBy] = [Number(submittedById)];
-    payload[FIELDS.owner] = [Number(submittedById)];
     payload[FIELDS.status] = Number(statusPendingOptionId);
     payload[FIELDS.modelSeries] = modelSeriesIds;
     payload[FIELDS.notes] = notes;

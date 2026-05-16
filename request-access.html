@@ -293,7 +293,7 @@ textarea{
 </div>
 
 <script>
-const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
+const API_BASE = "https://api.carstereogarage.com";
 
 const TABLES = {
   users: "957380",
@@ -410,7 +410,7 @@ function fillSingleSelectOptions(selectId, options, placeholder){
 async function createUserRow(payload){
   const res = await fetch(`${API_BASE}/create-user`, {
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
+    headers:{ "Content-Type":"text/plain" },
     body:JSON.stringify(payload)
   });
 

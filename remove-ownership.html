@@ -182,13 +182,18 @@ async function fetchAllRows(tableId){
 async function removeOwnership(payload){
   const res = await fetch(`${API_BASE}/remove-ownership`, {
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
+    credentials:"include",
+    headers:{
+      "Content-Type":"text/plain"
+    },
     body:JSON.stringify(payload)
   });
+
   if(!res.ok){
     const text = await res.text();
     throw new Error(text);
   }
+
   return await res.json();
 }
 

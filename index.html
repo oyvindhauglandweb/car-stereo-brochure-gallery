@@ -623,7 +623,7 @@ async function applyLoginVisibility(){
         popup.close();
       }
 
-      window.location.reload();
+      window.location.href = "index.html?logout=" + Date.now();
     }, 2500);
   }
 

@@ -269,6 +269,16 @@ async function loadPage(){
         `<strong>Ownership removed successfully.</strong><br><br>
          <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
         "success"
+        
+const submitButton = document.getElementById("submitButton");
+submitButton.textContent = "Close";
+submitButton.classList.remove("submit-button");
+submitButton.classList.add("secondary-button");
+submitButton.type = "button";
+submitButton.onclick = function(){
+  window.location.href = returnUrl;
+};
+        
       );
     } catch(error){
       console.error(error);

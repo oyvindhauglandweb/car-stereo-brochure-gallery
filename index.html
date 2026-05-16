@@ -294,7 +294,9 @@ body.dark-mode .portal-button:hover{
   <div class="button-grid">
 
 <a class="portal-button"
-   href="add-brochure.html">
+   id="addBrochureButton"
+   href="add-brochure.html"
+   style="display:none;">
    Add New Brochure
 </a>
 
@@ -443,6 +445,32 @@ body.dark-mode .portal-button:hover{
 </div>
   
 <script>
+async function fetchCurrentUser(){
+  try{
+    const res = await fetch(`${API_BASE}/whoami`, {
+      credentials:"include"
+    });
+
+    if(!res.ok){
+      return null;
+    }
+
+    return await res.json();
+  }catch(error){
+    return null;
+  }
+}
+
+async function applyLoginVisibility(){
+  const currentUser = await fetchCurrentUser();
+  const addButton = document.getElementById("addBrochureButton");
+
+  if(currentUser){
+    addButton.style.display = "flex";
+  }else{
+    addButton.style.display = "none";
+  }
+}
   
 function applySavedTheme(){
   const savedTheme =
@@ -458,6 +486,8 @@ function applySavedTheme(){
 applySavedTheme();
   
 const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
+  
+const API_BASE = "https://api.carstereogarage.com";
 
 async function loadBrandGuides(){
 
@@ -633,6 +663,7 @@ adminHotspot.addEventListener("click", () => {
 });
 
 applyAdminVisibility();
+applyLoginVisibility();
 loadBrandGuides();
 loadFacebookLinks();
 

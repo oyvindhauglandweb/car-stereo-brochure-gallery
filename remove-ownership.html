@@ -94,7 +94,7 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
 </div>
 
 <script>
-const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
+const API_BASE = "https://api.carstereogarage.com";
 const TABLES = { brochures: "959905" };
 
 let brochure = null;
@@ -265,27 +265,19 @@ async function loadPage(){
 
       renderBrochure(updatedOwnerNames);
 
-      showStatus(
-        `<strong>Ownership removed successfully.</strong><br><br>
-         <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
-        "success"
-        
-const submitButton = document.getElementById("submitButton");
-submitButton.textContent = "Close";
-submitButton.classList.remove("submit-button");
-submitButton.classList.add("secondary-button");
-submitButton.type = "button";
-submitButton.onclick = function(){
+    showStatus(
+  `<strong>Ownership removed successfully.</strong><br><br>
+   <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
+  "success"
+);
+
+const removeButton = document.getElementById("removeButton");
+removeButton.textContent = "Close";
+removeButton.classList.remove("remove-button");
+removeButton.classList.add("secondary-button");
+removeButton.onclick = function(){
   window.location.href = returnUrl;
 };
-        
-      );
-    } catch(error){
-      console.error(error);
-      showStatus(error.message, "error");
-    }
-  });
-}
 
 loadPage().catch(error => {
   console.error(error);

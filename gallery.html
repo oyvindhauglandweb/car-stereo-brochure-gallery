@@ -418,11 +418,9 @@ body:not(.dark-mode) .close-button:hover{
 </div>
 
 <script>
-const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
-const TABLE_ID = "959905";
-const GALLERY_URL = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html";
-const PORTAL_URL = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
-  const API_BASE = "https://api.carstereogarage.com";
+const API_BASE = "https://api.carstereogarage.com";
+const GALLERY_URL = "gallery.html";
+const PORTAL_URL = "index.html";
 
 let brochureData = [];
 let currentView = "image";
@@ -568,21 +566,14 @@ async function loadBrochures() {
   document.getElementById("resetFilterButton").style.display =
   hasFilter ? "flex" : "none";
   
-  let allRows = [];
-  let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
+  const galleryRes = await fetch(`${API_BASE}/gallery-data`);
 
-  while(nextUrl){
-    const res = await fetch(nextUrl, {
-      headers: {
-        Authorization: `Token ${BASEROW_TOKEN}`
-      }
-    });
+if(!galleryRes.ok){
+  throw new Error("Could not load gallery data");
+}
 
-    const data = await res.json();
-
-    allRows = allRows.concat(data.results || []);
-    nextUrl = data.next;
-  }
+const galleryData = await galleryRes.json();
+const allRows = galleryData.results || [];
 
 setupFilters(allRows, {
   brand: brandFilter,
@@ -1012,7 +1003,12 @@ function changeLanguage(value){ goWithFilters({language:value}); }
 function changeOwner(value){ goWithFilters({owner:value}); }
 function changeModelSeries(value){ goWithFilters({model_series:value}); }
   
-loadBrochures();
+loadBrochures().catch(error => {
+  console.error(error);
+
+  document.getElementById("gallery").innerHTML =
+    `Could not load gallery.<br><br>${esc(error.message)}`;
+});
 </script>
 </body>
 </html>

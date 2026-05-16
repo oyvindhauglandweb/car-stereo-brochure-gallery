@@ -245,6 +245,46 @@ body.dark-mode .portal-button:hover{
   font-weight:bold;
 }
 
+.login-status{
+  position:fixed;
+  top:14px;
+  right:16px;
+  z-index:9999;
+  padding:7px 11px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--card);
+  color:var(--text);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:bold;
+  line-height:1;
+  opacity:.82;
+}
+
+.login-status:hover{
+  opacity:1;
+  background:#e9eef2;
+}
+
+body.dark-mode .login-status:hover{
+  background:#3a3a3a;
+}
+
+.login-status.signed-in{
+  color:var(--muted);
+  cursor:default;
+}
+
+@media(max-width:800px){
+  .login-status{
+    top:10px;
+    right:10px;
+    font-size:12px;
+    padding:6px 9px;
+  }
+}
+  
 @media(max-width:800px){
 
   body{
@@ -267,6 +307,12 @@ body.dark-mode .portal-button:hover{
 
 <body>
 
+<a id="loginStatus"
+   class="login-status"
+   href="https://api.carstereogarage.com/login?returnUrl=https%3A%2F%2Fcarstereogarage.com%2Findex.html">
+   Sign in
+</a>
+  
 <div class="container">
 
   <div class="header">
@@ -464,11 +510,27 @@ async function fetchCurrentUser(){
 async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
   const addButton = document.getElementById("addBrochureButton");
+  const loginStatus = document.getElementById("loginStatus");
 
   if(currentUser){
-    addButton.style.display = "flex";
+    if(addButton){
+      addButton.style.display = "flex";
+    }
+
+    loginStatus.textContent = currentUser.name || currentUser.email || "Signed in";
+    loginStatus.href = "#";
+    loginStatus.classList.add("signed-in");
+    loginStatus.title = "Signed in";
   }else{
-    addButton.style.display = "none";
+    if(addButton){
+      addButton.style.display = "none";
+    }
+
+    loginStatus.textContent = "Sign in";
+    loginStatus.href =
+      `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
+    loginStatus.classList.remove("signed-in");
+    loginStatus.title = "Sign in";
   }
 }
   

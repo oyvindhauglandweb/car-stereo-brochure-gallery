@@ -287,7 +287,12 @@ function toggleTheme(){
     button.title = "Toggle dark mode";
 
   }
-loadModelSeries();
+loadModelSeries().catch(error => {
+  console.error(error);
+
+  document.getElementById("guideList").innerHTML =
+    `<div class="loading">Could not load model series guides.<br><br>${esc(error.message)}</div>`;
+});
 }
   
 function esc(value){

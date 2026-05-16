@@ -245,8 +245,7 @@ body{
 </div>
 
 <script>
-const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
-const TABLE_ID = "972230";
+const API_BASE = "https://api.carstereogarage.com";
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -354,21 +353,14 @@ async function loadModelSeries(){
     introText.innerText = "Choose a brand from the portal to open its model series guide.";
   }
 
-  let allRows = [];
-  let nextUrl = `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`;
+  const res = await fetch(`${API_BASE}/model-series-guides`);
 
-  while(nextUrl){
-    const res = await fetch(nextUrl, {
-      headers:{
-        Authorization:`Token ${BASEROW_TOKEN}`
-      }
-    });
+if(!res.ok){
+  throw new Error("Could not load model series guides");
+}
 
-    const data = await res.json();
-
-    allRows = allRows.concat(data.results || []);
-    nextUrl = data.next;
-  }
+const data = await res.json();
+const allRows = data.results || [];
 
   const guides = allRows
     .map(item => ({

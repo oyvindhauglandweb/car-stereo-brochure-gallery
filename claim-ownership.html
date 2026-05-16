@@ -358,15 +358,6 @@ document.querySelector(".claim-brochure-title").innerHTML = `
   </div>
 `;
 
-const submitButton = document.getElementById("submitButton");
-submitButton.textContent = "Close";
-submitButton.classList.remove("submit-button");
-submitButton.classList.add("secondary-button");
-submitButton.type = "button";
-submitButton.onclick = function(){
-  window.location.href = returnUrl;
-};
-
 ownershipComplete=true;
 
 const submitButton = document.getElementById("submitButton");

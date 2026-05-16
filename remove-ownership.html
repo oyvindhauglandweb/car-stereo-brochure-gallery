@@ -263,21 +263,28 @@ async function loadPage(){
           .filter(item => Number(item.id) !== ownerId)
       );
 
-      renderBrochure(updatedOwnerNames);
+       renderBrochure(updatedOwnerNames);
 
-    showStatus(
-  `<strong>Ownership removed successfully.</strong><br><br>
-   <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
-  "success"
-);
+      showStatus(
+        `<strong>Ownership removed successfully.</strong><br><br>
+         <a href="${esc(returnUrl)}" style="color:var(--link);font-weight:bold;">Return to gallery</a>`,
+        "success"
+      );
 
-const removeButton = document.getElementById("removeButton");
-removeButton.textContent = "Close";
-removeButton.classList.remove("remove-button");
-removeButton.classList.add("secondary-button");
-removeButton.onclick = function(){
-  window.location.href = returnUrl;
-};
+      const removeButton = document.getElementById("removeButton");
+      removeButton.textContent = "Close";
+      removeButton.classList.remove("remove-button");
+      removeButton.classList.add("secondary-button");
+      removeButton.onclick = function(){
+        window.location.href = returnUrl;
+      };
+
+    } catch(error){
+      console.error(error);
+      showStatus(error.message, "error");
+    }
+  });
+}
 
 loadPage().catch(error => {
   console.error(error);

@@ -410,7 +410,8 @@ async function fetchAllRows(tableId){
   });
 
   if(!res.ok){
-    throw new Error("Could not load table " + tableId);
+    const text = await res.text();
+    throw new Error("Could not load table " + tableId + ". Status " + res.status + ": " + text);
   }
 
   const data = await res.json();
@@ -423,7 +424,8 @@ async function fetchAllRowsNamed(tableId){
   });
 
   if(!res.ok){
-    throw new Error("Could not load table " + tableId);
+    const text = await res.text();
+    throw new Error("Could not load table " + tableId + ". Status " + res.status + ": " + text);
   }
 
   const data = await res.json();

@@ -337,15 +337,6 @@ body.dark-mode .login-status:hover{
     border-radius:999px;
   }
 }
-
-@media(max-width:800px){
-  .login-status{
-    top:10px;
-    right:10px;
-    font-size:12px;
-    padding:6px 9px;
-  }
-}
   
 @media(max-width:800px){
 
@@ -887,7 +878,11 @@ adminHotspot.addEventListener("click", () => {
     (!current).toString()
   );
 
-  document.addEventListener("click", function(event){
+  applyAdminVisibility();
+
+});
+
+document.addEventListener("click", function(event){
   const widget = document.querySelector(".login-widget");
   const menu = document.getElementById("loginMenu");
 
@@ -895,9 +890,7 @@ adminHotspot.addEventListener("click", () => {
     menu.style.display = "none";
   }
 });
-
-});
-
+  
 applyAdminVisibility();
 applyLoginVisibility();
 loadBrandGuides().catch(error => {

@@ -485,24 +485,29 @@ function applySavedTheme(){
 
 applySavedTheme();
   
-const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
-  
 const API_BASE = "https://api.carstereogarage.com";
 
+let portalOptionsData = null;
+
+async function loadPortalOptions(){
+  if(portalOptionsData){
+    return portalOptionsData;
+  }
+
+  const res = await fetch(`${API_BASE}/portal-options`);
+
+  if(!res.ok){
+    throw new Error("Could not load portal options");
+  }
+
+  portalOptionsData = await res.json();
+  return portalOptionsData;
+}
+  
 async function loadBrandGuides(){
 
-  const TABLE_ID = "957417";
-
-  const res = await fetch(
-    `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`,
-    {
-      headers:{
-        Authorization:`Token ${BASEROW_TOKEN}`
-      }
-    }
-  );
-
-  const data = await res.json();
+ const data = await loadPortalOptions();
+data.results = data.brands || [];
 
   const select = document.getElementById("brandGuideSelect");
 
@@ -546,18 +551,8 @@ if(e.target.value){
 
 async function loadFacebookLinks(){
 
-  const TABLE_ID = "969808";
-
-  const res = await fetch(
-    `https://api.baserow.io/api/database/rows/table/${TABLE_ID}/?user_field_names=false&size=200`,
-    {
-      headers:{
-        Authorization:`Token ${BASEROW_TOKEN}`
-      }
-    }
-  );
-
-  const data = await res.json();
+ const data = await loadPortalOptions();
+data.results = data.facebookLinks || [];
 
 function getFacebookSelectId(group){
   const g = String(group || "").toLowerCase();
@@ -664,8 +659,13 @@ adminHotspot.addEventListener("click", () => {
 
 applyAdminVisibility();
 applyLoginVisibility();
-loadBrandGuides();
-loadFacebookLinks();
+loadBrandGuides().catch(error => {
+  console.error(error);
+});
+
+loadFacebookLinks().catch(error => {
+  console.error(error);
+});
 
 </script>
 </body>

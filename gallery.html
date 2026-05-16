@@ -639,6 +639,10 @@ setupFilters(allRows, {
       market: item.field_8379591?.[0]?.value || "",
       page_count: item.field_8379594 || "",
       owner: item.field_8379595?.map(x => x.value).join(", ") || "",
+owners: item.field_8379595?.map(x => ({
+  id: Number(x.id),
+  name: x.value || x.name || ""
+})) || [],
       submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
       notes: item.field_8379601 || "",
       claim_ownership_url: item.field_8384825?.url || "",
@@ -847,9 +851,28 @@ const isCurrentUserOwner =
   currentUser && ownerNames.includes(currentUser.name);
 
 claimButton.style.display =
-  currentUser && !isCurrentUserOwner
-    ? "flex"
-    : "none";
+const claimButton = document.getElementById("claimButton");
+
+const currentOwner = currentUser
+  ? b.owners.find(owner => Number(owner.id) === Number(currentUser.id))
+  : null;
+
+claimButton.style.display = "none";
+
+if(currentUser && currentOwner){
+  claimButton.textContent = "Disclaim ownership";
+  claimButton.title = "Remove yourself as owner of this brochure";
+  claimButton.href =
+    `remove-ownership.html?brochure_id=${encodeURIComponent(b.id)}&owner_id=${encodeURIComponent(currentOwner.id)}&owner_name=${encodeURIComponent(currentOwner.name)}&returnUrl=${encodeURIComponent(window.location.href)}`;
+  claimButton.style.display = "flex";
+}
+
+if(currentUser && !currentOwner){
+  claimButton.textContent = "Claim ownership";
+  claimButton.title = "Register yourself as owner of this brochure";
+  claimButton.href =
+    `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
+  claimButton.style.display = "flex";
 }
 
 function closeModal(){

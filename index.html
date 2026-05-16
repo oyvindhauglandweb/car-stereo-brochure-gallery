@@ -247,24 +247,25 @@ body.dark-mode .portal-button:hover{
 
 .login-widget{
   position:fixed;
-  top:14px;
-  right:16px;
+  top:20px;
+  right:20px;
   z-index:9999;
+  height:44px;
+  display:flex;
+  align-items:center;
 }
 
 .login-status{
   display:flex;
   align-items:center;
   justify-content:center;
-  min-width:42px;
-  min-height:34px;
-  padding:7px 11px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:var(--card);
-  color:var(--text);
+  min-height:44px;
+  padding:0;
+  border:none;
+  background:transparent;
+  color:var(--muted);
   text-decoration:none;
-  font-size:13px;
+  font-size:14px;
   font-weight:bold;
   line-height:1;
   opacity:.86;
@@ -273,11 +274,12 @@ body.dark-mode .portal-button:hover{
 
 .login-status:hover{
   opacity:1;
-  background:#e9eef2;
+  color:var(--text);
+  background:transparent;
 }
 
 body.dark-mode .login-status:hover{
-  background:#3a3a3a;
+  background:transparent;
 }
 
 .login-status.signed-in{
@@ -286,7 +288,7 @@ body.dark-mode .login-status:hover{
 
 .login-menu{
   position:absolute;
-  top:42px;
+  top:44px;
   right:0;
   min-width:190px;
   padding:10px;
@@ -308,16 +310,28 @@ body.dark-mode .login-status:hover{
 
 .login-menu-link{
   display:block;
+  padding:8px 10px;
+  margin:0 -4px -4px;
+  border-radius:8px;
   color:var(--link);
   text-decoration:none;
   font-weight:bold;
   font-size:13px;
 }
 
+.login-menu-link:hover{
+  background:rgba(127,127,127,.10);
+}
+
+.login-menu-link:active{
+  background:rgba(127,127,127,.22);
+}
+
 @media(max-width:800px){
   .login-widget{
     top:10px;
     right:10px;
+    height:38px;
   }
 
   .login-status{
@@ -326,31 +340,38 @@ body.dark-mode .login-status:hover{
     min-width:38px;
     min-height:38px;
     padding:0;
+    border:none;
+    background:transparent;
     border-radius:50%;
+    font-size:20px;
+    color:var(--muted);
+  }
+
+  .login-status.signed-in{
     font-size:13px;
   }
 
   .login-status.is-signin{
-    width:auto;
-    min-width:60px;
-    padding:0 11px;
-    border-radius:999px;
+    width:38px;
+    min-width:38px;
+    padding:0;
+    border-radius:50%;
+  }
+
+  .login-status:hover{
+    background:transparent;
+  }
+
+  .login-status:active{
+    background:rgba(127,127,127,.14);
+  }
+
+  .login-menu{
+    top:40px;
+    right:0;
   }
 }
   
-@media(max-width:800px){
-
-  body{
-    padding:14px;
-  }
-
-  .portal-button{
-    height:44px;
-    font-size:16px;
-  }
-
-}
-
 </style>
 
   <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
@@ -681,7 +702,7 @@ async function applyLoginVisibility(){
       addButton.style.display = "none";
     }
 
-    loginStatus.textContent = "Sign in";
+   loginStatus.textContent = isMobile ? "⇥" : "Sign in";
 
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;

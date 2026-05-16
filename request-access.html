@@ -140,6 +140,20 @@ input, select, textarea{
   box-sizing:border-box;
 }
 
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:hover,
+body.dark-mode input:-webkit-autofill:focus,
+body.dark-mode textarea:-webkit-autofill,
+body.dark-mode textarea:-webkit-autofill:hover,
+body.dark-mode textarea:-webkit-autofill:focus,
+body.dark-mode select:-webkit-autofill,
+body.dark-mode select:-webkit-autofill:hover,
+body.dark-mode select:-webkit-autofill:focus{
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+  caret-color: var(--text);
+}  
+
 textarea{
   min-height:120px;
   padding:12px 14px;

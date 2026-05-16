@@ -113,6 +113,7 @@ let allBrochures=[];
 let claimStatusApprovedOptionId=null;
 let ownershipComplete=false;
 let signedInUserName="";
+let signedInUserId=null;
 
 function applySavedTheme(){const savedTheme=localStorage.getItem("brochureTheme")||"dark";const logo=document.getElementById("siteLogo");if(savedTheme==="dark"){document.body.classList.add("dark-mode");logo.src="Car Stereo Garage2_3.png"}else{document.body.classList.remove("dark-mode");logo.src="Car Stereo Garage2_3.png"}}
 function toggleTheme(){const isDark=document.body.classList.toggle("dark-mode");if(isDark){localStorage.setItem("brochureTheme","dark");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}else{localStorage.setItem("brochureTheme","light");document.getElementById("siteLogo").src="Car Stereo Garage2_3.png"}}
@@ -213,6 +214,7 @@ function getFileUrl(value){
 async function loadFormData(){
   const currentUser = await fetchCurrentUser();
 signedInUserName = currentUser.name || currentUser.email || "signed-in user";
+signedInUserId = currentUser.id;
 document.getElementById("signedInText").textContent =
   `You are signed in as ${signedInUserName}. Ownership to this brochure will be added to your account.`;  
   applySavedTheme();
@@ -317,7 +319,11 @@ document.getElementById("claimForm").addEventListener("submit",async function(ev
   const params = new URLSearchParams(window.location.search);
   const returnUrl = params.get("returnUrl") || "gallery.html";
   const brochureId = Number(params.get("brochure_id"));
-  const userId=Number(document.getElementById("userSelect").value);
+  const userId=Number(signedInUserId);
+  if(!userId){
+  showStatus("Could not identify signed-in user.", "error");
+  return;
+}
   if(!claimStatusApprovedOptionId){showStatus("Could not find the Approved status option in Baserow.","error");return}
   const brochure=allBrochures.find(row=>Number(row.id)===brochureId);
   if(!brochure){showStatus("Could not find the selected brochure.","error");return}

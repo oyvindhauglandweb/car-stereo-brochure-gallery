@@ -607,42 +607,84 @@ async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
   const addButton = document.getElementById("addBrochureButton");
   const loginStatus = document.getElementById("loginStatus");
+  const loginMenu = document.getElementById("loginMenu");
+  const loginMenuName = document.getElementById("loginMenuName");
+  const logoutLink = document.getElementById("logoutLink");
 
-  const logoutUrl =
-    "https://carstereogarage.cloudflareaccess.com/cdn-cgi/access/logout";
+  async function performLogout(){
+    try{
+      await fetch("https://api.carstereogarage.com/cdn-cgi/access/logout", {
+        method:"GET",
+        credentials:"include",
+        mode:"no-cors"
+      });
+    }catch(error){
+      console.warn("Logout request may have been blocked, continuing anyway.", error);
+    }
 
-  function openLogoutPopup(){
-    const popup = window.open(
-      logoutUrl,
-      "cloudflareLogout",
-      "width=520,height=720"
-    );
-
-    setTimeout(function(){
-      if(popup && !popup.closed){
-        popup.close();
-      }
-
-      window.location.href = "index.html?logout=" + Date.now();
-    }, 2500);
+    window.location.href = "index.html?logout=" + Date.now();
   }
 
+  const isMobile =
+    window.matchMedia("(max-width: 800px)").matches;
+
   if(currentUser){
+    const displayName =
+      currentUser.name || currentUser.email || "Signed in";
+
     if(addButton){
       addButton.style.display = "flex";
     }
 
-    loginStatus.textContent =
-      `${currentUser.name || currentUser.email || "Signed in"} · Sign out`;
-
-    loginStatus.href = "#";
-    loginStatus.onclick = function(event){
-      event.preventDefault();
-      openLogoutPopup();
-    };
+    loginStatus.textContent = isMobile
+      ? getInitials(displayName)
+      : `${displayName} · Sign out`;
 
     loginStatus.classList.add("signed-in");
-    loginStatus.title = "Sign out";
+    loginStatus.classList.remove("is-signin");
+
+    loginStatus.title = isMobile
+      ? displayName
+      : "Sign out";
+
+    if(loginMenuName){
+      loginMenuName.textContent = displayName;
+    }
+
+    if(logoutLink){
+      logoutLink.href = "#";
+      logoutLink.removeAttribute("target");
+      logoutLink.onclick = function(event){
+        event.preventDefault();
+        performLogout();
+      };
+    }
+
+    if(isMobile){
+      loginStatus.href = "#";
+      loginStatus.removeAttribute("target");
+
+      loginStatus.onclick = function(event){
+        event.preventDefault();
+
+        if(loginMenu){
+          loginMenu.style.display =
+            loginMenu.style.display === "block" ? "none" : "block";
+        }
+      };
+    }else{
+      loginStatus.href = "#";
+      loginStatus.removeAttribute("target");
+
+      loginStatus.onclick = function(event){
+        event.preventDefault();
+        performLogout();
+      };
+
+      if(loginMenu){
+        loginMenu.style.display = "none";
+      }
+    }
   }else{
     if(addButton){
       addButton.style.display = "none";
@@ -653,12 +695,17 @@ async function applyLoginVisibility(){
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
 
-    loginStatus.onclick = null;
+    loginStatus.removeAttribute("target");
     loginStatus.classList.remove("signed-in");
+    loginStatus.classList.add("is-signin");
     loginStatus.title = "Sign in";
+    loginStatus.onclick = null;
+
+    if(loginMenu){
+      loginMenu.style.display = "none";
+    }
   }
-}
-  
+}  
 function applySavedTheme(){
   const savedTheme =
     localStorage.getItem("brochureTheme") || "dark";

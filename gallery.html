@@ -422,10 +422,28 @@ const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
 const TABLE_ID = "959905";
 const GALLERY_URL = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/gallery.html";
 const PORTAL_URL = "https://oyvindhauglandweb.github.io/car-stereo-brochure-gallery/";
+  const API_BASE = "https://api.carstereogarage.com";
 
 let brochureData = [];
 let currentView = "image";
+let currentUser = null;
 
+async function fetchCurrentUser(){
+  try{
+    const res = await fetch(`${API_BASE}/whoami`, {
+      credentials:"include"
+    });
+
+    if(!res.ok){
+      return null;
+    }
+
+    return await res.json();
+  }catch(error){
+    return null;
+  }
+}
+  
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g, function(char){
     return {
@@ -502,6 +520,8 @@ function toggleTheme(){
 
 async function loadBrochures() {
   applySavedTheme();
+
+  currentUser = await fetchCurrentUser();
 
   const params = new URLSearchParams(window.location.search);
   const ownerFilter = params.get("owner");
@@ -819,7 +839,17 @@ const claimButton = document.getElementById("claimButton");
 claimButton.href =
   `claim-ownership.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
 
-claimButton.style.display = "none";
+const ownerNames = b.owner
+  ? b.owner.split(", ").map(name => name.trim()).filter(Boolean)
+  : [];
+
+const isCurrentUserOwner =
+  currentUser && ownerNames.includes(currentUser.name);
+
+claimButton.style.display =
+  currentUser && !isCurrentUserOwner
+    ? "flex"
+    : "none";
 }
 
 function closeModal(){

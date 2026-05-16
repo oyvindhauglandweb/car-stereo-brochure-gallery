@@ -340,10 +340,10 @@ body.dark-mode .login-status:hover{
     min-width:38px;
     min-height:38px;
     padding:0;
-    border:none;
-    background:transparent;
+    border:1px solid var(--border);
+    background:var(--card);
     border-radius:50%;
-    font-size:20px;
+    font-size:13px;
     color:var(--muted);
   }
 
@@ -356,18 +356,25 @@ body.dark-mode .login-status:hover{
     min-width:38px;
     padding:0;
     border-radius:50%;
+    background:var(--card);
+    background-image:url("LogIn.png");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:24px 24px;
+    text-indent:-9999px;
+    overflow:hidden;
   }
 
   .login-status:hover{
-    background:transparent;
+    background-color:var(--card);
   }
 
   .login-status:active{
-    background:rgba(127,127,127,.14);
+    background-color:rgba(127,127,127,.18);
   }
 
   .login-menu{
-    top:40px;
+    top:44px;
     right:0;
   }
 }

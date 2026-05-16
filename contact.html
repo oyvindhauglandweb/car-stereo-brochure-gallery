@@ -63,7 +63,7 @@ textarea{min-height:160px;padding:12px 14px;resize:vertical}
   </div>
 </div>
 <script>
-const API_BASE = "https://shy-heart-4d13.oyvind-haugland.workers.dev";
+const API_BASE = "https://api.carstereogarage.com";
 
 const FIELDS = {
   name: "field_8400182",
@@ -121,7 +121,7 @@ function setLoading(isLoading){
 async function createContactMessage(payload){
   const res=await fetch(`${API_BASE}/create-contact-message`,{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
+    headers:{"Content-Type":"text/plain"},
     body:JSON.stringify(payload)
   });
   if(!res.ok){

@@ -233,10 +233,7 @@ body{
 </div>
 
 <script>
-const BASEROW_TOKEN = "0d9HltmXB6ehmXHOBCrKYDYckO65DKKK";
-
-const HELP_TABLE_ID = "972409";
-const HELP_CASES_TABLE_ID = "973091";
+const API_BASE = "https://api.carstereogarage.com";
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -322,24 +319,14 @@ function getFileUrl(value){
   return "";
 }
 
-async function fetchAllRows(tableId){
-  let allRows = [];
-  let nextUrl = `https://api.baserow.io/api/database/rows/table/${tableId}/?user_field_names=false&size=200`;
+async function fetchHelpData(){
+  const res = await fetch(`${API_BASE}/help`);
 
-  while(nextUrl){
-    const res = await fetch(nextUrl, {
-      headers:{
-        Authorization:`Token ${BASEROW_TOKEN}`
-      }
-    });
-
-    const data = await res.json();
-
-    allRows = allRows.concat(data.results || []);
-    nextUrl = data.next;
+  if(!res.ok){
+    throw new Error("Could not load help content");
   }
 
-  return allRows;
+  return await res.json();
 }
 
 async function loadHelp(){
@@ -353,7 +340,8 @@ async function loadHelp(){
   const caseDescription = document.getElementById("caseDescription");
   const helpList = document.getElementById("helpList");
 
-  const cases = await fetchAllRows(HELP_CASES_TABLE_ID);
+  const helpData = await fetchHelpData();
+  const cases = helpData.cases || [];
 
   const selectedCase = cases
     .map(item => ({
@@ -381,7 +369,7 @@ async function loadHelp(){
   subHeader.innerText = selectedCase.sub_header || "";
   caseDescription.innerText = selectedCase.description || "";
 
-  const helpRows = await fetchAllRows(HELP_TABLE_ID);
+  const helpRows = helpData.paragraphs || [];
 
   const paragraphs = helpRows
     .map(item => ({
@@ -444,7 +432,12 @@ async function loadHelp(){
   });
 }
 
-loadHelp();
+loadHelp().catch(error => {
+  console.error(error);
+
+  document.getElementById("helpList").innerHTML =
+    `<div class="loading">Could not load help page.<br><br>${esc(error.message)}</div>`;
+});
 </script>
 
 </body>

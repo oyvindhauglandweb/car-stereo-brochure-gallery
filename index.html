@@ -248,7 +248,7 @@ body.dark-mode .portal-button:hover{
 .login-widget{
   position:fixed;
   top:20px;
-  right:20px;
+  right:max(20px, calc((100vw - 1200px) / 2));
   z-index:9999;
   height:44px;
   display:flex;
@@ -270,6 +270,7 @@ body.dark-mode .portal-button:hover{
   line-height:1;
   opacity:.86;
   box-sizing:border-box;
+  cursor:pointer;
 }
 
 .login-status:hover{
@@ -660,17 +661,21 @@ async function applyLoginVisibility(){
 
     loginStatus.textContent = isMobile
       ? getInitials(displayName)
-      : `${displayName} · Sign out`;
+      : displayName;
+
+    loginStatus.href = "#";
+    loginStatus.removeAttribute("target");
 
     loginStatus.classList.add("signed-in");
     loginStatus.classList.remove("is-signin");
 
     loginStatus.title = isMobile
       ? displayName
-      : "Sign out";
+      : "Account menu";
 
     if(loginMenuName){
       loginMenuName.textContent = displayName;
+      loginMenuName.style.display = isMobile ? "block" : "none";
     }
 
     if(logoutLink){
@@ -682,37 +687,20 @@ async function applyLoginVisibility(){
       };
     }
 
-    if(isMobile){
-      loginStatus.href = "#";
-      loginStatus.removeAttribute("target");
-
-      loginStatus.onclick = function(event){
-        event.preventDefault();
-
-        if(loginMenu){
-          loginMenu.style.display =
-            loginMenu.style.display === "block" ? "none" : "block";
-        }
-      };
-    }else{
-      loginStatus.href = "#";
-      loginStatus.removeAttribute("target");
-
-      loginStatus.onclick = function(event){
-        event.preventDefault();
-        performLogout();
-      };
+    loginStatus.onclick = function(event){
+      event.preventDefault();
 
       if(loginMenu){
-        loginMenu.style.display = "none";
+        loginMenu.style.display =
+          loginMenu.style.display === "block" ? "none" : "block";
       }
-    }
+    };
   }else{
     if(addButton){
       addButton.style.display = "none";
     }
 
-   loginStatus.textContent = isMobile ? "⇥" : "Sign in";
+    loginStatus.textContent = "Sign in";
 
     loginStatus.href =
       `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
@@ -726,8 +714,13 @@ async function applyLoginVisibility(){
     if(loginMenu){
       loginMenu.style.display = "none";
     }
+
+    if(loginMenuName){
+      loginMenuName.style.display = "none";
+    }
   }
-}  
+}
+
 function applySavedTheme(){
   const savedTheme =
     localStorage.getItem("brochureTheme") || "dark";

@@ -217,15 +217,6 @@ body.dark-mode .portal-button:hover{
   height:48px;
 }
 
-#adminHotspot{
-  position:fixed;
-  right:0;
-  bottom:0;
-  width:24px;
-  height:24px;
-  opacity:0;
-  z-index:99999;
-}
   
 @media(max-width:800px){
   .facebook-grid{
@@ -604,10 +595,6 @@ body.dark-mode .login-status:hover{
   </div>
 
 </div>
-
-<div id="adminHotspot"
-     title="Admin toggle">
-</div>
   
 <script>
 async function fetchCurrentUser(){
@@ -906,35 +893,12 @@ const adminHotspot =
   document.getElementById("adminHotspot");
 
 function applyAdminVisibility(){
-  const adminVisible =
-    localStorage.getItem("adminVisible") === "true";
-
   const isAdmin =
     loggedInUserRole === "Admin";
 
   adminSection.style.display =
-    adminVisible && isAdmin ? "block" : "none";
+    isAdmin ? "block" : "none";
 }
-
-adminHotspot.addEventListener("click", () => {
-
-  if(loggedInUserRole !== "Admin"){
-    localStorage.setItem("adminVisible", "false");
-    applyAdminVisibility();
-    return;
-  }
-
-  const current =
-    localStorage.getItem("adminVisible") === "true";
-
-  localStorage.setItem(
-    "adminVisible",
-    (!current).toString()
-  );
-
-  applyAdminVisibility();
-
-});
 
 document.addEventListener("click", function(event){
   const widget = document.querySelector(".login-widget");

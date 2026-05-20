@@ -259,6 +259,87 @@ body:not(.dark-mode) .close-button:hover{
   display:none;
 }  
 
+.gallery.large-view{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.gallery.small-view{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(125px,1fr));
+  gap:12px;
+}
+
+.gallery.mini-view{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(72px,1fr));
+  gap:8px;
+}
+
+.gallery.small-view .card,
+.gallery.mini-view .card{
+  border-radius:8px;
+}
+
+.gallery.small-view .info,
+.gallery.mini-view .info{
+  padding:7px;
+  text-align:center;
+}
+
+.gallery.small-view .brand{
+  font-size:13px;
+}
+
+.gallery.small-view .title{
+  display:none;
+}
+
+.gallery.small-view .meta{
+  font-size:12px;
+  margin-top:3px;
+}
+
+.gallery.mini-view .brand{
+  font-size:11px;
+  line-height:1.15;
+}
+
+.gallery.mini-view .title{
+  display:none;
+}
+
+.gallery.mini-view .meta{
+  font-size:10px;
+  margin-top:2px;
+  line-height:1.1;
+}
+
+.gallery.small-view .list-extra,
+.gallery.mini-view .list-extra{
+  display:none;
+}
+
+.gallery.small-view .image-meta,
+.gallery.mini-view .image-meta{
+  display:block;
+}
+
+.compact-meta{
+  display:none;
+}
+
+.gallery.small-view .large-meta,
+.gallery.mini-view .large-meta{
+  display:none;
+}
+
+.gallery.small-view .compact-meta,
+.gallery.mini-view .compact-meta{
+  display:inline;
+}
+  
 @media(max-width:800px){
   body{
     padding:10px;
@@ -423,7 +504,7 @@ const GALLERY_URL = "gallery.html";
 const PORTAL_URL = "index.html";
 
 let brochureData = [];
-let currentView = "image";
+let currentView = "large";
 let currentUser = null;
 
 async function fetchCurrentUser(){
@@ -683,9 +764,10 @@ image:
         <div class="info">
           <div class="brand">${esc(b.brand)}</div>
           <div class="title">${esc(b.title)}</div>
-          <div class="meta image-meta">
-            ${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}
-          </div>
+<div class="meta image-meta">
+  <span class="large-meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</span>
+  <span class="compact-meta">${esc(b.year)}</span>
+</div>
           <div class="list-extra">
             <div>
               ${esc(b.month)} ${esc(b.year)}
@@ -857,47 +939,62 @@ function closeModal(){
 }
 
 function applySavedView(){
-  const savedView = localStorage.getItem("brochureView") || "image";
-  const gallery = document.getElementById("gallery");
-  const button = document.getElementById("viewToggle");
+  const savedView =
+    localStorage.getItem("brochureView") || "large";
 
-  currentView = savedView;
+  const validViews = ["list", "large", "small", "mini"];
 
-  if(savedView === "list"){
-    gallery.classList.add("list-view");
-    button.innerText = "⊞";
-    button.title = "Toggle image view";
-  } else {
-    gallery.classList.remove("list-view");
-    button.innerText = "☰";
-    button.title = "Toggle list view";
-  }
+  currentView = validViews.includes(savedView)
+    ? savedView
+    : "large";
+
+  applyViewMode();
 }
 
-function toggleView(){
-
+function applyViewMode(){
   const gallery = document.getElementById("gallery");
   const button = document.getElementById("viewToggle");
 
-  if(currentView === "image"){
+  gallery.classList.remove(
+    "list-view",
+    "large-view",
+    "small-view",
+    "mini-view"
+  );
 
-    currentView = "list";
-    localStorage.setItem("brochureView", "list");
-    gallery.classList.add("list-view");
+  gallery.classList.add(currentView + "-view");
 
-    button.innerText = "⊞";
-    button.title = "Toggle image view";
-
-  } else {
-
-    currentView = "image";
-    localStorage.setItem("brochureView", "image");
-    gallery.classList.remove("list-view");
-
+  if(currentView === "list"){
     button.innerText = "☰";
-    button.title = "Toggle list view";
-
+    button.title = "View: List view";
   }
+
+  if(currentView === "large"){
+    button.innerText = "⊞";
+    button.title = "View: Large image view";
+  }
+
+  if(currentView === "small"){
+    button.innerText = "⊞";
+    button.title = "View: Small image view";
+  }
+
+  if(currentView === "mini"){
+    button.innerText = "⊞";
+    button.title = "View: Mini image view";
+  }
+}
+  
+function toggleView(){
+  const views = ["list", "large", "small", "mini"];
+  const currentIndex = views.indexOf(currentView);
+
+  currentView =
+    views[(currentIndex + 1) % views.length];
+
+  localStorage.setItem("brochureView", currentView);
+
+  applyViewMode();
 }
 
 function fillSelect(selectId, values, selectedValue){

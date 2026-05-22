@@ -422,6 +422,21 @@ function renderLinkCell(value, href){
   return `<a class="link" href="${esc(href)}" target="_blank" rel="noopener">${esc(value)}</a>`;
 }
 
+function renderMultiLinkCell(value, buildHref){
+  const parts = String(value || "")
+    .split(", ")
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  if(!parts.length){
+    return "-";
+  }
+
+  return parts
+    .map(part => renderLinkCell(part, buildHref(part)))
+    .join(" ");
+}
+
 function renderCompareTable(brochures){
   document.getElementById("pageTitle").textContent =
     `Compare ${brochures.length} brochure${brochures.length === 1 ? "" : "s"}`;
@@ -473,23 +488,38 @@ function renderCompareTable(brochures){
     },
     {
       label:"Model series",
-      render:b => renderCell(b.model_series)
+      render:b => renderMultiLinkCell(
+        b.model_series,
+        series => `${GALLERY_URL}?model_series=${encodeURIComponent(series)}`
+      )
     },
     {
       label:"Language",
-      render:b => renderCell(b.language)
+      render:b => renderLinkCell(
+        b.language,
+        `${GALLERY_URL}?brand=${encodeURIComponent(b.brand)}&language=${encodeURIComponent(b.language)}`
+      )
     },
     {
       label:"Market",
-      render:b => renderCell(b.market)
+      render:b => renderLinkCell(
+        b.market,
+        `${GALLERY_URL}?brand=${encodeURIComponent(b.brand)}&market=${encodeURIComponent(b.market)}`
+      )
     },
     {
       label:"Owner",
-      render:b => renderCell(b.owner)
+      render:b => renderMultiLinkCell(
+        b.owner,
+        owner => `${GALLERY_URL}?owner=${encodeURIComponent(owner)}`
+      )
     },
     {
       label:"Submitted by",
-      render:b => renderCell(b.submitted_by)
+      render:b => renderMultiLinkCell(
+        b.submitted_by,
+        name => `${GALLERY_URL}?submitted_by=${encodeURIComponent(name)}`
+      )
     },
     {
       label:"Notes",

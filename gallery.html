@@ -150,37 +150,37 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
 }
 
 .compare-button{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:34px;
-  height:30px;
-  padding:0 10px;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:7px;
+  border-radius:8px;
   color:var(--text);
   text-decoration:none;
-  font-size:16px;
-  font-weight:bold;
+  font-size:24px;
+  font-weight:900;
   box-sizing:border-box;
   cursor:pointer;
 }
 
 .compare-button.active{
-  min-width:160px;
-  justify-content:center;
+  width:auto;
+  min-width:190px;
+  padding:0 14px;
+  font-size:15px;
 }
 
 .compare-cancel{
   display:none;
   align-items:center;
   justify-content:center;
-  height:30px;
-  padding:0 10px;
+  height:44px;
+  padding:0 14px;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:7px;
+  border-radius:8px;
   color:var(--text);
   font-size:14px;
   font-weight:bold;
@@ -191,7 +191,11 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   display:flex;
 }
 
-.gallery-item.compare-selected{
+.compare-mode .card{
+  cursor:pointer;
+}
+
+.card.compare-selected{
   outline:3px solid var(--link);
   outline-offset:3px;
 }
@@ -477,16 +481,6 @@ body:not(.dark-mode) .close-button:hover{
     </select>
   </div>
 
-<div class="compare-controls">
-  <button id="compareBtn" class="compare-button" type="button" title="Compare brochures">
-    ⇄
-  </button>
-
-  <button id="compareCancelBtn" class="compare-cancel" type="button">
-    Cancel
-  </button>
-</div>
-  
 <div class="top-buttons">
 
   <a class="top-button"
@@ -520,6 +514,16 @@ body:not(.dark-mode) .close-button:hover{
           title="Toggle list view">
     ☰
   </button>
+
+  <div class="compare-controls">
+    <button id="compareBtn" class="top-button compare-button" type="button" title="Compare brochures">
+      ⇄
+    </button>
+
+    <button id="compareCancelBtn" class="compare-cancel" type="button">
+      Cancel
+    </button>
+  </div>
 
   <a class="top-button"
      id="resetFilterButton"
@@ -816,26 +820,37 @@ image:
   });
 
   brochureData = brochures;
+  renderBrochures();
+}
 
+function renderBrochures(){
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
 
-  brochures.forEach((b, index) => {
+  brochureData.forEach((b, index) => {
+    const isSelected = selectedCompareIds.has(String(b.id));
+
     gallery.innerHTML += `
-      <div class="card" onclick="openModal(${index}, this)">
+      <div
+        class="card ${isSelected ? "compare-selected" : ""}"
+        onclick="handleBrochureClick(${index}, this, event)"
+      >
         <img src="${esc(b.image)}" alt="${esc(b.brochure)}">
         <div class="info">
           <div class="brand">${esc(b.brand)}</div>
           <div class="title">${esc(b.title)}</div>
-<div class="meta image-meta">
-  <span class="large-meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</span>
-  <span class="compact-meta">${esc(b.year)}</span>
-</div>
+
+          <div class="meta image-meta">
+            <span class="large-meta">${esc(b.month)} ${esc(b.year)} • ${esc(b.language)}</span>
+            <span class="compact-meta">${esc(b.year)}</span>
+          </div>
+
           <div class="list-extra">
             <div>
               ${esc(b.month)} ${esc(b.year)}
-              • ${esc(b.language)}
+              • ${esc(b.type)}
               • Pages: ${esc(b.page_count)}
+              • ${esc(b.language)}
             </div>
 
             <div>
@@ -846,10 +861,24 @@ image:
       </div>
     `;
   });
+
   applySavedView();
-  if(brochures.length === 0){
+
+  if(brochureData.length === 0){
     gallery.innerHTML = "No brochures found.";
   }
+}
+
+function handleBrochureClick(index, card, event){
+  const brochure = brochureData[index];
+
+  if(compareMode){
+    event.preventDefault();
+    toggleCompareSelection(brochure, card);
+    return;
+  }
+
+  openModal(index, card);
 }
 
 function openModal(index, card){
@@ -1067,26 +1096,9 @@ function updateCompareButton(){
   const button = document.getElementById("compareBtn");
   const count = selectedCompareIds.size;
 
-  if(!compareMode){
-    button.classList.remove("active");
-    button.textContent = "⇄";
-    button.title = "Compare brochures";
-    button.disabled = false;
+  if(!button){
     return;
   }
-
-  button.classList.add("active");
-  button.textContent = `⇄ Compare ${count} brochure${count === 1 ? "" : "s"}`;
-  button.title = count >= 2 ? "Open comparison" : "Select at least 2 brochures";
-  button.disabled = false;
-}
-
-let compareMode = false;
-let selectedCompareIds = new Set();
-
-function updateCompareButton(){
-  const button = document.getElementById("compareBtn");
-  const count = selectedCompareIds.size;
 
   if(!compareMode){
     button.classList.remove("active");
@@ -1102,17 +1114,23 @@ function updateCompareButton(){
   button.disabled = false;
 }
 
-document.getElementById("compareBtn").addEventListener("click", function(){
-  if(!compareMode){
-    compareMode = true;
-    selectedCompareIds.clear();
-    document.body.classList.add("compare-mode");
+function startCompareMode(){
+  compareMode = true;
+  selectedCompareIds.clear();
+  document.body.classList.add("compare-mode");
+  renderBrochures();
+  updateCompareButton();
+}
 
-    renderGallery(currentItems);
-    updateCompareButton();
-    return;
-  }
+function cancelCompareMode(){
+  compareMode = false;
+  selectedCompareIds.clear();
+  document.body.classList.remove("compare-mode");
+  renderBrochures();
+  updateCompareButton();
+}
 
+function openComparePage(){
   const ids = Array.from(selectedCompareIds);
 
   if(ids.length < 2){
@@ -1120,19 +1138,10 @@ document.getElementById("compareBtn").addEventListener("click", function(){
   }
 
   window.location.href = `compare.html?ids=${encodeURIComponent(ids.join(","))}`;
-});
+}
 
-document.getElementById("compareCancelBtn").addEventListener("click", function(){
-  compareMode = false;
-  selectedCompareIds.clear();
-  document.body.classList.remove("compare-mode");
-
-  renderGallery(currentItems);
-  updateCompareButton();
-});
-
-function toggleCompareSelection(item, card){
-  const id = String(item.id);
+function toggleCompareSelection(brochure, card){
+  const id = String(brochure.id);
 
   if(selectedCompareIds.has(id)){
     selectedCompareIds.delete(id);
@@ -1145,16 +1154,29 @@ function toggleCompareSelection(item, card){
   updateCompareButton();
 }
 
-card.addEventListener("click", function(event){
-  if(compareMode){
-    event.preventDefault();
-    toggleCompareSelection(item, card);
-    return;
+function setupCompareButtons(){
+  const compareButton = document.getElementById("compareBtn");
+  const cancelButton = document.getElementById("compareCancelBtn");
+
+  if(compareButton){
+    compareButton.addEventListener("click", function(){
+      if(!compareMode){
+        startCompareMode();
+        return;
+      }
+
+      openComparePage();
+    });
   }
 
-  // eksisterende normal klikk-handling her
-});
-  
+  if(cancelButton){
+    cancelButton.addEventListener("click", function(){
+      cancelCompareMode();
+    });
+  }
+
+  updateCompareButton();
+}
   
 function fillSelect(selectId, values, selectedValue){
   const select = document.getElementById(selectId);
@@ -1259,6 +1281,8 @@ function changeLanguage(value){ goWithFilters({language:value}); }
 function changeOwner(value){ goWithFilters({owner:value}); }
 function changeModelSeries(value){ goWithFilters({model_series:value}); }
   
+setupCompareButtons();
+
 loadBrochures().catch(error => {
   console.error(error);
 

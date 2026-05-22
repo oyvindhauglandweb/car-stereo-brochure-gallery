@@ -654,7 +654,11 @@ fillSelect(
   languages
     .map(row => ({id: row.id, name: row.Name || row.name || ""}))
     .filter(row => row.name)
-    .sort((a,b) => a.name.localeCompare(b.name)),
+    .sort((a,b) => {
+    if(a.name === "Other") return 1;
+    if(b.name === "Other") return -1;
+    return a.name.localeCompare(b.name);
+}),
   "Choose language..."
 );
 

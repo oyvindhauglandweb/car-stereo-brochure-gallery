@@ -143,6 +143,59 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   font-weight:700;
 }
 
+.compare-controls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.compare-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:34px;
+  height:30px;
+  padding:0 10px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:var(--text);
+  text-decoration:none;
+  font-size:16px;
+  font-weight:bold;
+  box-sizing:border-box;
+  cursor:pointer;
+}
+
+.compare-button.active{
+  min-width:160px;
+  justify-content:center;
+}
+
+.compare-cancel{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  height:30px;
+  padding:0 10px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:var(--text);
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.compare-mode .compare-cancel{
+  display:flex;
+}
+
+.gallery-item.compare-selected{
+  outline:3px solid var(--link);
+  outline-offset:3px;
+}
+  
 .modal{
   display:none;
   position:absolute;
@@ -424,6 +477,16 @@ body:not(.dark-mode) .close-button:hover{
     </select>
   </div>
 
+<div class="compare-controls">
+  <button id="compareBtn" class="compare-button" type="button" title="Compare brochures">
+    ⇄
+  </button>
+
+  <button id="compareCancelBtn" class="compare-cancel" type="button">
+    Cancel
+  </button>
+</div>
+  
 <div class="top-buttons">
 
   <a class="top-button"
@@ -997,6 +1060,102 @@ function toggleView(){
   applyViewMode();
 }
 
+let compareMode = false;
+let selectedCompareIds = new Set();
+
+function updateCompareButton(){
+  const button = document.getElementById("compareBtn");
+  const count = selectedCompareIds.size;
+
+  if(!compareMode){
+    button.classList.remove("active");
+    button.textContent = "⇄";
+    button.title = "Compare brochures";
+    button.disabled = false;
+    return;
+  }
+
+  button.classList.add("active");
+  button.textContent = `⇄ Compare ${count} brochure${count === 1 ? "" : "s"}`;
+  button.title = count >= 2 ? "Open comparison" : "Select at least 2 brochures";
+  button.disabled = false;
+}
+
+let compareMode = false;
+let selectedCompareIds = new Set();
+
+function updateCompareButton(){
+  const button = document.getElementById("compareBtn");
+  const count = selectedCompareIds.size;
+
+  if(!compareMode){
+    button.classList.remove("active");
+    button.textContent = "⇄";
+    button.title = "Compare brochures";
+    button.disabled = false;
+    return;
+  }
+
+  button.classList.add("active");
+  button.textContent = `⇄ Compare ${count} brochure${count === 1 ? "" : "s"}`;
+  button.title = count >= 2 ? "Open comparison" : "Select at least 2 brochures";
+  button.disabled = false;
+}
+
+document.getElementById("compareBtn").addEventListener("click", function(){
+  if(!compareMode){
+    compareMode = true;
+    selectedCompareIds.clear();
+    document.body.classList.add("compare-mode");
+
+    renderGallery(currentItems);
+    updateCompareButton();
+    return;
+  }
+
+  const ids = Array.from(selectedCompareIds);
+
+  if(ids.length < 2){
+    return;
+  }
+
+  window.location.href = `compare.html?ids=${encodeURIComponent(ids.join(","))}`;
+});
+
+document.getElementById("compareCancelBtn").addEventListener("click", function(){
+  compareMode = false;
+  selectedCompareIds.clear();
+  document.body.classList.remove("compare-mode");
+
+  renderGallery(currentItems);
+  updateCompareButton();
+});
+
+function toggleCompareSelection(item, card){
+  const id = String(item.id);
+
+  if(selectedCompareIds.has(id)){
+    selectedCompareIds.delete(id);
+    card.classList.remove("compare-selected");
+  }else{
+    selectedCompareIds.add(id);
+    card.classList.add("compare-selected");
+  }
+
+  updateCompareButton();
+}
+
+card.addEventListener("click", function(event){
+  if(compareMode){
+    event.preventDefault();
+    toggleCompareSelection(item, card);
+    return;
+  }
+
+  // eksisterende normal klikk-handling her
+});
+  
+  
 function fillSelect(selectId, values, selectedValue){
   const select = document.getElementById(selectId);
 

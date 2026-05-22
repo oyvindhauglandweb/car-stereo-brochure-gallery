@@ -170,6 +170,7 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   min-width:190px;
   padding:0 14px;
   font-size:15px;
+  white-space:nowrap;
 }
 
 .compare-cancel{
@@ -422,6 +423,20 @@ body:not(.dark-mode) .close-button:hover{
   .filter-select{
     width:calc(50% - 8px);
     max-width:none;
+  }
+
+  .compare-button.active{
+    width:72px;
+    min-width:72px;
+    padding:0 8px;
+    font-size:18px;
+    white-space:nowrap;
+  }
+
+  .compare-cancel{
+    height:44px;
+    padding:0 12px;
+    font-size:14px;
   }
 
   .modal{
@@ -1095,6 +1110,7 @@ let selectedCompareIds = new Set();
 function updateCompareButton(){
   const button = document.getElementById("compareBtn");
   const count = selectedCompareIds.size;
+  const isMobile = window.matchMedia("(max-width:800px)").matches;
 
   if(!button){
     return;
@@ -1109,7 +1125,13 @@ function updateCompareButton(){
   }
 
   button.classList.add("active");
-  button.textContent = `⇄ Compare ${count} brochure${count === 1 ? "" : "s"}`;
+
+  if(isMobile){
+    button.textContent = `⇄ ${count}`;
+  }else{
+    button.textContent = `⇄ Compare ${count} brochure${count === 1 ? "" : "s"}`;
+  }
+
   button.title = count >= 2 ? "Open comparison" : "Select at least 2 brochures";
   button.disabled = false;
 }
@@ -1282,6 +1304,7 @@ function changeOwner(value){ goWithFilters({owner:value}); }
 function changeModelSeries(value){ goWithFilters({model_series:value}); }
   
 setupCompareButtons();
+window.addEventListener("resize", updateCompareButton);
 
 loadBrochures().catch(error => {
   console.error(error);

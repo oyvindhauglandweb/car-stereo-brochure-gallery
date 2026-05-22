@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compare Brochures - Car Stereo Garage</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.site-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  max-width:1400px;
+  margin:0 auto 24px;
+  padding:10px 0;
+}
+
+.site-header img{
+  height:48px;
+  width:auto;
+}
+
+.top-buttons{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--card);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.top-button:hover{
+  background:#e9eef2;
+}
+
+body.dark-mode .top-button:hover{
+  background:#3a3a3a;
+}
+
+.icon-back{
+  position:relative;
+  top:-1px;
+  font-size:28px;
+  font-weight:700;
+}
+
+.icon-home{
+  position:relative;
+  top:-2px;
+  font-size:30px;
+  font-weight:700;
+}
+
+.theme-icon{
+  font-size:22px;
+  font-weight:700;
+}
+
+.page-title{
+  text-align:center;
+  margin-bottom:22px;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.status{
+  max-width:1400px;
+  margin:0 auto;
+  color:var(--muted);
+}
+
+.compare-wrapper{
+  max-width:1400px;
+  margin:0 auto;
+  overflow-x:auto;
+  padding-bottom:20px;
+}
+
+.compare-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.compare-table th,
+.compare-table td{
+  border-bottom:1px solid var(--border);
+  border-right:1px solid var(--border);
+  padding:12px;
+  vertical-align:top;
+  min-width:190px;
+}
+
+.compare-table tr:last-child th,
+.compare-table tr:last-child td{
+  border-bottom:none;
+}
+
+.compare-table th:last-child,
+.compare-table td:last-child{
+  border-right:none;
+}
+
+.compare-table th.field-name{
+  width:160px;
+  min-width:160px;
+  background:rgba(127,127,127,.08);
+  text-align:left;
+  position:sticky;
+  left:0;
+  z-index:2;
+}
+
+.compare-table thead th{
+  background:rgba(127,127,127,.08);
+  text-align:left;
+}
+
+.cover-cell{
+  text-align:center;
+}
+
+.cover-image{
+  width:180px;
+  max-width:100%;
+  aspect-ratio:210/297;
+  object-fit:contain;
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.brochure-title{
+  font-weight:bold;
+  margin-top:10px;
+  line-height:1.3;
+}
+
+.highlight{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.link{
+  color:var(--link);
+  text-decoration:none;
+}
+
+.link:hover{
+  text-decoration:underline;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.86);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal img{
+  max-width:95vw;
+  max-height:95vh;
+  object-fit:contain;
+  background:var(--soft);
+  border-radius:8px;
+}
+
+@media(max-width:800px){
+  body{
+    padding:10px;
+  }
+
+  .compare-table th,
+  .compare-table td{
+    min-width:160px;
+    padding:10px;
+  }
+
+  .compare-table th.field-name{
+    min-width:120px;
+    width:120px;
+  }
+
+  .cover-image{
+    width:140px;
+  }
+}
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <a href="index.html" target="_top">
+    <img id="siteLogo"
+         src="Car Stereo Garage2_3.png"
+         alt="Car Stereo Brochures">
+  </a>
+
+  <div class="top-buttons">
+    <a class="top-button"
+       href="javascript:history.back()"
+       title="Back">
+      <span class="icon-back">←</span>
+    </a>
+
+    <a class="top-button"
+       href="index.html"
+       target="_top"
+       title="Home">
+      <span class="icon-home">⌂</span>
+    </a>
+
+    <button type="button"
+            class="top-button"
+            onclick="toggleTheme()"
+            id="themeToggle"
+            title="Toggle dark mode">
+      <span class="theme-icon">☾</span>
+    </button>
+  </div>
+</header>
+
+<div class="page-title" id="pageTitle">Compare Brochures</div>
+<div class="status" id="status">Loading...</div>
+<div class="compare-wrapper" id="compareWrapper"></div>
+
+<div class="modal" id="imageModal" onclick="closeImageModal()">
+  <img id="modalImage" alt="">
+</div>
+
+<script>
+const API_BASE = "https://api.carstereogarage.com";
+const GALLERY_URL = "gallery.html";
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[char];
+  });
+}
+
+function getUrl(value){
+  if(!value) return "";
+  if(typeof value === "string") return value;
+
+  if(Array.isArray(value)){
+    for(const item of value){
+      const found = getUrl(item);
+      if(found) return found;
+    }
+
+    return "";
+  }
+
+  if(typeof value === "object"){
+    return value.url || value.value || value.link || "";
+  }
+
+  return "";
+}
+
+function getLookupValue(value){
+  if(!value) return "";
+
+  if(typeof value === "string") return value;
+
+  if(Array.isArray(value)){
+    return value
+      .map(item => getLookupValue(item))
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if(typeof value === "object"){
+    return (
+      getLookupValue(value.value) ||
+      value.name ||
+      value.text ||
+      ""
+    );
+  }
+
+  return "";
+}
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
+
+  if(savedTheme === "dark"){
+    document.body.classList.add("dark-mode");
+  }else{
+    document.body.classList.remove("dark-mode");
+  }
+}
+
+function toggleTheme(){
+  const isDark = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("brochureTheme", isDark ? "dark" : "light");
+}
+
+function getSelectedIds(){
+  const params = new URLSearchParams(window.location.search);
+  const idsText = params.get("ids") || "";
+
+  return idsText
+    .split(",")
+    .map(id => id.trim())
+    .filter(Boolean);
+}
+
+function mapBrochure(item){
+  return {
+    id: String(item.id),
+    brochure: item.field_8379584?.[0]?.value || "",
+    brand: item.field_8379585?.[0]?.value || "",
+    type: item.field_8379586?.[0]?.value || "",
+    model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
+    title: item.field_8379608 || "",
+    year: item.field_8379588 || "",
+    month: item.field_8379589?.value || "",
+    language: item.field_8379590?.[0]?.value || "",
+    market: item.field_8379591?.[0]?.value || "",
+    page_count: item.field_8379594 || "",
+    owner: item.field_8379595?.map(x => x.value).join(", ") || "",
+    submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
+    notes: item.field_8379601 || "",
+    claim_ownership_url: item.field_8384825?.url || "",
+    model_series_guide_url: getUrl(item.field_8460146),
+    model_series_guide_present: getLookupValue(item.field_8497529),
+    image:
+      item.field_8379592?.[0]?.url ||
+      item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
+      ""
+  };
+}
+
+function renderCell(value){
+  return esc(value || "-");
+}
+
+function renderLinkCell(value, href){
+  if(!value){
+    return "-";
+  }
+
+  if(!href){
+    return esc(value);
+  }
+
+  return `<a class="link" href="${esc(href)}" target="_blank" rel="noopener">${esc(value)}</a>`;
+}
+
+function renderCompareTable(brochures){
+  document.getElementById("pageTitle").textContent =
+    `Compare ${brochures.length} brochure${brochures.length === 1 ? "" : "s"}`;
+
+  const rows = [
+    {
+      label:"Cover",
+      render:b => `
+        <div class="cover-cell">
+          <img
+            class="cover-image"
+            src="${esc(b.image)}"
+            alt="${esc(b.brochure)}"
+            onclick="openImageModal('${esc(b.image)}')"
+          >
+          <div class="brochure-title">${esc(b.brochure || b.title)}</div>
+        </div>
+      `
+    },
+    {
+      label:"Brand",
+      render:b => renderLinkCell(
+        b.brand,
+        `${GALLERY_URL}?brand=${encodeURIComponent(b.brand)}`
+      )
+    },
+    {
+      label:"Year",
+      render:b => renderLinkCell(
+        b.year,
+        `${GALLERY_URL}?brand=${encodeURIComponent(b.brand)}&year=${encodeURIComponent(b.year)}`
+      )
+    },
+    {
+      label:"Month",
+      render:b => `<span class="highlight">${renderCell(b.month)}</span>`
+    },
+    {
+      label:"Type",
+      render:b => `<span class="highlight">${renderCell(b.type)}</span>`
+    },
+    {
+      label:"Pages",
+      render:b => `<span class="highlight">${renderCell(b.page_count)}</span>`
+    },
+    {
+      label:"Title",
+      render:b => renderCell(b.title)
+    },
+    {
+      label:"Model series",
+      render:b => renderCell(b.model_series)
+    },
+    {
+      label:"Language",
+      render:b => renderCell(b.language)
+    },
+    {
+      label:"Market",
+      render:b => renderCell(b.market)
+    },
+    {
+      label:"Owner",
+      render:b => renderCell(b.owner)
+    },
+    {
+      label:"Submitted by",
+      render:b => renderCell(b.submitted_by)
+    },
+    {
+      label:"Notes",
+      render:b => renderCell(b.notes)
+    }
+  ];
+
+  const html = `
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th class="field-name">Field</th>
+          ${brochures.map((brochure, index) => `
+            <th>Brochure ${index + 1}</th>
+          `).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(row => `
+          <tr>
+            <th class="field-name">${esc(row.label)}</th>
+            ${brochures.map(brochure => `
+              <td>${row.render(brochure)}</td>
+            `).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+
+  document.getElementById("compareWrapper").innerHTML = html;
+}
+
+function openImageModal(imageUrl){
+  if(!imageUrl){
+    return;
+  }
+
+  const modal = document.getElementById("imageModal");
+  const image = document.getElementById("modalImage");
+
+  image.src = imageUrl;
+  modal.classList.add("open");
+}
+
+function closeImageModal(){
+  const modal = document.getElementById("imageModal");
+  modal.classList.remove("open");
+}
+
+async function loadCompare(){
+  applySavedTheme();
+
+  const selectedIds = getSelectedIds();
+
+  if(selectedIds.length < 2){
+    document.getElementById("status").innerHTML =
+      `Select at least two brochures from <a class="link" href="${GALLERY_URL}">the gallery</a>.`;
+    return;
+  }
+
+  const galleryRes = await fetch(`${API_BASE}/gallery-data`);
+
+  if(!galleryRes.ok){
+    throw new Error("Could not load gallery data");
+  }
+
+  const galleryData = await galleryRes.json();
+  const selectedIdSet = new Set(selectedIds.map(String));
+
+  const brochures = (galleryData.results || [])
+    .filter(item => selectedIdSet.has(String(item.id)))
+    .map(mapBrochure);
+
+  const selectedOrder = new Map(
+    selectedIds.map((id, index) => [String(id), index])
+  );
+
+  brochures.sort((a, b) => {
+    return selectedOrder.get(a.id) - selectedOrder.get(b.id);
+  });
+
+  if(!brochures.length){
+    document.getElementById("status").textContent = "No matching brochures found.";
+    return;
+  }
+
+  document.getElementById("status").textContent = "";
+  renderCompareTable(brochures);
+}
+
+document.addEventListener("keydown", function(event){
+  if(event.key === "Escape"){
+    closeImageModal();
+  }
+});
+
+loadCompare().catch(error => {
+  console.error(error);
+
+  document.getElementById("status").innerHTML =
+    `Could not load comparison.<br><br>${esc(error.message)}`;
+});
+</script>
+</body>
+</html>

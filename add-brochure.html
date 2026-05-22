@@ -507,6 +507,74 @@ function updateModelSeriesOptions(){
   });
 }
 
+function getSelectedOptionText(select){
+  if(!select || select.selectedIndex < 0){
+    return "";
+  }
+
+  return select.options[select.selectedIndex]?.textContent?.trim() || "";
+}
+
+function setSelectByVisibleText(selectId, wantedText){
+  const select = document.getElementById(selectId);
+
+  if(!select || !wantedText){
+    return false;
+  }
+
+  const normalizedWantedText = String(wantedText).trim().toLowerCase();
+
+  for(const option of select.options){
+    const optionText = option.textContent.trim().toLowerCase();
+
+    if(optionText === normalizedWantedText){
+      select.value = option.value;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function updateMarketFromLanguage(){
+  const languageSelect = document.getElementById("languageSelect");
+
+  if(!languageSelect){
+    return;
+  }
+
+  const languageToMarket = {
+    "Arabic":"Middle East",
+    "Chinese":"Asia",
+    "Danish":"Europe",
+    "Dutch":"Europe",
+    "English":"USA",
+    "Finnish":"Europe",
+    "French":"Europe",
+    "German":"Europe",
+    "Greek":"Europe",
+    "Italian":"Europe",
+    "Japanese":"Asia",
+    "Korean":"Asia",
+    "Norwegian":"Europe",
+    "Polish":"Europe",
+    "Portuguese":"Europe",
+    "Russian":"Europe",
+    "Spanish":"Europe",
+    "Swedish":"Europe",
+    "Thai":"Asia"
+  };
+
+  const selectedLanguage = getSelectedOptionText(languageSelect);
+  const suggestedMarket = languageToMarket[selectedLanguage];
+
+  if(!suggestedMarket){
+    return;
+  }
+
+  setSelectByVisibleText("marketSelect", suggestedMarket);
+}
+
 async function uploadFile(file){
   const formData = new FormData();
   formData.append("file", file);
@@ -610,6 +678,7 @@ fillSelect(
 );
 
   document.getElementById("brandSelect").addEventListener("change", updateModelSeriesOptions);
+  document.getElementById("languageSelect").addEventListener("change", updateMarketFromLanguage);
 }
 
 document.getElementById("brochureForm").addEventListener("submit", async function(event){

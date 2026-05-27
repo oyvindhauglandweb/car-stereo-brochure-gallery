@@ -200,6 +200,44 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   outline:3px solid var(--link);
   outline-offset:3px;
 }
+
+.access-box{
+  max-width:720px;
+  margin:40px auto;
+  padding:24px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card);
+  text-align:center;
+  line-height:1.55;
+}
+
+.access-box h2{
+  margin:0 0 10px;
+}
+
+.access-login-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:0 18px;
+  margin-top:14px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--text);
+  text-decoration:none;
+  font-weight:bold;
+}
+
+.access-login-button:hover{
+  background:#3a3a3a;
+}
+
+body:not(.dark-mode) .access-login-button:hover{
+  background:#e9eef2;
+}
   
 .modal{
   display:none;
@@ -604,6 +642,24 @@ async function fetchCurrentUser(){
     return null;
   }
 }
+
+function getLoginUrl(){
+  return `${API_BASE}/login?returnUrl=${encodeURIComponent(window.location.href)}`;
+}
+
+function showLoginRequired(message){
+  const gallery = document.getElementById("gallery");
+
+  document.getElementById("pageTitle").innerText = "Member access required";
+
+  gallery.innerHTML = `
+    <div class="access-box">
+      <h2>Login required</h2>
+      <div>${esc(message || "You need an approved Car Stereo Garage user account to view the brochure gallery.")}</div>
+      <a class="access-login-button" href="${esc(getLoginUrl())}">Log in</a>
+    </div>
+  `;
+}
   
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g, function(char){
@@ -684,6 +740,11 @@ async function loadBrochures() {
 
   currentUser = await fetchCurrentUser();
 
+  if(!currentUser){
+    showLoginRequired("The Public Brochure Gallery is temporarily limited to approved users.");
+    return;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const ownerFilter = params.get("owner");
   const modelSeriesFilter = params.get("model_series");
@@ -729,10 +790,23 @@ async function loadBrochures() {
   document.getElementById("resetFilterButton").style.display =
   hasFilter ? "flex" : "none";
   
-  const galleryRes = await fetch(`${API_BASE}/gallery-data`);
+  const galleryRes = await fetch(`${API_BASE}/gallery-data`, {
+    credentials:"include"
+  });
 
 if(!galleryRes.ok){
-  throw new Error("Could not load gallery data");
+  if(galleryRes.status === 401){
+    showLoginRequired("Your login session has expired. Please log in again to view the brochure gallery.");
+    return;
+  }
+
+  if(galleryRes.status === 403){
+    showLoginRequired("Your user account does not have access to the brochure gallery yet.");
+    return;
+  }
+
+  const errorText = await galleryRes.text();
+  throw new Error(errorText || "Could not load gallery data");
 }
 
 const galleryData = await galleryRes.json();

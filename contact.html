@@ -31,6 +31,83 @@ textarea{min-height:160px;padding:12px 14px;resize:vertical}
 .status-box{display:none;margin-top:20px;padding:14px 16px;border-radius:8px;border:1px solid var(--border);background:var(--soft);line-height:1.5}
 .status-box.success{display:block;border-color:#4f8f5f}.status-box.error{display:block;border-color:#b85c5c}.disabled{opacity:.55;pointer-events:none}
 @media(max-width:800px){body{padding:14px}.form-card{padding:18px}.page-title{font-size:24px}.action-row{justify-content:stretch}.submit-button,.secondary-button{width:100%}}
+
+
+/* Soft no-frame design update – permanent */
+:root{
+  --soft-surface:rgba(0,0,0,.035);
+  --soft-control:rgba(0,0,0,.055);
+  --soft-control-hover:rgba(0,0,0,.085);
+}
+
+body.dark-mode{
+  --soft-surface:rgba(255,255,255,.035);
+  --soft-control:rgba(255,255,255,.055);
+  --soft-control-hover:rgba(255,255,255,.085);
+}
+
+.top-button,
+.portal-button,
+.tribute-button,
+.guide-select,
+.filter-select,
+.compare-button,
+.compare-cancel,
+.access-login-button,
+.claim-button,
+.close-button,
+.secondary-button,
+.login-status:not(.is-signin),
+input,
+select,
+textarea,
+button:not(.submit-button):not(.remove-button):not(.admin-button){
+  border:0 !important;
+  background:var(--soft-control) !important;
+  box-shadow:none !important;
+}
+
+.top-button:hover,
+.portal-button:hover,
+.tribute-button:hover,
+.guide-select:hover,
+.filter-select:hover,
+.compare-button:hover,
+.compare-cancel:hover,
+.access-login-button:hover,
+.claim-button:hover,
+.close-button:hover,
+.secondary-button:hover,
+.login-status:not(.is-signin):hover,
+button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
+  background:var(--soft-control-hover) !important;
+}
+
+.form-card,
+.status-box,
+.status,
+.access-box,
+.help-card,
+.guide-card,
+.login-menu,
+.modal-content,
+.claim-brochure-title,
+[style*="border:1px solid var(--border)"],
+[style*="border: 1px solid var(--border)"]{
+  border:0 !important;
+  background:var(--soft-surface) !important;
+  box-shadow:none !important;
+}
+
+.submit-button{
+  border:0 !important;
+}
+
+.remove-button,
+.admin-button{
+  border:0 !important;
+}
+
 </style>
 <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>

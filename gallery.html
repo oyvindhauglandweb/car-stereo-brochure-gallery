@@ -577,6 +577,7 @@ button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
   <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
   
+<!-- version: GALLERY v1 ios12 load fix 2026-06-19 -->
 </head>
 
 <body>
@@ -739,7 +740,7 @@ function showLoginRequired(message){
 }
   
 function esc(value){
-  return String(value ?? "").replace(/[&<>"']/g, function(char){
+  return String(value == null ? "" : value).replace(/[&<>"']/g, function(char){
     return {
       "&":"&amp;",
       "<":"&lt;",
@@ -898,21 +899,21 @@ setupFilters(allRows, {
 });
 
   const brochures = allRows
-    .filter(item => item.field_8379597?.value !== "Rejected")
-    .filter(item => item.field_8379592?.length > 0)
+    .filter(item => (item.field_8379597 && item.field_8379597.value) !== "Rejected")
+    .filter(item => (item.field_8379592 && item.field_8379592.length) > 0)
     .filter(item => {
       if (!ownerFilter) return true;
-      const owners = item.field_8379595?.map(x => x.value) || [];
+      const owners = (item.field_8379595 || []).map(x => x.value) || [];
       return owners.includes(ownerFilter);
     })
     .filter(item => {
       if (!modelSeriesFilter) return true;
-      const series = item.field_8384650?.map(x => x.value) || [];
+      const series = (item.field_8384650 || []).map(x => x.value) || [];
       return series.includes(modelSeriesFilter);
     })
     .filter(item => {
       if (!brandFilter) return true;
-      return item.field_8379585?.[0]?.value === brandFilter;
+      return (item.field_8379585 && item.field_8379585[0] && item.field_8379585[0].value) === brandFilter;
     })
     .filter(item => {
       if (!yearFilter) return true;
@@ -920,43 +921,43 @@ setupFilters(allRows, {
     })
     .filter(item => {
       if (!languageFilter) return true;
-      return item.field_8379590?.[0]?.value === languageFilter;
+      return (item.field_8379590 && item.field_8379590[0] && item.field_8379590[0].value) === languageFilter;
     })
     .filter(item => {
       if (!marketFilter) return true;
-      return item.field_8379591?.[0]?.value === marketFilter;
+      return (item.field_8379591 && item.field_8379591[0] && item.field_8379591[0].value) === marketFilter;
     })
     .filter(item => {
       if (!submittedByFilter) return true;
-      const submittedBy = item.field_8379596?.map(x => x.value) || [];
+      const submittedBy = (item.field_8379596 || []).map(x => x.value) || [];
       return submittedBy.includes(submittedByFilter);
     })
     .map(item => ({
       id: item.id,
-      brochure: item.field_8379584?.[0]?.value || "",
-      brand: item.field_8379585?.[0]?.value || "",
-      type: item.field_8379586?.[0]?.value || "",
-      model_series: item.field_8384650?.map(x => x.value).join(", ") || "",
+      brochure: (item.field_8379584 && item.field_8379584[0] && item.field_8379584[0].value) || "",
+      brand: (item.field_8379585 && item.field_8379585[0] && item.field_8379585[0].value) || "",
+      type: (item.field_8379586 && item.field_8379586[0] && item.field_8379586[0].value) || "",
+      model_series: (item.field_8384650 || []).map(x => x.value).join(", ") || "",
       title: item.field_8379608 || "",
       year: item.field_8379588 || "",
-      month: item.field_8379589?.value || "",
-      language: item.field_8379590?.[0]?.value || "",
-      market: item.field_8379591?.[0]?.value || "",
+      month: (item.field_8379589 && item.field_8379589.value) || "",
+      language: (item.field_8379590 && item.field_8379590[0] && item.field_8379590[0].value) || "",
+      market: (item.field_8379591 && item.field_8379591[0] && item.field_8379591[0].value) || "",
       page_count: item.field_8379594 || "",
-      owner: item.field_8379595?.map(x => x.value).join(", ") || "",
-owners: item.field_8379595?.map(x => ({
+      owner: (item.field_8379595 || []).map(x => x.value).join(", ") || "",
+owners: (item.field_8379595 || []).map(x => ({
   id: Number(x.id),
   name: x.value || x.name || ""
 })) || [],
-      submitted_by: item.field_8379596?.map(x => x.value).join(", ") || "",
+      submitted_by: (item.field_8379596 || []).map(x => x.value).join(", ") || "",
       notes: item.field_8379601 || "",
-      claim_ownership_url: item.field_8384825?.url || "",
+      claim_ownership_url: (item.field_8384825 && item.field_8384825.url) || "",
       model_series_guide_url: getUrl(item.field_8460146),
 model_series_guide_present: getLookupValue(item.field_8497529),
 debug_present_raw: item.field_8497529,
 image:
-        item.field_8379592?.[0]?.url ||
-        item.field_8379592?.[0]?.thumbnails?.card_cover?.url ||
+        (item.field_8379592 && item.field_8379592[0] && item.field_8379592[0].url) ||
+        (item.field_8379592 && item.field_8379592[0] && item.field_8379592[0].thumbnails && item.field_8379592[0].thumbnails.card_cover && item.field_8379592[0].thumbnails.card_cover.url) ||
         ""
     }));
 
@@ -1370,16 +1371,16 @@ function fillSelect(selectId, values, selectedValue){
 function setupFilters(items, selected){
 
   const validRows = items
-    .filter(item => item.field_8379597?.value !== "Rejected")
-    .filter(item => item.field_8379592?.length > 0);
+    .filter(item => (item.field_8379597 && item.field_8379597.value) !== "Rejected")
+    .filter(item => (item.field_8379592 && item.field_8379592.length) > 0);
 
   function rowMatches(item, filterName){
 
-    const brand = item.field_8379585?.[0]?.value || "";
+    const brand = (item.field_8379585 && item.field_8379585[0] && item.field_8379585[0].value) || "";
     const year = item.field_8379588 || "";
-    const language = item.field_8379590?.[0]?.value || "";
-    const owners = item.field_8379595?.map(x => x.value) || [];
-    const modelSeries = item.field_8384650?.map(x => x.value) || [];
+    const language = (item.field_8379590 && item.field_8379590[0] && item.field_8379590[0].value) || "";
+    const owners = (item.field_8379595 || []).map(x => x.value) || [];
+    const modelSeries = (item.field_8384650 || []).map(x => x.value) || [];
 
     if(filterName !== "brand" && selected.brand && brand !== selected.brand) return false;
     if(filterName !== "year" && selected.year && year !== selected.year) return false;
@@ -1390,40 +1391,40 @@ function setupFilters(items, selected){
     return true;
   }
 
-  const brands = [...new Set(
+  const brands = Array.from(new Set(
     validRows
       .filter(item => rowMatches(item, "brand"))
-      .map(item => item.field_8379585?.[0]?.value)
+      .map(item => (item.field_8379585 && item.field_8379585[0] && item.field_8379585[0].value))
       .filter(Boolean)
-  )].sort();
+  )).sort();
 
-  const years = [...new Set(
+  const years = Array.from(new Set(
     validRows
       .filter(item => rowMatches(item, "year"))
       .map(item => item.field_8379588)
       .filter(Boolean)
-  )].sort();
+  )).sort();
 
-  const languages = [...new Set(
+  const languages = Array.from(new Set(
     validRows
       .filter(item => rowMatches(item, "language"))
-      .map(item => item.field_8379590?.[0]?.value)
+      .map(item => (item.field_8379590 && item.field_8379590[0] && item.field_8379590[0].value))
       .filter(Boolean)
-  )].sort();
+  )).sort();
 
-  const owners = [...new Set(
+  const owners = Array.from(new Set(
     validRows
       .filter(item => rowMatches(item, "owner"))
-      .flatMap(item => item.field_8379595?.map(x => x.value) || [])
+      .reduce(function(acc, item){ return acc.concat((item.field_8379595 || []).map(function(x){ return x.value; })); }, [])
       .filter(Boolean)
-  )].sort();
+  )).sort();
 
-  const modelSeries = [...new Set(
+  const modelSeries = Array.from(new Set(
     validRows
       .filter(item => rowMatches(item, "model_series"))
-      .flatMap(item => item.field_8384650?.map(x => x.value) || [])
+      .reduce(function(acc, item){ return acc.concat((item.field_8384650 || []).map(function(x){ return x.value; })); }, [])
       .filter(Boolean)
-  )].sort();
+  )).sort();
 
   fillSelect("brandSelect", brands, selected.brand);
   fillSelect("yearSelect", years, selected.year);

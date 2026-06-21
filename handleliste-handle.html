@@ -744,9 +744,25 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
   color:#fee2e2 !important;
 }
 
+
+/* Handle v76: vis avbryt-tekst også hvis gammel tekst ligger i knappen */
+#activateStandardNotificationButton.standard-notification-active{
+  font-size:0 !important;
+}
+#activateStandardNotificationButton.standard-notification-active::after{
+  content:"Avbryt varsling";
+  font-size:.92rem !important;
+  line-height:1 !important;
+}
+@media(max-width:700px){
+  #activateStandardNotificationButton.standard-notification-active::after{
+    font-size:.86rem !important;
+  }
+}
+
 </style><!-- lightdark-restore-2026-06-16 -->
 <!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
-<!-- version: HANDLE v75 toggle_active_notification 2026-06-21 -->
+<!-- version: HANDLE v76 active_notification_button_text_css 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
   window.applyShoppingThemeState = window.applyShoppingThemeState || function(){
@@ -914,7 +930,7 @@ const ITEM_ADDED_AT_STORAGE_KEY="kvimarka92ShoppingItemAddedAtV1";
 const NEW_ITEM_ALERT_STORAGE_KEY="kvimarka92ShoppingNewItemAlertSeenV1";
 const SHOPPING_IN_PROGRESS_SINCE_KEY="kvimarka92ShoppingInProgressSinceV1";
 const DEFAULT_TYPES=["Frukt og grønt","Meieri","Kjøtt og fisk","Brød","Tørrvarer","Frysevarer","Drikke","Husholdning","Personlig","Annet"];
-const HANDLELISTE_HANDLE_VERSION="v75-toggle-active-notification";
+const HANDLELISTE_HANDLE_VERSION="v76-active-notification-button-text";
 const SHOPPING_AREA_DEFAULT="Matvarer";
 const SHOPPING_AREA_STORAGE_KEY="kvimarka92SelectedShoppingAreaV1";
 const SHOPPING_ACTIVE_AREA_STORAGE_KEY="kvimarka92ActiveShoppingAreaV1";
@@ -1433,6 +1449,9 @@ function updateActivateStandardNotificationButtonState(){
   btn.setAttribute("aria-pressed", active ? "true" : "false");
   btn.textContent=active ? "Avbryt varsling" : "Aktiver varsling før handling";
   btn.title=active ? "Avbryt aktiv varsling før handling" : "Aktiver varsling før handling med lagret varslingsoppsett";
+
+  // Ekstra robusthet dersom gammel inline-handler ligger igjen i cachet DOM.
+  btn.onclick=toggleStandardNotification;
 }
 function getActiveNewItemContextStart(){
   // v48: Bruk kun aktiv varsling fra Worker/API eller pågående handling.
@@ -2408,4 +2427,20 @@ loadItems();</script>
 })();
 </script>
 
-<script src="handleliste-menu.js?v=10"></script></body></html>
+<script src="handleliste-menu.js?v=10"></script>
+<script>
+(function(){
+  let count=0;
+  const timer=window.setInterval(function(){
+    count+=1;
+    try{
+      if(typeof updateActivateStandardNotificationButtonState==="function"){
+        updateActivateStandardNotificationButtonState();
+      }
+    }catch(error){}
+    if(count>=20)window.clearInterval(timer);
+  },1000);
+})();
+</script>
+
+</body></html>

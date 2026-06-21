@@ -788,7 +788,7 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
 }
 
 </style><!-- lightdark-restore-2026-06-16 -->
-<!-- version: HANDLE v79 suppress_known_dategettime_after_activation 2026-06-21 -->
+<!-- version: HANDLE v80 activation_error_confirm_before_red 2026-06-21 -->
 <!-- version: HANDLE v78 activation_worker_error_recheck 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
@@ -957,7 +957,7 @@ const ITEM_ADDED_AT_STORAGE_KEY="kvimarka92ShoppingItemAddedAtV1";
 const NEW_ITEM_ALERT_STORAGE_KEY="kvimarka92ShoppingNewItemAlertSeenV1";
 const SHOPPING_IN_PROGRESS_SINCE_KEY="kvimarka92ShoppingInProgressSinceV1";
 const DEFAULT_TYPES=["Frukt og grønt","Meieri","Kjøtt og fisk","Brød","Tørrvarer","Frysevarer","Drikke","Husholdning","Personlig","Annet"];
-const HANDLELISTE_HANDLE_VERSION="v79-suppress-known-dategettime-after-activation";
+const HANDLELISTE_HANDLE_VERSION="v80-activation-error-confirm-before-red";
 const SHOPPING_AREA_DEFAULT="Matvarer";
 const SHOPPING_AREA_STORAGE_KEY="kvimarka92SelectedShoppingAreaV1";
 const SHOPPING_ACTIVE_AREA_STORAGE_KEY="kvimarka92ActiveShoppingAreaV1";
@@ -1335,6 +1335,12 @@ async function activateStandardNotification(){
     }
   }
 
+  function suppressKnownActivationAfterError(message){
+    // Denne feilen skjer etter at Worker allerede har opprettet varslingen.
+    // Den skal derfor aldri vises som "Kunne ikke aktivere".
+    return String(message||"").toLowerCase().indexOf("gettime") >= 0;
+  }
+
   try{
     const data=await fetchJson(activationUrl,{
       method:"POST",
@@ -1349,9 +1355,23 @@ async function activateStandardNotification(){
   }catch(error){
     const message=String(error && error.message || error || "");
 
-    // Kjent situasjon: Worker oppretter varslingen, men feiler i etterbehandling med date.getTime.
-    // Da skal ikke brukeren se rød feilmelding. Varslingen fungerer, så vi setter UI lokalt aktivt.
-    if(message.indexOf("date.getTime is not a function") >= 0){
+    // Før vi viser rød feilmelding: sjekk om Worker likevel rakk å opprette varslingen.
+    // Dette gjøres for alle feil, fordi nettopp denne funksjonen tidligere ga "falsk feil".
+    try{
+      await new Promise(resolve=>window.setTimeout(resolve,1300));
+      await refreshShoppingNotificationState(true);
+
+      if(shoppingNotificationActive){
+        updateActivateStandardNotificationButtonState();
+        setStatus(`Varsling før handling er aktivert for <strong>${esc(notificationPlace || notificationArea)}</strong>.`, "success");
+        if(button)button.disabled=false;
+        return;
+      }
+    }catch(confirmError){
+      console.warn("Ettersjekk av varsling feilet.", confirmError);
+    }
+
+    if(suppressKnownActivationAfterError(message)){
       markNotificationActiveLocal(null,`Varsling før handling er aktivert for <strong>${esc(notificationPlace || notificationArea)}</strong>.`);
       if(button)button.disabled=false;
 
@@ -1360,7 +1380,7 @@ async function activateStandardNotification(){
           refreshShoppingNotificationState(true)
             .then(function(){ updateActivateStandardNotificationButtonState(); })
             .catch(function(err){ console.warn("Ettersjekk av varsling feilet.", err); });
-        },1500);
+        },2000);
       }catch(ignore){}
 
       return;

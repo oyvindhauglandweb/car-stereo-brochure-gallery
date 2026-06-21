@@ -737,7 +737,7 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
 
 </style><!-- lightdark-restore-2026-06-16 -->
 <!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
-<!-- version: HANDLE v69 notification shopping area 2026-06-21 -->
+<!-- version: HANDLE v70 notification_date_string_fix 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
   window.applyShoppingThemeState = window.applyShoppingThemeState || function(){
@@ -1140,8 +1140,9 @@ function minutesToNumber(value){
   if(text==="0"||text==="0 minutter"||text.includes("ved handling"))return 0;
   return 0;
 }
-function formatLocalDateTimeShort(date){
-  if(!date||Number.isNaN(date.getTime()))return "-";
+function formatLocalDateTimeShort(value){
+  const date = value instanceof Date ? value : new Date(value);
+  if(!date || Number.isNaN(date.getTime()))return "-";
   return date.toLocaleString("no-NO",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 function readNotificationDefault(){

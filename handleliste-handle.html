@@ -737,7 +737,7 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
 
 </style><!-- lightdark-restore-2026-06-16 -->
 <!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
-<!-- version: HANDLE v72 notification_place_cache_bust 2026-06-21 -->
+<!-- version: HANDLE v73 notification_area_place_robust 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
   window.applyShoppingThemeState = window.applyShoppingThemeState || function(){
@@ -905,7 +905,7 @@ const ITEM_ADDED_AT_STORAGE_KEY="kvimarka92ShoppingItemAddedAtV1";
 const NEW_ITEM_ALERT_STORAGE_KEY="kvimarka92ShoppingNewItemAlertSeenV1";
 const SHOPPING_IN_PROGRESS_SINCE_KEY="kvimarka92ShoppingInProgressSinceV1";
 const DEFAULT_TYPES=["Frukt og grønt","Meieri","Kjøtt og fisk","Brød","Tørrvarer","Frysevarer","Drikke","Husholdning","Personlig","Annet"];
-const HANDLELISTE_HANDLE_VERSION="v72-notification-place-cache-bust";
+const HANDLELISTE_HANDLE_VERSION="v73-notification-area-place-robust";
 const SHOPPING_AREA_DEFAULT="Matvarer";
 const SHOPPING_AREA_STORAGE_KEY="kvimarka92SelectedShoppingAreaV1";
 const SHOPPING_ACTIVE_AREA_STORAGE_KEY="kvimarka92ActiveShoppingAreaV1";
@@ -1038,6 +1038,18 @@ function getNotificationShoppingPlace(){
   }
 
   return defaultShoppingPlaceForArea(selectedShoppingArea);
+}
+function getSelectedShoppingAreaForNotification(){
+  const activeButton=document.querySelector(".shopping-area-button.active");
+  const buttonArea=activeButton ? String(activeButton.textContent||"").trim() : "";
+
+  if(buttonArea){
+    selectedShoppingArea=normalizeShoppingArea(buttonArea,"");
+    writeShoppingAreaStorage(SHOPPING_AREA_STORAGE_KEY,selectedShoppingArea);
+    return selectedShoppingArea;
+  }
+
+  return normalizeShoppingArea(selectedShoppingArea,"");
 }
 
 function esc(value){
@@ -1187,12 +1199,15 @@ async function activateStandardNotification(){
   const button=document.getElementById("activateStandardNotificationButton");
   if(button)button.disabled=true;
   try{
+    const notificationArea=getSelectedShoppingAreaForNotification();
+    const notificationPlace=getNotificationShoppingPlace();
+
     const data=await fetchJson(`${API_BASE}/shopping/notification-activate-default`,{
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=UTF-8"},
       body:JSON.stringify({
-        shoppingArea:selectedShoppingArea,
-        shoppingPlace:getNotificationShoppingPlace()
+        shoppingArea:notificationArea,
+        shoppingPlace:notificationPlace
       })
     });
 
@@ -1209,8 +1224,8 @@ async function activateStandardNotification(){
 
     const shoppingTime=data.shoppingTime||(data.notification && data.notification.shoppingTime)||shoppingNotificationShoppingTime||"";
     const recipientCount=Array.isArray(data.recipients)?data.recipients.length:0;
-    const activatedArea=data.shoppingArea||selectedShoppingArea;
-    const activatedPlace=data.shoppingPlace||getNotificationShoppingPlace();
+    const activatedArea=data.shoppingArea||notificationArea;
+    const activatedPlace=data.shoppingPlace||notificationPlace;
     const sentText=data.sentNow?" Melding er sendt.":"";
     setStatus(`Varsling før handling er aktivert for <strong>${esc(activatedPlace)}</strong>. Tidspunkt for handling: ${esc(formatLocalDateTimeShort(shoppingTime))}. Mottakere: ${recipientCount}.${sentText}`,"success");
   }catch(error){

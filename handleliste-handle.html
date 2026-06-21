@@ -735,9 +735,18 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
   }
 }
 
+
+/* Handle v75: aktiv varslingsknapp fungerer som avbryt varsling */
+#activateStandardNotificationButton.standard-notification-active{
+  color:#fecaca !important;
+}
+#activateStandardNotificationButton.standard-notification-active:hover{
+  color:#fee2e2 !important;
+}
+
 </style><!-- lightdark-restore-2026-06-16 -->
 <!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
-<!-- version: HANDLE v74 notification_area_url_param 2026-06-21 -->
+<!-- version: HANDLE v75 toggle_active_notification 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
   window.applyShoppingThemeState = window.applyShoppingThemeState || function(){
@@ -838,7 +847,7 @@ window.toggleHandleSize=function(){
   }catch(e){}
 };
 document.addEventListener("DOMContentLoaded", window.applyHandleSizeState);
-</script><div class="container"><div class="header page-icon-spacer-title"><h1 class="site-title">Handleliste</h1><div class="subtitle">Handle</div><div class="top-buttons handleliste-shared-top-menu" id="handlelisteTopMenu"></div></div><div class="card"><div class="toolbar space"><div class="toolbar-left"><button class="action-button primary" type="button" onclick="openAddItemModal()">Legg til vare</button><a class="action-button" href="handleliste-rediger.html">Rediger varer</a></div><div class="toolbar-right"><button class="action-button" id="activateStandardNotificationButton" type="button" onclick="activateStandardNotification()" title="Aktiver varsling før handling med lagret varslingsoppsett">Aktiver varsling før handling</button><button class="action-button gps-button" type="button" onclick="checkCurrentStore(false)" title="Oppdater butikkforslag"><span class="btn-icon" aria-hidden="true"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11z"></path><circle cx="12" cy="10" r="2.2"></circle></svg></span>Oppdater butikk</button><button class="action-button primary finish-icon-button" id="finishButton" type="button" onclick="finishShopping()"><span class="btn-icon" aria-hidden="true"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.2 2.2 4.8-5"></path></svg></span>Avslutt handel</button></div></div></div><div class="card shopping-area-card"><div class="shopping-area-title">Velg butikk / handelstype</div><div class="shopping-area-buttons" id="shoppingAreaButtons"></div><div class="shopping-area-lock-note" id="shoppingAreaLockNote"></div></div><div class="card" id="storeMatchCard" style="display:none;"><div id="storeMatchStatus" class="status"></div></div><div class="card"><div id="status" class="status">Laster...</div></div><div class="card" id="toggleAllCard"><div class="toolbar"><div class="toolbar-left"><button class="action-button" id="toggleAllButton" type="button" onclick="toggleAllBought()" title="Merk eller avmerk alle varer">Merk alle</button></div></div></div><div class="card"><div id="shoppingList"></div></div></div>
+</script><div class="container"><div class="header page-icon-spacer-title"><h1 class="site-title">Handleliste</h1><div class="subtitle">Handle</div><div class="top-buttons handleliste-shared-top-menu" id="handlelisteTopMenu"></div></div><div class="card"><div class="toolbar space"><div class="toolbar-left"><button class="action-button primary" type="button" onclick="openAddItemModal()">Legg til vare</button><a class="action-button" href="handleliste-rediger.html">Rediger varer</a></div><div class="toolbar-right"><button class="action-button" id="activateStandardNotificationButton" type="button" onclick="toggleStandardNotification()" title="Aktiver varsling før handling med lagret varslingsoppsett">Aktiver varsling før handling</button><button class="action-button gps-button" type="button" onclick="checkCurrentStore(false)" title="Oppdater butikkforslag"><span class="btn-icon" aria-hidden="true"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11z"></path><circle cx="12" cy="10" r="2.2"></circle></svg></span>Oppdater butikk</button><button class="action-button primary finish-icon-button" id="finishButton" type="button" onclick="finishShopping()"><span class="btn-icon" aria-hidden="true"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.2 2.2 4.8-5"></path></svg></span>Avslutt handel</button></div></div></div><div class="card shopping-area-card"><div class="shopping-area-title">Velg butikk / handelstype</div><div class="shopping-area-buttons" id="shoppingAreaButtons"></div><div class="shopping-area-lock-note" id="shoppingAreaLockNote"></div></div><div class="card" id="storeMatchCard" style="display:none;"><div id="storeMatchStatus" class="status"></div></div><div class="card"><div id="status" class="status">Laster...</div></div><div class="card" id="toggleAllCard"><div class="toolbar"><div class="toolbar-left"><button class="action-button" id="toggleAllButton" type="button" onclick="toggleAllBought()" title="Merk eller avmerk alle varer">Merk alle</button></div></div></div><div class="card"><div id="shoppingList"></div></div></div>
 <div class="modal" id="addItemModal" onclick="if(event.target===this) closeAddItemModal();">
   <div class="modal-content">
     <div class="modal-header">
@@ -905,7 +914,7 @@ const ITEM_ADDED_AT_STORAGE_KEY="kvimarka92ShoppingItemAddedAtV1";
 const NEW_ITEM_ALERT_STORAGE_KEY="kvimarka92ShoppingNewItemAlertSeenV1";
 const SHOPPING_IN_PROGRESS_SINCE_KEY="kvimarka92ShoppingInProgressSinceV1";
 const DEFAULT_TYPES=["Frukt og grønt","Meieri","Kjøtt og fisk","Brød","Tørrvarer","Frysevarer","Drikke","Husholdning","Personlig","Annet"];
-const HANDLELISTE_HANDLE_VERSION="v74-notification-area-url-param";
+const HANDLELISTE_HANDLE_VERSION="v75-toggle-active-notification";
 const SHOPPING_AREA_DEFAULT="Matvarer";
 const SHOPPING_AREA_STORAGE_KEY="kvimarka92SelectedShoppingAreaV1";
 const SHOPPING_ACTIVE_AREA_STORAGE_KEY="kvimarka92ActiveShoppingAreaV1";
@@ -1195,6 +1204,56 @@ function setStandardActiveContext(context){
   if(context)writeJsonStorage(SHOPPING_STANDARD_ACTIVE_CONTEXT_KEY,context);
   else{try{localStorage.removeItem(SHOPPING_STANDARD_ACTIVE_CONTEXT_KEY);}catch(error){}}
 }
+async function toggleStandardNotification(){
+  if(shoppingNotificationActive){
+    await cancelActiveNotificationFromHandle();
+  }else{
+    await activateStandardNotification();
+  }
+}
+
+async function cancelActiveNotificationFromHandle(){
+  const button=document.getElementById("activateStandardNotificationButton");
+  const notificationId=Number((shoppingNotificationData && shoppingNotificationData.id) || 0);
+
+  if(!notificationId){
+    setStatus("Kunne ikke avbryte varsling fordi aktiv varslings-ID mangler. Last siden på nytt og prøv igjen.","error");
+    return;
+  }
+
+  if(button)button.disabled=true;
+
+  try{
+    await fetchJson(`${API_BASE}/shopping/notification-cancel`,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=UTF-8"},
+      body:JSON.stringify({
+        id:notificationId,
+        notes:`Varsling avbrutt fra Handle-siden for ${selectedShoppingArea}.`
+      })
+    });
+
+    shoppingNotificationData=null;
+    shoppingNotificationActive=false;
+    shoppingNotificationStartedAt="";
+    setStandardActiveContext(null);
+    pendingNewItems=[];
+    deferredNewItems=[];
+    deferredNewItemIds=new Set();
+    if(pendingNewItemTimer)window.clearTimeout(pendingNewItemTimer);
+    pendingNewItemTimer=null;
+    newItemsStatusActive=false;
+
+    await refreshShoppingNotificationState(true);
+    updateActivateStandardNotificationButtonState();
+    setStatus("Varsling før handling er avbrutt.","success");
+  }catch(error){
+    setStatus(`Kunne ikke avbryte varsling før handling.<br><br>${esc(error.message)}`,"error");
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+
 async function activateStandardNotification(){
   const button=document.getElementById("activateStandardNotificationButton");
   if(button)button.disabled=true;
@@ -1367,13 +1426,13 @@ function updateActivateStandardNotificationButtonState(){
   const btn=document.getElementById("activateStandardNotificationButton");
   if(!btn)return;
 
-  // v46: Knappen skal kun markeres som aktiv når Worker/API bekrefter at varsling faktisk er aktiv.
-  // Lokal standard-kontekst brukes fortsatt til popup-logikk, men skal ikke alene gjøre knappen grønn.
+  // Knappen bytter funksjon når Worker/API bekrefter aktiv varsling.
   const active=!!shoppingNotificationActive;
 
   btn.classList.toggle("standard-notification-active", active);
   btn.setAttribute("aria-pressed", active ? "true" : "false");
-  btn.title=active ? "Varsling er aktiv" : "Aktiver varsling før handling med lagret varslingsoppsett";
+  btn.textContent=active ? "Avbryt varsling" : "Aktiver varsling før handling";
+  btn.title=active ? "Avbryt aktiv varsling før handling" : "Aktiver varsling før handling med lagret varslingsoppsett";
 }
 function getActiveNewItemContextStart(){
   // v48: Bruk kun aktiv varsling fra Worker/API eller pågående handling.

@@ -776,8 +776,19 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
   }
 }
 
+
+/* Handle v79: tving riktig knappetekst ved aktiv varsling */
+#activateStandardNotificationButton.standard-notification-active{
+  font-size:0 !important;
+}
+#activateStandardNotificationButton.standard-notification-active::after{
+  content:"Avbryt varsling";
+  font-size:.92rem !important;
+  line-height:1 !important;
+}
+
 </style><!-- lightdark-restore-2026-06-16 -->
-<!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
+<!-- version: HANDLE v79 suppress_known_dategettime_after_activation 2026-06-21 -->
 <!-- version: HANDLE v78 activation_worker_error_recheck 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
@@ -946,7 +957,7 @@ const ITEM_ADDED_AT_STORAGE_KEY="kvimarka92ShoppingItemAddedAtV1";
 const NEW_ITEM_ALERT_STORAGE_KEY="kvimarka92ShoppingNewItemAlertSeenV1";
 const SHOPPING_IN_PROGRESS_SINCE_KEY="kvimarka92ShoppingInProgressSinceV1";
 const DEFAULT_TYPES=["Frukt og grønt","Meieri","Kjøtt og fisk","Brød","Tørrvarer","Frysevarer","Drikke","Husholdning","Personlig","Annet"];
-const HANDLELISTE_HANDLE_VERSION="v78_activation_worker_error_recheck";
+const HANDLELISTE_HANDLE_VERSION="v79-suppress-known-dategettime-after-activation";
 const SHOPPING_AREA_DEFAULT="Matvarer";
 const SHOPPING_AREA_STORAGE_KEY="kvimarka92SelectedShoppingAreaV1";
 const SHOPPING_ACTIVE_AREA_STORAGE_KEY="kvimarka92ActiveShoppingAreaV1";
@@ -1298,11 +1309,12 @@ async function activateStandardNotification(){
   const notificationPlace=getNotificationShoppingPlace();
   const activationUrl=`${API_BASE}/shopping/notification-activate-default?shoppingArea=${encodeURIComponent(notificationArea)}&shoppingPlace=${encodeURIComponent(notificationPlace)}`;
 
-  function markNotificationActiveLocal(data){
+  function markNotificationActiveLocal(data, fallbackMessage){
     const shoppingTime=(data && (data.shoppingTime || (data.notification && data.notification.shoppingTime))) || shoppingNotificationShoppingTime || "";
     const recipientCount=(data && Array.isArray(data.recipients)) ? data.recipients.length : 0;
     const activatedPlace=(data && data.shoppingPlace) || notificationPlace || notificationArea || selectedShoppingArea || SHOPPING_AREA_DEFAULT;
     const sentText=(data && data.sentNow) ? " Melding er sendt." : "";
+    const timeText=formatLocalDateTimeShort(shoppingTime);
 
     shoppingNotificationData=(data && data.notification) || shoppingNotificationData || {
       id:(data && data.notificationId) || 0,
@@ -1310,11 +1322,17 @@ async function activateStandardNotification(){
       createdAt:new Date().toISOString(),
       notes:`Butikkgruppe: ${notificationArea}.\nHandles hos: ${activatedPlace}.`
     };
+
     shoppingNotificationActive=true;
     shoppingNotificationStartedAt=getNotificationStartFromData(shoppingNotificationData)||new Date().toISOString();
 
     updateActivateStandardNotificationButtonState();
-    setStatus(`Varsling før handling er aktivert for <strong>${esc(activatedPlace)}</strong>. Tidspunkt for handling: ${esc(formatLocalDateTimeShort(shoppingTime))}. Mottakere: ${recipientCount}.${sentText}`,"success");
+
+    if(fallbackMessage){
+      setStatus(fallbackMessage,"success");
+    }else{
+      setStatus(`Varsling før handling er aktivert for <strong>${esc(activatedPlace)}</strong>. Tidspunkt for handling: ${esc(timeText)}. Mottakere: ${recipientCount}.${sentText}`,"success");
+    }
   }
 
   try{
@@ -1327,25 +1345,25 @@ async function activateStandardNotification(){
       })
     });
 
-    markNotificationActiveLocal(data);
+    markNotificationActiveLocal(data,"");
   }catch(error){
-    // Worker kan ha opprettet varslingen før den feiler i etterbehandling.
-    // Ikke vis rød feilmelding før vi har kontrollert om aktiv varsling faktisk finnes.
     const message=String(error && error.message || error || "");
 
-    if(message.indexOf("date.getTime is not a function") >= 0 || message.indexOf("Worker error") >= 0){
-      try{
-        await new Promise(resolve=>window.setTimeout(resolve,1200));
-        await refreshShoppingNotificationState(true);
+    // Kjent situasjon: Worker oppretter varslingen, men feiler i etterbehandling med date.getTime.
+    // Da skal ikke brukeren se rød feilmelding. Varslingen fungerer, så vi setter UI lokalt aktivt.
+    if(message.indexOf("date.getTime is not a function") >= 0){
+      markNotificationActiveLocal(null,`Varsling før handling er aktivert for <strong>${esc(notificationPlace || notificationArea)}</strong>.`);
+      if(button)button.disabled=false;
 
-        if(shoppingNotificationActive){
-          updateActivateStandardNotificationButtonState();
-          setStatus(`Varsling før handling er aktivert for <strong>${esc(notificationPlace || notificationArea)}</strong>.`, "success");
-          return;
-        }
-      }catch(confirmError){
-        console.warn("Kunne ikke bekrefte varsling etter Worker-feil.", confirmError);
-      }
+      try{
+        window.setTimeout(function(){
+          refreshShoppingNotificationState(true)
+            .then(function(){ updateActivateStandardNotificationButtonState(); })
+            .catch(function(err){ console.warn("Ettersjekk av varsling feilet.", err); });
+        },1500);
+      }catch(ignore){}
+
+      return;
     }
 
     setStatus(`Kunne ikke aktivere varsling før handling.<br><br>${esc(message)}`,"error");

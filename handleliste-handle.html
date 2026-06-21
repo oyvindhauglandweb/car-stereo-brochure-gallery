@@ -737,7 +737,7 @@ body:not(.dark-mode) #shoppingList .badge.area-bondekompaniet{background:rgba(22
 
 </style><!-- lightdark-restore-2026-06-16 -->
 <!-- version: HANDLE v66 ios12 syntax check fix 2026-06-19 -->
-<!-- version: HANDLE v70 notification_date_string_fix 2026-06-21 -->
+<!-- version: HANDLE v71 notification_shopping_place 2026-06-21 -->
 </head><body class="dark-mode"><script>
 (function(){
   window.applyShoppingThemeState = window.applyShoppingThemeState || function(){
@@ -1003,6 +1003,7 @@ function setShoppingArea(area){
     return;
   }
   selectedShoppingArea=next;
+  currentShoppingPlace="";
   writeShoppingAreaStorage(SHOPPING_AREA_STORAGE_KEY,selectedShoppingArea);
   if(isShoppingAreaLocked())writeShoppingAreaStorage(SHOPPING_ACTIVE_AREA_STORAGE_KEY,selectedShoppingArea);
   renderShoppingAreaButtons();
@@ -1017,6 +1018,25 @@ function renderShoppingAreaButtons(){
   const locked=isShoppingAreaLocked();
   root.innerHTML=SHOPPING_AREA_ORDER.map(area=>`<button class="shopping-area-button ${area===selectedShoppingArea?"active":""} ${locked?"locked":""}" type="button" onclick="setShoppingArea('${escJs(area)}')" ${locked&&area!==selectedShoppingArea?'title="Handel er aktiv. Avslutt handel før bytte."':""}>${esc(area)}</button>`).join("");
   if(note)note.innerHTML=locked?`Aktiv handel: <strong>${esc(selectedShoppingArea)}</strong>`:"";
+}
+function defaultShoppingPlaceForArea(area){
+  const normalized=normalizeShoppingArea(area,"");
+  return normalized || SHOPPING_AREA_DEFAULT;
+}
+
+function getNotificationShoppingPlace(){
+  const place=String(currentShoppingPlace||"").trim();
+
+  if(place){
+    return place;
+  }
+
+  if(selectedShoppingArea===SHOPPING_AREA_DEFAULT){
+    const chain=String(currentStoreChain||"").trim();
+    return chain && chain !== "Standard" ? chain : SHOPPING_AREA_DEFAULT;
+  }
+
+  return defaultShoppingPlaceForArea(selectedShoppingArea);
 }
 
 function esc(value){
@@ -1169,7 +1189,10 @@ async function activateStandardNotification(){
     const data=await fetchJson(`${API_BASE}/shopping/notification-activate-default`,{
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify({shoppingArea:selectedShoppingArea})
+      body:JSON.stringify({
+        shoppingArea:selectedShoppingArea,
+        shoppingPlace:getNotificationShoppingPlace()
+      })
     });
 
     await refreshShoppingNotificationState(true);
@@ -1186,8 +1209,9 @@ async function activateStandardNotification(){
     const shoppingTime=data.shoppingTime||(data.notification && data.notification.shoppingTime)||shoppingNotificationShoppingTime||"";
     const recipientCount=Array.isArray(data.recipients)?data.recipients.length:0;
     const activatedArea=data.shoppingArea||selectedShoppingArea;
+    const activatedPlace=data.shoppingPlace||getNotificationShoppingPlace();
     const sentText=data.sentNow?" Melding er sendt.":"";
-    setStatus(`Varsling før handling er aktivert for <strong>${esc(activatedArea)}</strong>. Tidspunkt for handling: ${esc(formatLocalDateTimeShort(shoppingTime))}. Mottakere: ${recipientCount}.${sentText}`,"success");
+    setStatus(`Varsling før handling er aktivert for <strong>${esc(activatedPlace)}</strong>. Tidspunkt for handling: ${esc(formatLocalDateTimeShort(shoppingTime))}. Mottakere: ${recipientCount}.${sentText}`,"success");
   }catch(error){
     setStatus(`Kunne ikke aktivere varsling før handling.<br><br>${esc(error.message)}`,"error");
   }finally{
@@ -1603,7 +1627,7 @@ function startShoppingItemsPolling(){
 
 
 const BOUGHT_STORAGE_KEY="kvimarka92ShoppingBoughtIds";
-let items=[];let boughtIds=new Set();let typeOrder=[];let typeOptions=[];let currentStoreChain="Standard";
+let items=[];let boughtIds=new Set();let typeOrder=[];let typeOptions=[];let currentStoreChain="Standard";let currentShoppingPlace="";
 function getBoughtStorageKey(){return BOUGHT_STORAGE_KEY;}
 function loadRememberedBoughtIds(){
   try{
@@ -1923,10 +1947,15 @@ async function checkCurrentStore(silent){
 
     const matched=!!(data.storeName || (data.store && data.store.name));
     const uncertain=String(data.storeMatchStatus || "") === "Uncertain";
+    const matchedChain=String(data.storeChain || (data.store && data.store.chain) || "").trim();
+    const matchedName=String(data.storeName || (data.store && data.store.name) || "").trim();
+    currentShoppingPlace=matched
+      ? (matchedChain || selectedShoppingArea || SHOPPING_AREA_DEFAULT)
+      : defaultShoppingPlaceForArea(selectedShoppingArea);
 
     if(Array.isArray(data.typeOrder) && data.typeOrder.length){
       typeOrder=data.typeOrder;
-      currentStoreChain=data.typeOrderChain || data.storeChain || (data.store && data.store.chain) || "Standard";
+      currentStoreChain=data.typeOrderChain || matchedChain || "Standard";
       render();
     }
 

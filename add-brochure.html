@@ -272,6 +272,33 @@ button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
   border:0 !important;
 }
 
+
+
+/* Native select/dropdown contrast fix - keeps options readable in dark mode */
+select,
+select option,
+select optgroup{
+  background:var(--card);
+  color:var(--text);
+}
+
+select option:checked{
+  background:var(--link, #1f789d);
+  color:#ffffff;
+}
+
+body.dark-mode select,
+body.dark-mode select option,
+body.dark-mode select optgroup{
+  background:#242424;
+  color:#eeeeee;
+}
+
+body.dark-mode select option:checked{
+  background:#1f6fd1;
+  color:#ffffff;
+}
+
 </style>
 
 <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"

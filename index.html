@@ -875,48 +875,83 @@ async function loadPortalOptions(){
 }
   
 async function loadBrandGuides(){
-
- const data = await loadPortalOptions();
-data.results = data.brands || [];
-
   const select = document.getElementById("brandGuideSelect");
 
-  data.results
-    .filter(item => item.field_8476152?.value === "Present")
+  if(!select){
+    return;
+  }
+
+  function getLinkedValue(value){
+    if(!value) return "";
+
+    if(Array.isArray(value)){
+      return value
+        .map(item => item.value || item.name || "")
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    if(typeof value === "object"){
+      return value.value || value.name || "";
+    }
+
+    return String(value || "");
+  }
+
+  const res = await fetch(`${API_BASE}/model-series-guides`);
+
+  if(!res.ok){
+    throw new Error("Could not load model series guides");
+  }
+
+  const data = await res.json();
+  const rows = data.results || [];
+
+  const brandMap = new Map();
+
+  rows
+    .map(item => ({
+      brand: getLinkedValue(item.field_8501353).trim(),
+      active:
+        item.field_8501354?.value ||
+        item.field_8501354 ||
+        "",
+      sort_order: Number(item.field_8503101 || 0)
+    }))
+    .filter(item => item.brand && item.active === "Active")
     .forEach(item => {
+      const current = brandMap.get(item.brand);
 
-      const brand =
-        item.field_8351135 || "";
+      if(!current || item.sort_order < current.sort_order){
+        brandMap.set(item.brand, item);
+      }
+    });
 
-      const url =
-        item.field_8445075 || "";
+  Array.from(select.options)
+    .slice(1)
+    .forEach(option => option.remove());
 
-      if(!brand || !url) return;
+  Array.from(brandMap.values())
+    .sort((a,b) => {
+      if(a.sort_order !== b.sort_order){
+        return a.sort_order - b.sort_order;
+      }
 
+      return a.brand.localeCompare(b.brand);
+    })
+    .forEach(item => {
       const option = document.createElement("option");
-
-      option.value = url;
-      option.textContent = brand;
-
+      option.value = item.brand;
+      option.textContent = item.brand;
       select.appendChild(option);
-
     });
 
   select.addEventListener("change", e => {
-
-if(e.target.value){
-
-  const brand =
-    encodeURIComponent(
-      e.target.options[e.target.selectedIndex].text
-    );
-
-  window.location.href =
-    `model-series.html?brand=${brand}`;
-}
-
+    if(e.target.value){
+      window.location.href =
+        `model-series.html?brand=${encodeURIComponent(e.target.value)}`;
+    }
   });
-
 }
 
 async function loadFacebookLinks(){

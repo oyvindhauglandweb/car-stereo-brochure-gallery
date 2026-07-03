@@ -731,6 +731,7 @@ const PORTAL_URL = "index.html";
 let brochureData = [];
 let currentView = "large";
 let currentUser = null;
+let activeModelSeriesGuideBrands = new Set();
 
 async function fetchCurrentUser(){
   try{
@@ -776,6 +777,60 @@ function esc(value){
       "'":"&#039;"
     }[char];
   });
+}
+
+function normalizeGuideBrand(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function getLinkedValue(value){
+  if (!value) return "";
+
+  if (typeof value === "string") return value;
+
+  if (Array.isArray(value)) {
+    return value
+      .map(item => getLinkedValue(item))
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (typeof value === "object") {
+    return (
+      getLinkedValue(value.value) ||
+      value.name ||
+      value.text ||
+      ""
+    );
+  }
+
+  return "";
+}
+
+async function loadActiveModelSeriesGuideBrands(){
+  try{
+    const res = await fetch(`${API_BASE}/model-series-guides`);
+
+    if(!res.ok){
+      return new Set();
+    }
+
+    const data = await res.json();
+    const rows = data.results || [];
+
+    return new Set(
+      rows
+        .map(item => ({
+          brand: getLinkedValue(item.field_8501353),
+          active: item.field_8501354?.value || item.field_8501354 || ""
+        }))
+        .filter(item => String(item.active).trim() === "Active")
+        .map(item => normalizeGuideBrand(item.brand))
+        .filter(Boolean)
+    );
+  }catch(error){
+    return new Set();
+  }
 }
 
 function getUrl(value){
@@ -916,6 +971,7 @@ if(!galleryRes.ok){
 
 const galleryData = await galleryRes.json();
 const allRows = galleryData.results || [];
+activeModelSeriesGuideBrands = await loadActiveModelSeriesGuideBrands();
 
 setupFilters(allRows, {
   brand: brandFilter,
@@ -1078,9 +1134,6 @@ function handleBrochureClick(index, card, event){
 function openModal(index, card){
   const b = brochureData[index];
   
-console.log("Guide present raw:", b.debug_present_raw);
-console.log("Guide present parsed:", b.model_series_guide_present);
-console.log("Guide URL:", b.model_series_guide_url);
   
   const modal = document.getElementById("modal");
   modal.style.top = Math.max(0, card.offsetTop - 20) + "px";
@@ -1176,7 +1229,7 @@ const ownerLinks = b.owner
     <div class="detail-row">
 <span class="detail-label">
   ${
-    String(b.model_series_guide_present).includes("Present")
+    hasModelSeriesGuide
       ? `<a href="model-series.html?brand=${encodeURIComponent(b.brand)}"
    target="_blank"
    style="text-decoration:none;color:var(--link);"

@@ -269,6 +269,84 @@ button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
   border:0 !important;
 }
 
+/* Image enlargement/lightbox for model series guide images */
+.zoomable-image{
+  cursor:zoom-in;
+}
+
+.lightbox-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.86);
+  box-sizing:border-box;
+}
+
+.lightbox-overlay.is-open{
+  display:flex;
+}
+
+.lightbox-image{
+  max-width:96vw;
+  max-height:88vh;
+  object-fit:contain;
+  background:var(--card);
+  border-radius:10px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+.lightbox-close{
+  position:fixed;
+  top:14px;
+  right:16px;
+  width:46px;
+  height:46px;
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.14) !important;
+  color:#ffffff;
+  font-size:34px;
+  line-height:42px;
+  cursor:pointer;
+}
+
+.lightbox-close:hover{
+  background:rgba(255,255,255,.22) !important;
+}
+
+.lightbox-caption{
+  position:fixed;
+  left:24px;
+  right:24px;
+  bottom:14px;
+  text-align:center;
+  color:#ffffff;
+  font-size:15px;
+  line-height:1.4;
+  text-shadow:0 1px 3px rgba(0,0,0,.8);
+}
+
+@media(max-width:800px){
+  .lightbox-overlay{
+    padding:12px;
+  }
+
+  .lightbox-image{
+    max-width:98vw;
+    max-height:84vh;
+  }
+
+  .lightbox-caption{
+    left:12px;
+    right:12px;
+    font-size:14px;
+  }
+}
+
 </style>
 
 <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
@@ -319,6 +397,24 @@ button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
     <div class="loading">Loading...</div>
   </div>
 
+</div>
+
+
+<div class="lightbox-overlay"
+     id="imageLightbox"
+     aria-hidden="true"
+     role="dialog"
+     aria-label="Enlarged image">
+  <button type="button"
+          class="lightbox-close"
+          id="lightboxClose"
+          aria-label="Close enlarged image">×</button>
+  <img class="lightbox-image"
+       id="lightboxImage"
+       src=""
+       alt="">
+  <div class="lightbox-caption"
+       id="lightboxCaption"></div>
 </div>
 
 <script>
@@ -504,16 +600,20 @@ const exampleToUse =
 
         ${
           logoToUse
-            ? `<img class="logo-image"
+            ? `<img class="logo-image zoomable-image"
                     src="${esc(logoToUse)}"
+                    data-full-src="${esc(logoToUse)}"
+                    loading="lazy"
                     alt="${esc(item.name)} logo">`
             : `<div></div>`
         }
 
         ${
           exampleToUse
-          ? `<img class="example-image"
+          ? `<img class="example-image zoomable-image"
           src="${esc(exampleToUse)}"
+          data-full-src="${esc(exampleToUse)}"
+          loading="lazy"
           alt="${esc(item.name)} example">`
           : `<div></div>`
         }
@@ -524,6 +624,58 @@ const exampleToUse =
   `;
 });
 }
+
+
+function openImageLightbox(src, caption){
+  if(!src) return;
+
+  const overlay = document.getElementById("imageLightbox");
+  const image = document.getElementById("lightboxImage");
+  const captionElement = document.getElementById("lightboxCaption");
+
+  image.src = src;
+  image.alt = caption || "Enlarged image";
+  captionElement.innerText = caption || "";
+
+  overlay.classList.add("is-open");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeImageLightbox(){
+  const overlay = document.getElementById("imageLightbox");
+  const image = document.getElementById("lightboxImage");
+
+  overlay.classList.remove("is-open");
+  overlay.setAttribute("aria-hidden", "true");
+  image.src = "";
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("click", event => {
+  const zoomImage = event.target.closest(".zoomable-image");
+
+  if(zoomImage){
+    openImageLightbox(
+      zoomImage.dataset.fullSrc || zoomImage.currentSrc || zoomImage.src,
+      zoomImage.alt || ""
+    );
+    return;
+  }
+
+  if(
+    event.target.id === "imageLightbox" ||
+    event.target.id === "lightboxClose"
+  ){
+    closeImageLightbox();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape"){
+    closeImageLightbox();
+  }
+});
 
 loadModelSeries();
 </script>

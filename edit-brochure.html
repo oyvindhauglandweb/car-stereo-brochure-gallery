@@ -1,0 +1,805 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add New Brochure - Car Stereo Brochures</title>
+
+<style>
+:root{
+  --bg:#f2f2f2;
+  --card:#ffffff;
+  --text:#333333;
+  --muted:#777777;
+  --border:#cccccc;
+  --soft:#eaeaea;
+  --link:#1f789d;
+  --button:#ffffff;
+  --button-hover:#e9eef2;
+}
+
+body.dark-mode{
+  --bg:#151515;
+  --card:#242424;
+  --text:#eeeeee;
+  --muted:#bbbbbb;
+  --border:#555555;
+  --soft:#333333;
+  --link:#7cc7e8;
+  --button:#242424;
+  --button-hover:#3a3a3a;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  background:var(--bg);
+  font-family:Arial,sans-serif;
+  color:var(--text);
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:34px;
+}
+
+.logo{
+  height:48px;
+  width:auto;
+}
+
+.top-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.top-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  background:var(--button);
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:26px;
+  font-weight:900;
+  font-family:Arial,sans-serif;
+  line-height:44px;
+  box-sizing:border-box;
+  cursor:pointer;
+}
+
+.top-button:hover{
+  background:var(--button-hover);
+}
+
+.icon-back{position:relative;top:-1px;font-size:28px;}
+.icon-home{position:relative;top:-2px;font-size:30px;}
+.theme-icon{font-size:22px;font-weight:700;}
+
+.page-title{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.intro{
+  text-align:center;
+  color:var(--muted);
+  line-height:1.5;
+  margin:0 auto 32px;
+  max-width:760px;
+}
+
+.form-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  box-sizing:border-box;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(220px, 1fr));
+  gap:18px;
+}
+
+.form-field{display:flex;flex-direction:column;gap:7px;}
+.form-field.full{grid-column:1 / -1;}
+label{font-weight:bold;font-size:15px;}
+.required{color:#c94;}
+
+input,select,textarea{
+  width:100%;
+  min-height:44px;
+  padding:0 14px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  font-size:16px;
+  font-family:Arial,sans-serif;
+  box-sizing:border-box;
+}
+
+select[multiple]{min-height:150px;padding:10px 14px;}
+textarea{min-height:120px;padding:12px 14px;resize:vertical;}
+input[type="file"]{padding:10px 14px;}
+.help-text{color:var(--muted);font-size:13px;line-height:1.4;}
+
+.action-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-end;
+  margin-top:24px;
+  flex-wrap:wrap;
+}
+
+.submit-button,.secondary-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:160px;
+  height:44px;
+  padding:0 18px;
+  background:var(--button);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+  text-decoration:none;
+  font-size:16px;
+  font-weight:bold;
+  font-family:Arial,sans-serif;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.submit-button:hover,.secondary-button:hover{background:var(--button-hover);}
+.submit-button{background:#1f789d;color:#ffffff;border:none;}
+.submit-button:hover{background:#17627f;}
+
+.status-box{
+  display:none;
+  margin-top:20px;
+  padding:14px 16px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--soft);
+  line-height:1.5;
+}
+.status-box.success{display:block;border-color:#4f8f5f;}
+.status-box.error{display:block;border-color:#b85c5c;}
+.disabled{opacity:.55;pointer-events:none;}
+
+@media(max-width:800px){
+  body{padding:14px;}
+  .form-card{padding:18px;}
+  .form-grid{grid-template-columns:1fr;}
+  .page-title{font-size:24px;}
+  .action-row{justify-content:stretch;}
+  .submit-button,.secondary-button{width:100%;}
+}
+
+
+/* Soft no-frame design update – permanent */
+:root{
+  --soft-surface:rgba(0,0,0,.035);
+  --soft-control:rgba(0,0,0,.055);
+  --soft-control-hover:rgba(0,0,0,.085);
+}
+
+body.dark-mode{
+  --soft-surface:rgba(255,255,255,.035);
+  --soft-control:rgba(255,255,255,.055);
+  --soft-control-hover:rgba(255,255,255,.085);
+}
+
+.top-button,
+.portal-button,
+.tribute-button,
+.guide-select,
+.filter-select,
+.compare-button,
+.compare-cancel,
+.access-login-button,
+.claim-button,
+.close-button,
+.secondary-button,
+.login-status:not(.is-signin),
+input,
+select,
+textarea,
+button:not(.submit-button):not(.remove-button):not(.admin-button){
+  border:0 !important;
+  background:var(--soft-control) !important;
+  box-shadow:none !important;
+}
+
+.top-button:hover,
+.portal-button:hover,
+.tribute-button:hover,
+.guide-select:hover,
+.filter-select:hover,
+.compare-button:hover,
+.compare-cancel:hover,
+.access-login-button:hover,
+.claim-button:hover,
+.close-button:hover,
+.secondary-button:hover,
+.login-status:not(.is-signin):hover,
+button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
+  background:var(--soft-control-hover) !important;
+}
+
+.form-card,
+.status-box,
+.status,
+.access-box,
+.help-card,
+.guide-card,
+.login-menu,
+.modal-content,
+.claim-brochure-title,
+[style*="border:1px solid var(--border)"],
+[style*="border: 1px solid var(--border)"]{
+  border:0 !important;
+  background:var(--soft-surface) !important;
+  box-shadow:none !important;
+}
+
+.submit-button{
+  border:0 !important;
+}
+
+.remove-button,
+.admin-button{
+  border:0 !important;
+}
+
+
+
+/* Native select/dropdown contrast fix - keeps options readable in dark mode */
+select,
+select option,
+select optgroup{
+  background:var(--card);
+  color:var(--text);
+}
+
+select option:checked{
+  background:var(--link, #1f789d);
+  color:#ffffff;
+}
+
+body.dark-mode select,
+body.dark-mode select option,
+body.dark-mode select optgroup{
+  background:#242424;
+  color:#eeeeee;
+}
+
+body.dark-mode select option:checked{
+  background:#1f6fd1;
+  color:#ffffff;
+}
+
+</style>
+
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Brochures">
+
+    <div class="top-buttons">
+      <a class="top-button" href="index.html" title="Back"><span class="icon-back">←</span></a>
+      <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
+      <button type="button" class="top-button" onclick="toggleTheme()" id="themeToggle" title="Toggle light/dark mode">
+        <span class="theme-icon">◐</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="page-title">Edit Brochure</div>
+  <div class="intro">
+    Update brochure details. Leave Cover image and Full brochure PDF empty unless you want to replace the existing files.
+  </div>
+
+  <div class="form-card">
+    <form id="brochureForm">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="brandSelect">Brand <span class="required">*</span></label>
+          <select id="brandSelect" required><option value="">Loading brands...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="titleInput">Title <span class="required">*</span></label>
+          <input id="titleInput" type="text" required placeholder="Example: Car Audio Sensor SK-800">
+        </div>
+
+        <div class="form-field">
+          <label for="yearInput">Year <span class="required">*</span></label>
+          <input id="yearInput" type="number" min="1900" max="2100" required placeholder="1979">
+        </div>
+
+        <div class="form-field">
+          <label for="monthSelect">Month <span class="required">*</span></label>
+          <select id="monthSelect" required><option value="">Loading months...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="languageSelect">Language <span class="required">*</span></label>
+          <select id="languageSelect" required><option value="">Loading languages...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="marketSelect">Market <span class="required">*</span></label>
+          <select id="marketSelect" required><option value="">Loading markets...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="typeSelect">Type <span class="required">*</span></label>
+          <select id="typeSelect" required><option value="">Loading types...</option></select>
+        </div>
+
+        <div class="form-field">
+          <label for="pageCountInput">Page count <span class="required">*</span></label>
+          <input id="pageCountInput" type="number" min="1" required placeholder="6">
+        </div>
+
+        <div class="form-field full">
+          <label>Signed in user</label>
+          <div id="signedInText" style="width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);line-height:1.5;">
+            Loading signed-in user...
+          </div>
+        </div>
+
+        <div class="form-field full">
+          <label for="modelSeriesSelect">Model series</label>
+          <select id="modelSeriesSelect" multiple></select>
+          <div class="help-text">Optional. Hold Ctrl / Cmd to select more than one model series. The list updates after choosing a brand.</div>
+        </div>
+
+        <div class="form-field full">
+          <label for="modelNumbersInput">Model numbers</label>
+          <textarea id="modelNumbersInput" placeholder="Paste all model numbers from the brochure, e.g. AV-5 BL-5 CS-B1 CS-B3 FB-5 GE-5"></textarea>
+          <div class="help-text">Optional. Paste all model numbers at once. Space, comma, semicolon and new lines are accepted. Duplicates are removed automatically.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="coverInput">Replace cover image</label>
+          <input id="coverInput" type="file" accept="image/*">
+          <div class="help-text" id="currentCoverText">Existing cover image will be kept unless you select a new file.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="pdfInput">Replace full brochure PDF</label>
+          <input id="pdfInput" type="file" accept="application/pdf">
+          <div class="help-text" id="currentPdfText">Existing PDF will be kept unless you select a new file.</div>
+        </div>
+
+        <div class="form-field full">
+          <label for="notesInput">Notes</label>
+          <textarea id="notesInput" placeholder="Optional notes about this brochure"></textarea>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <a class="secondary-button" id="cancelButton" href="gallery.html">Cancel</a>
+        <button class="submit-button" id="submitButton" type="submit">Save changes</button>
+      </div>
+
+      <div id="statusBox" class="status-box"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://api.carstereogarage.com";
+
+const TABLES = {
+  brochures: "959905",
+  brands: "957417",
+  modelSeries: "957421",
+  users: "957380",
+  languages: "957475",
+  markets: "957422",
+  types: "957419"
+};
+
+const FIELDS = {
+  brand: "field_8379585",
+  title: "field_8379608",
+  year: "field_8379588",
+  month: "field_8379589",
+  language: "field_8379590",
+  market: "field_8379591",
+  type: "field_8379586",
+  coverImage: "field_8379592",
+  pageCount: "field_8379594",
+  submittedBy: "field_8379596",
+  owner: "field_8379595",
+  status: "field_8379597",
+  modelSeries: "field_8379587",
+  brochureFile: "field_8379593",
+  notes: "field_8379601",
+  modelNumbers: "field_9356970"
+};
+
+let allModelSeries = [];
+let currentBrochure = null;
+let currentUser = null;
+let selectedModelSeriesIds = [];
+
+function applySavedTheme(){
+  const savedTheme = localStorage.getItem("brochureTheme") || "dark";
+  const logo = document.getElementById("siteLogo");
+  if(savedTheme === "dark") document.body.classList.add("dark-mode");
+  else document.body.classList.remove("dark-mode");
+  if(logo) logo.src = "Car Stereo Garage2_3.png";
+}
+
+function toggleTheme(){
+  const isDark = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("brochureTheme", isDark ? "dark" : "light");
+  document.getElementById("siteLogo").src = "Car Stereo Garage2_3.png";
+}
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, function(char){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+  });
+}
+
+function showStatus(message, type){
+  const box = document.getElementById("statusBox");
+  box.className = "status-box " + type;
+  box.innerHTML = message;
+}
+
+function setLoading(isLoading){
+  const button = document.getElementById("submitButton");
+  if(isLoading){
+    button.textContent = "Saving...";
+    button.classList.add("disabled");
+  } else {
+    button.textContent = "Save changes";
+    button.classList.remove("disabled");
+  }
+}
+
+function getParam(name){
+  return new URLSearchParams(window.location.search).get(name) || "";
+}
+
+function getReturnUrl(){
+  const returnUrl = getParam("returnUrl");
+  return returnUrl || "gallery.html";
+}
+
+async function fetchCurrentUser(){
+  const res = await fetch(`${API_BASE}/whoami`, {credentials:"include"});
+  if(!res.ok) throw new Error("Could not load signed-in user");
+  return await res.json();
+}
+
+async function fetchAllRows(tableId){
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=false`, {credentials:"include"});
+  if(!res.ok) throw new Error("Could not load table " + tableId + ": " + await res.text());
+  const data = await res.json();
+  return data.results || [];
+}
+
+async function fetchAllRowsNamed(tableId){
+  const res = await fetch(`${API_BASE}/rows?table=${tableId}&user_field_names=true`, {credentials:"include"});
+  if(!res.ok) throw new Error("Could not load table " + tableId + ": " + await res.text());
+  const data = await res.json();
+  return data.results || [];
+}
+
+async function fetchTableFields(tableId){
+  const res = await fetch(`${API_BASE}/fields?table=${tableId}`, {credentials:"include"});
+  if(!res.ok) throw new Error("Could not load field metadata for table " + tableId);
+  return await res.json();
+}
+
+async function fetchGalleryRows(){
+  const res = await fetch(`${API_BASE}/gallery-data`, {credentials:"include"});
+  if(!res.ok) throw new Error("Could not load brochure data: " + await res.text());
+  const data = await res.json();
+  return data.results || [];
+}
+
+function fillSelect(selectId, rows, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+  rows.forEach(row => {
+    const option = document.createElement("option");
+    option.value = row.id;
+    option.textContent = row.name;
+    select.appendChild(option);
+  });
+}
+
+function fillSingleSelectOptions(selectId, options, placeholder){
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+  options.forEach(optionData => {
+    const option = document.createElement("option");
+    option.value = optionData.id;
+    option.textContent = optionData.value;
+    select.appendChild(option);
+  });
+}
+
+function linkedId(row, fieldName){
+  const values = row[fieldName] || [];
+  return values[0]?.id ? String(values[0].id) : "";
+}
+
+function singleSelectId(row, fieldName){
+  const value = row[fieldName];
+  return value?.id ? String(value.id) : (value ? String(value) : "");
+}
+
+function getModelSeriesBrandIds(row){
+  const brandLinks = row.field_8351556 || [];
+  return brandLinks.map(item => String(item.id));
+}
+
+function updateModelSeriesOptions(){
+  const brandId = document.getElementById("brandSelect").value;
+  const select = document.getElementById("modelSeriesSelect");
+  const selected = new Set(selectedModelSeriesIds.map(String));
+  select.innerHTML = "";
+
+  const relevant = allModelSeries
+    .filter(row => !brandId || getModelSeriesBrandIds(row).includes(String(brandId)))
+    .map(row => ({id: row.id, name: row.field_8384572 || ""}))
+    .filter(row => row.name)
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  relevant.forEach(row => {
+    const option = document.createElement("option");
+    option.value = row.id;
+    option.textContent = row.name;
+    option.selected = selected.has(String(row.id));
+    select.appendChild(option);
+  });
+}
+
+function getSelectedOptionText(select){
+  if(!select || select.selectedIndex < 0) return "";
+  return select.options[select.selectedIndex]?.textContent?.trim() || "";
+}
+
+function setSelectByVisibleText(selectId, wantedText){
+  const select = document.getElementById(selectId);
+  if(!select || !wantedText) return false;
+  const normalizedWantedText = String(wantedText).trim().toLowerCase();
+  for(const option of select.options){
+    if(option.textContent.trim().toLowerCase() === normalizedWantedText){
+      select.value = option.value;
+      return true;
+    }
+  }
+  return false;
+}
+
+function updateMarketFromLanguage(){
+  const languageToMarket = {
+    "Arabic":"Middle East","Chinese":"Asia","Canadian":"North America","Danish":"Europe","Dutch":"Europe",
+    "English":"North America","English EU":"Europe","English US":"North America","Finnish":"Europe","French":"Europe",
+    "German":"Europe","Greek":"Europe","Italian":"Europe","Japanese":"Asia","Korean":"Asia","Norwegian":"Europe",
+    "Polish":"Europe","Portuguese":"Europe","Russian":"Europe","Spanish":"Europe","Swedish":"Europe","Thai":"Asia"
+  };
+  const suggestedMarket = languageToMarket[getSelectedOptionText(document.getElementById("languageSelect"))];
+  if(suggestedMarket) setSelectByVisibleText("marketSelect", suggestedMarket);
+}
+
+function normalizeModelNumbers(value){
+  const seen = new Set();
+  return String(value || "")
+    .toUpperCase()
+    .split(/[\s,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .filter(item => {
+      if(seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    })
+    .join(" ");
+}
+
+async function uploadFile(file){
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE}/upload-file`, {method:"POST", credentials:"include", body:formData});
+  if(!res.ok) throw new Error("File upload failed: " + await res.text());
+  return await res.json();
+}
+
+async function updateBrochureRow(brochureId, payload){
+  const res = await fetch(`${API_BASE}/update-brochure`, {
+    method:"POST",
+    credentials:"include",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify({brochure_id:Number(brochureId), brochure:payload})
+  });
+  if(!res.ok) throw new Error("Could not update brochure row: " + await res.text());
+  return await res.json();
+}
+
+function userCanEdit(row){
+  const userId = Number(currentUser?.id);
+  const role = String(currentUser?.role || "").toLowerCase();
+  const owners = (row[FIELDS.owner] || []).map(x => Number(x.id));
+  const submittedBy = (row[FIELDS.submittedBy] || []).map(x => Number(x.id));
+  return role === "admin" || role === "administrator" || owners.includes(userId) || submittedBy.includes(userId);
+}
+
+function populateForm(row){
+  document.getElementById("brandSelect").value = linkedId(row, FIELDS.brand);
+  document.getElementById("titleInput").value = row[FIELDS.title] || "";
+  document.getElementById("yearInput").value = row[FIELDS.year] || "";
+  document.getElementById("monthSelect").value = singleSelectId(row, FIELDS.month);
+  document.getElementById("languageSelect").value = linkedId(row, FIELDS.language);
+  document.getElementById("marketSelect").value = linkedId(row, FIELDS.market);
+  document.getElementById("typeSelect").value = linkedId(row, FIELDS.type);
+  document.getElementById("pageCountInput").value = row[FIELDS.pageCount] || "";
+  document.getElementById("notesInput").value = row[FIELDS.notes] || "";
+  document.getElementById("modelNumbersInput").value = row[FIELDS.modelNumbers] || "";
+  selectedModelSeriesIds = (row[FIELDS.modelSeries] || []).map(x => String(x.id));
+  updateModelSeriesOptions();
+
+  const cover = row[FIELDS.coverImage]?.[0];
+  const pdf = row[FIELDS.brochureFile]?.[0];
+  document.getElementById("currentCoverText").textContent = cover ? "Existing cover image will be kept unless you select a new file." : "No existing cover image found.";
+  document.getElementById("currentPdfText").textContent = pdf ? "Existing PDF will be kept unless you select a new file." : "No existing PDF found.";
+}
+
+async function loadFormData(){
+  applySavedTheme();
+  const brochureId = getParam("brochure_id");
+  if(!brochureId) throw new Error("Missing brochure_id in URL.");
+
+  document.getElementById("cancelButton").href = getReturnUrl();
+
+  currentUser = await fetchCurrentUser();
+  document.getElementById("signedInText").textContent = `You are signed in as ${currentUser.name || currentUser.email || "signed-in user"}.`;
+
+  const [brands, modelSeries, languages, markets, types, fields, galleryRows] = await Promise.all([
+    fetchAllRows(TABLES.brands),
+    fetchAllRows(TABLES.modelSeries),
+    fetchAllRowsNamed(TABLES.languages),
+    fetchAllRowsNamed(TABLES.markets),
+    fetchAllRowsNamed(TABLES.types),
+    fetchTableFields(TABLES.brochures),
+    fetchGalleryRows()
+  ]);
+
+  const brandOptions = brands.map(row => ({id: row.id, name: row.field_8351135 || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name));
+  fillSelect("brandSelect", brandOptions, "Choose brand...");
+
+  allModelSeries = modelSeries;
+
+  const monthField = fields.find(field => field.id === 8379589);
+  fillSingleSelectOptions("monthSelect", monthField?.select_options || [], "Choose month...");
+
+  fillSelect("languageSelect", languages.map(row => ({id: row.id, name: row.Name || row.name || ""})).filter(row => row.name).sort((a,b) => {
+    if(a.name === "Other") return 1;
+    if(b.name === "Other") return -1;
+    return a.name.localeCompare(b.name);
+  }), "Choose language...");
+
+  fillSelect("marketSelect", markets.map(row => ({id: row.id, name: row.Name || row.name || ""})).filter(row => row.name).sort((a,b) => a.name.localeCompare(b.name)), "Choose market...");
+
+  fillSelect("typeSelect", types.map(row => ({
+    id: row.id,
+    name: row.Name || row.name || "",
+    priority: Number(row.Priority || row.priority || row.field_8522717 || 9999)
+  })).filter(row => row.name).sort((a,b) => a.priority - b.priority || a.name.localeCompare(b.name)), "Choose type...");
+
+  currentBrochure = galleryRows.find(row => Number(row.id) === Number(brochureId));
+  if(!currentBrochure) throw new Error("Brochure not found.");
+  if(!userCanEdit(currentBrochure)) throw new Error("You are not allowed to edit this brochure.");
+
+  populateForm(currentBrochure);
+
+  document.getElementById("brandSelect").addEventListener("change", function(){
+    selectedModelSeriesIds = Array.from(document.getElementById("modelSeriesSelect").selectedOptions).map(option => String(option.value));
+    updateModelSeriesOptions();
+  });
+  document.getElementById("modelSeriesSelect").addEventListener("change", function(){
+    selectedModelSeriesIds = Array.from(this.selectedOptions).map(option => String(option.value));
+  });
+  document.getElementById("languageSelect").addEventListener("change", updateMarketFromLanguage);
+}
+
+document.getElementById("brochureForm").addEventListener("submit", async function(event){
+  event.preventDefault();
+
+  const brochureId = getParam("brochure_id");
+  const brandId = document.getElementById("brandSelect").value;
+  const title = document.getElementById("titleInput").value.trim();
+  const year = document.getElementById("yearInput").value;
+  const monthOptionId = document.getElementById("monthSelect").value;
+  const languageId = document.getElementById("languageSelect").value;
+  const marketId = document.getElementById("marketSelect").value;
+  const typeId = document.getElementById("typeSelect").value;
+  const pageCount = document.getElementById("pageCountInput").value;
+  const modelSeriesIds = Array.from(document.getElementById("modelSeriesSelect").selectedOptions).map(option => Number(option.value));
+  const coverFile = document.getElementById("coverInput").files[0];
+  const pdfFile = document.getElementById("pdfInput").files[0];
+  const notes = document.getElementById("notesInput").value.trim();
+  const modelNumbers = normalizeModelNumbers(document.getElementById("modelNumbersInput").value);
+
+  try{
+    setLoading(true);
+    showStatus("Saving changes...", "success");
+
+    const payload = {};
+    payload[FIELDS.brand] = [Number(brandId)];
+    payload[FIELDS.title] = title;
+    payload[FIELDS.year] = Number(year);
+    payload[FIELDS.month] = Number(monthOptionId);
+    payload[FIELDS.language] = [Number(languageId)];
+    payload[FIELDS.market] = [Number(marketId)];
+    payload[FIELDS.type] = [Number(typeId)];
+    payload[FIELDS.pageCount] = Number(pageCount);
+    payload[FIELDS.modelSeries] = modelSeriesIds;
+    payload[FIELDS.notes] = notes;
+    payload[FIELDS.modelNumbers] = modelNumbers;
+
+    if(coverFile){
+      showStatus("Uploading new cover image...", "success");
+      payload[FIELDS.coverImage] = [await uploadFile(coverFile)];
+    }
+
+    if(pdfFile){
+      showStatus("Uploading new PDF...", "success");
+      payload[FIELDS.brochureFile] = [await uploadFile(pdfFile)];
+    }
+
+    showStatus("Updating brochure entry...", "success");
+    await updateBrochureRow(brochureId, payload);
+
+    showStatus(`Brochure updated successfully.<br><br><a href="${esc(getReturnUrl())}" style="color:var(--link);font-weight:bold;">Back to gallery</a>`, "success");
+  }catch(error){
+    console.error(error);
+    showStatus("Update failed.<br><br>" + esc(error.message), "error");
+  }finally{
+    setLoading(false);
+  }
+});
+
+loadFormData().catch(error => {
+  console.error(error);
+  showStatus("Could not load edit form.<br><br>" + esc(error.message), "error");
+});
+</script>
+
+</body>
+</html>

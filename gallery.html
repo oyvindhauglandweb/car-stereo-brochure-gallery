@@ -88,6 +88,15 @@ body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;col
   box-sizing:border-box;
 }
 
+#modelNumberInput{
+  min-width:170px;
+}
+
+#modelNumberSearchButton{
+  height:44px;
+  min-width:44px;
+}
+
 .top-buttons{
   display:flex;
   flex-direction:row;
@@ -637,6 +646,21 @@ body.dark-mode select option:checked{
     <select id="modelSeriesSelect" class="filter-select" onchange="changeModelSeries(this.value)">
       <option value="">All model series</option>
     </select>
+
+    <input id="modelNumberInput"
+           class="filter-select"
+           type="search"
+           placeholder="Model number"
+           autocomplete="off"
+           onkeydown="handleModelNumberKey(event)">
+
+    <button id="modelNumberSearchButton"
+            class="top-button"
+            type="button"
+            onclick="changeModelNumber(document.getElementById('modelNumberInput').value)"
+            title="Search model number">
+      🔍
+    </button>
   </div>
 
 <div class="top-buttons">
@@ -779,6 +803,30 @@ function esc(value){
   });
 }
 
+function normalizeModelNumber(value){
+  return String(value || "")
+    .trim()
+    .toUpperCase();
+}
+
+function modelNumberTokens(value){
+  return String(value || "")
+    .toUpperCase()
+    .split(/[\s,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function hasModelNumber(item, modelNumberFilter){
+  const wanted = normalizeModelNumber(modelNumberFilter);
+  if(!wanted) return true;
+  return modelNumberTokens(item.field_9356970).includes(wanted);
+}
+
+function formatModelNumbers(value){
+  return modelNumberTokens(value).join(" ");
+}
+
 function normalizeGuideBrand(value){
   return String(value || "").trim().toLowerCase();
 }
@@ -908,6 +956,7 @@ async function loadBrochures() {
   const params = new URLSearchParams(window.location.search);
   const ownerFilter = params.get("owner");
   const modelSeriesFilter = params.get("model_series");
+  const modelNumberFilter = params.get("model_number");
   const brandFilter = params.get("brand");
   const yearFilter = params.get("year");
   const languageFilter = params.get("language");
@@ -918,6 +967,10 @@ async function loadBrochures() {
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){
     document.getElementById("pageTitle").innerText = "Brochures in model series: " + modelSeriesFilter;
+  } else if(modelNumberFilter && brandFilter){
+    document.getElementById("pageTitle").innerText = brandFilter + " brochures with model number: " + modelNumberFilter;
+  } else if(modelNumberFilter){
+    document.getElementById("pageTitle").innerText = "Brochures with model number: " + modelNumberFilter;
   } else if(brandFilter && yearFilter){
     document.getElementById("pageTitle").innerText = brandFilter + " brochures from " + yearFilter;
   } else if(brandFilter && languageFilter){
@@ -933,6 +986,7 @@ async function loadBrochures() {
   const hasFilter =
     ownerFilter ||
     modelSeriesFilter ||
+    modelNumberFilter ||
     brandFilter ||
     yearFilter ||
     languageFilter ||
@@ -978,7 +1032,8 @@ setupFilters(allRows, {
   year: yearFilter,
   language: languageFilter,
   owner: ownerFilter,
-  model_series: modelSeriesFilter
+  model_series: modelSeriesFilter,
+  model_number: modelNumberFilter
 });
 
   const brochures = allRows
@@ -994,6 +1049,7 @@ setupFilters(allRows, {
       const series = (item.field_8384650 || []).map(x => x.value) || [];
       return series.includes(modelSeriesFilter);
     })
+    .filter(item => hasModelNumber(item, modelNumberFilter))
     .filter(item => {
       if (!brandFilter) return true;
       return (item.field_8379585 && item.field_8379585[0] && item.field_8379585[0].value) === brandFilter;
@@ -1034,6 +1090,7 @@ owners: (item.field_8379595 || []).map(x => ({
 })) || [],
       submitted_by: (item.field_8379596 || []).map(x => x.value).join(", ") || "",
       notes: item.field_8379601 || "",
+      model_numbers: formatModelNumbers(item.field_9356970),
       claim_ownership_url: (item.field_8384825 && item.field_8384825.url) || "",
       model_series_guide_url: getUrl(item.field_8460146),
 model_series_guide_present: getLookupValue(item.field_8497529),
@@ -1245,6 +1302,7 @@ ${modelSeriesLinks}
     <div class="detail-row"><span class="detail-label">Page count:</span> ${esc(b.page_count)}</div>
     <div class="detail-row"><span class="detail-label">Owner:</span> ${ownerLinks}</div>
     <div class="detail-row"><span class="detail-label">Submitted by:</span> ${submittedByLinks}</div>
+    ${b.model_numbers ? `<div class="detail-row"><span class="detail-label">Model numbers:</span> ${esc(b.model_numbers)}</div>` : ""}
     <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
   `;
 
@@ -1467,6 +1525,7 @@ function setupFilters(items, selected){
     if(filterName !== "language" && selected.language && language !== selected.language) return false;
     if(filterName !== "owner" && selected.owner && !owners.includes(selected.owner)) return false;
     if(filterName !== "model_series" && selected.model_series && !modelSeries.includes(selected.model_series)) return false;
+    if(selected.model_number && !hasModelNumber(item, selected.model_number)) return false;
 
     return true;
   }
@@ -1511,6 +1570,7 @@ function setupFilters(items, selected){
   fillSelect("languageSelect", languages, selected.language);
   fillSelect("ownerSelect", owners, selected.owner);
   fillSelect("modelSeriesSelect", modelSeries, selected.model_series);
+  document.getElementById("modelNumberInput").value = selected.model_number || "";
 }
 
 function goWithFilters(overrides){
@@ -1534,6 +1594,13 @@ function changeYear(value){ goWithFilters({year:value}); }
 function changeLanguage(value){ goWithFilters({language:value}); }
 function changeOwner(value){ goWithFilters({owner:value}); }
 function changeModelSeries(value){ goWithFilters({model_series:value}); }
+function changeModelNumber(value){ goWithFilters({model_number:normalizeModelNumber(value)}); }
+function handleModelNumberKey(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    changeModelNumber(event.target.value);
+  }
+}
   
 setupCompareButtons();
 window.addEventListener("resize", updateCompareButton);

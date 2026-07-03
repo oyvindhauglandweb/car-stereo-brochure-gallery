@@ -387,6 +387,12 @@ body.dark-mode select option:checked{
           <div class="help-text">Optional. Hold Ctrl / Cmd to select more than one model series. The list updates after choosing a brand.</div>
         </div>
 
+        <div class="form-field full">
+          <label for="modelNumbersInput">Model numbers</label>
+          <textarea id="modelNumbersInput" placeholder="Paste all model numbers from the brochure, e.g. AV-5 BL-5 CS-B1 CS-B3 FB-5 GE-5"></textarea>
+          <div class="help-text">Optional. Paste all model numbers at once. Space, comma, semicolon and new lines are accepted. Duplicates are removed automatically.</div>
+        </div>
+
         <div class="form-field">
           <label for="coverInput">Cover image <span class="required">*</span></label>
           <input id="coverInput" type="file" accept="image/*" required>
@@ -441,7 +447,8 @@ const FIELDS = {
   status: "field_8379597",
   modelSeries: "field_8379587",
   brochureFile: "field_8379593",
-  notes: "field_8379601"
+  notes: "field_8379601",
+  modelNumbers: "field_9356970"
 };
 
 let allModelSeries = [];
@@ -700,6 +707,22 @@ const res = await fetch(`${API_BASE}/upload-file`, {
   return await res.json();
 }
 
+function normalizeModelNumbers(value){
+  const seen = new Set();
+
+  return String(value || "")
+    .toUpperCase()
+    .split(/[\s,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .filter(item => {
+      if(seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    })
+    .join(" ");
+}
+
 async function createBrochureRow(payload){
 const res = await fetch(`${API_BASE}/create-brochure`, {
   method:"POST",
@@ -807,6 +830,7 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   const coverFile = document.getElementById("coverInput").files[0];
   const pdfFile = document.getElementById("pdfInput").files[0];
   const notes = document.getElementById("notesInput").value.trim();
+  const modelNumbers = normalizeModelNumbers(document.getElementById("modelNumbersInput").value);
 
   if(!statusPendingOptionId){
     showStatus("Could not find the Pending status option in Baserow.", "error");
@@ -838,6 +862,7 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
     payload[FIELDS.status] = Number(statusPendingOptionId);
     payload[FIELDS.modelSeries] = modelSeriesIds;
     payload[FIELDS.notes] = notes;
+    payload[FIELDS.modelNumbers] = modelNumbers;
     if(uploadedPdf) payload[FIELDS.brochureFile] = [uploadedPdf];
 
     showStatus("Creating brochure entry...", "success");

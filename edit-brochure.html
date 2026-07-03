@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add New Brochure - Car Stereo Brochures</title>
+<title>Edit Brochure - Car Stereo Garage</title>
 
 <style>
 :root{
@@ -139,6 +139,35 @@ input,select,textarea{
 
 select[multiple]{min-height:150px;padding:10px 14px;}
 textarea{min-height:120px;padding:12px 14px;resize:vertical;}
+
+.current-cover-wrap{
+  display:none;
+  max-width:520px;
+  margin:0 auto 22px;
+  text-align:center;
+}
+
+.current-cover-title{
+  font-weight:bold;
+  font-size:15px;
+  margin-bottom:8px;
+  color:var(--muted);
+}
+
+.current-cover-img{
+  display:block;
+  max-width:100%;
+  max-height:360px;
+  margin:0 auto;
+  border-radius:10px;
+  object-fit:contain;
+  background:rgba(0,0,0,.08);
+}
+
+body.dark-mode .current-cover-img{
+  background:rgba(255,255,255,.05);
+}
+
 input[type="file"]{padding:10px 14px;}
 .help-text{color:var(--muted);font-size:13px;line-height:1.4;}
 
@@ -326,6 +355,11 @@ body.dark-mode select option:checked{
   </div>
 
   <div class="form-card">
+
+    <div class="current-cover-wrap" id="currentCoverWrap">
+      <div class="current-cover-title">Current cover image</div>
+      <img class="current-cover-img" id="currentCoverPreview" src="" alt="Current cover image">
+    </div>
     <form id="brochureForm">
       <div class="form-grid">
         <div class="form-field">
@@ -660,6 +694,34 @@ function userCanEdit(row){
   return role === "admin" || role === "administrator" || owners.includes(userId) || submittedBy.includes(userId);
 }
 
+function baserowFileUrl(file){
+  if(!file) return "";
+  return file.url || file.thumbnails?.card_cover?.url || file.thumbnails?.small?.url || file.thumbnails?.tiny?.url || "";
+}
+
+function setCoverPreview(url){
+  const wrap = document.getElementById("currentCoverWrap");
+  const img = document.getElementById("currentCoverPreview");
+  if(!wrap || !img) return;
+
+  if(url){
+    img.src = url;
+    wrap.style.display = "block";
+  } else {
+    img.removeAttribute("src");
+    wrap.style.display = "none";
+  }
+}
+
+function previewSelectedCoverFile(){
+  const input = document.getElementById("coverInput");
+  const file = input?.files?.[0];
+  if(!file) return;
+
+  const objectUrl = URL.createObjectURL(file);
+  setCoverPreview(objectUrl);
+}
+
 function populateForm(row){
   document.getElementById("brandSelect").value = linkedId(row, FIELDS.brand);
   document.getElementById("titleInput").value = row[FIELDS.title] || "";
@@ -676,6 +738,7 @@ function populateForm(row){
 
   const cover = row[FIELDS.coverImage]?.[0];
   const pdf = row[FIELDS.brochureFile]?.[0];
+  setCoverPreview(baserowFileUrl(cover));
   document.getElementById("currentCoverText").textContent = cover ? "Existing cover image will be kept unless you select a new file." : "No existing cover image found.";
   document.getElementById("currentPdfText").textContent = pdf ? "Existing PDF will be kept unless you select a new file." : "No existing PDF found.";
 }
@@ -736,6 +799,7 @@ async function loadFormData(){
     selectedModelSeriesIds = Array.from(this.selectedOptions).map(option => String(option.value));
   });
   document.getElementById("languageSelect").addEventListener("change", updateMarketFromLanguage);
+  document.getElementById("coverInput").addEventListener("change", previewSelectedCoverFile);
 }
 
 document.getElementById("brochureForm").addEventListener("submit", async function(event){
@@ -786,7 +850,9 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
     showStatus("Updating brochure entry...", "success");
     await updateBrochureRow(brochureId, payload);
 
-    showStatus(`Brochure updated successfully.<br><br><a href="${esc(getReturnUrl())}" style="color:var(--link);font-weight:bold;">Back to gallery</a>`, "success");
+    showStatus("Brochure updated successfully. Returning to gallery...", "success");
+    window.location.href = getReturnUrl();
+    return;
   }catch(error){
     console.error(error);
     showStatus("Update failed.<br><br>" + esc(error.message), "error");

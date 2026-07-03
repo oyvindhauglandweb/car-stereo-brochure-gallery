@@ -1190,8 +1190,12 @@ function handleBrochureClick(index, card, event){
 
 function openModal(index, card){
   const b = brochureData[index];
-  
-  
+
+  const hasModelSeriesGuide =
+    activeModelSeriesGuideBrands.has(normalizeGuideBrand(b.brand)) ||
+    String(b.model_series_guide_present || "").split(",").map(v => v.trim()).includes("Present") ||
+    !!b.model_series_guide_url;
+
   const modal = document.getElementById("modal");
   modal.style.top = Math.max(0, card.offsetTop - 20) + "px";
   modal.style.display = "flex";

@@ -291,6 +291,7 @@ button:not(.submit-button):not(.remove-button):not(.admin-button):hover{
 }
 
 .lightbox-image{
+  cursor:zoom-out;
   max-width:96vw;
   max-height:88vh;
   object-fit:contain;
@@ -665,7 +666,8 @@ document.addEventListener("click", event => {
 
   if(
     event.target.id === "imageLightbox" ||
-    event.target.id === "lightboxClose"
+    event.target.id === "lightboxClose" ||
+    event.target.id === "lightboxImage"
   ){
     closeImageLightbox();
   }

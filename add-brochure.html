@@ -141,6 +141,54 @@ input,select,textarea{
 select[multiple]{min-height:150px;padding:10px 14px;}
 textarea{min-height:120px;padding:12px 14px;resize:vertical;}
 input[type="file"]{padding:10px 14px;}
+.custom-file-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+.custom-file-control{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--text);
+  box-sizing:border-box;
+}
+.custom-file-button{
+  flex:0 0 auto;
+  min-height:30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--button);
+  color:var(--text);
+  font-weight:bold;
+  cursor:pointer;
+}
+.custom-file-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+}
+.custom-file-input:focus + .custom-file-control{
+  outline:2px solid var(--link);
+  outline-offset:2px;
+}
 .help-text{color:var(--muted);font-size:13px;line-height:1.4;}
 
 .action-row{
@@ -403,6 +451,10 @@ body.dark-mode select option:checked{
   border-color:var(--link);
 }
 
+html:not([data-theme="dark"]) .model-series-modal-save{
+  color:#000;
+}
+
 .model-series-modal-action:hover{filter:brightness(1.08);}
 
 .model-series-image-grid{
@@ -586,12 +638,20 @@ body.dark-mode select option:checked{
 
         <div class="form-field">
           <label for="coverInput">Cover image <span class="required">*</span></label>
-          <input id="coverInput" type="file" accept="image/*" required>
+          <input class="custom-file-input" id="coverInput" type="file" accept="image/*" required>
+          <div class="custom-file-control">
+            <label class="custom-file-button" for="coverInput">Choose file</label>
+            <span class="custom-file-name" id="coverFileName">No file selected</span>
+          </div>
         </div>
 
         <div class="form-field">
           <label for="pdfInput">Full brochure PDF</label>
-          <input id="pdfInput" type="file" accept="application/pdf">
+          <input class="custom-file-input" id="pdfInput" type="file" accept="application/pdf">
+          <div class="custom-file-control">
+            <label class="custom-file-button" for="pdfInput">Choose file</label>
+            <span class="custom-file-name" id="pdfFileName">No file selected</span>
+          </div>
         </div>
 
         <div class="form-field full">
@@ -1263,6 +1323,8 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
 
     showStatus(`Brochure submitted successfully. It is now listed as Pending.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`, "success");
     document.getElementById("brochureForm").reset();
+    updateCustomFileName("coverInput", "coverFileName");
+    updateCustomFileName("pdfInput", "pdfFileName");
     updateModelSeriesOptions();
   } catch(error){
     console.error(error);
@@ -1270,6 +1332,22 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   } finally{
     setLoading(false);
   }
+});
+
+
+function updateCustomFileName(inputId, outputId){
+  const input = document.getElementById(inputId);
+  const output = document.getElementById(outputId);
+  const file = input?.files?.[0];
+  if(output) output.textContent = file ? file.name : "No file selected";
+}
+
+document.getElementById("coverInput").addEventListener("change", () => {
+  updateCustomFileName("coverInput", "coverFileName");
+});
+
+document.getElementById("pdfInput").addEventListener("change", () => {
+  updateCustomFileName("pdfInput", "pdfFileName");
 });
 
 loadFormData().catch(error => {

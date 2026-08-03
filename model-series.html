@@ -586,10 +586,16 @@ const allRows = data.results || [];
     savedTheme === "dark" && item.logo_dark
       ? item.logo_dark
       : item.logo;
-const exampleToUse =
-  savedTheme === "dark" && item.example_dark
-    ? item.example_dark
-    : item.example;
+
+  const exampleToUse =
+    savedTheme === "dark" && item.example_dark
+      ? item.example_dark
+      : item.example;
+
+  // Enlarged images use the dark variant whenever one exists.
+  // This also gives light mode a better-looking image on the dark lightbox background.
+  const logoFullSize = item.logo_dark || logoToUse;
+  const exampleFullSize = item.example_dark || exampleToUse;
    
   guideList.innerHTML += `
     <div class="guide-card">
@@ -616,7 +622,7 @@ const exampleToUse =
           logoToUse
             ? `<img class="logo-image zoomable-image"
                     src="${esc(logoToUse)}"
-                    data-full-src="${esc(logoToUse)}"
+                    data-full-src="${esc(logoFullSize)}"
                     loading="lazy"
                     alt="${esc(item.name)} logo">`
             : `<div></div>`
@@ -626,7 +632,7 @@ const exampleToUse =
           exampleToUse
           ? `<img class="example-image zoomable-image"
           src="${esc(exampleToUse)}"
-          data-full-src="${esc(exampleToUse)}"
+          data-full-src="${esc(exampleFullSize)}"
           loading="lazy"
           alt="${esc(item.name)} example">`
           : `<div></div>`

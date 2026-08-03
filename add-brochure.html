@@ -1,5 +1,6 @@
 
 <!DOCTYPE html>
+<!-- V20260803-1803 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -374,6 +375,36 @@ body.dark-mode select option:checked{
 
 .model-series-modal-close:hover{background:var(--button-hover);}
 
+.model-series-modal-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-left:auto;
+}
+
+.model-series-modal-action{
+  min-height:40px;
+  padding:0 18px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.model-series-modal-cancel{
+  background:var(--button);
+  color:var(--text);
+}
+
+.model-series-modal-save{
+  background:var(--link);
+  color:#fff;
+  border-color:var(--link);
+}
+
+.model-series-modal-action:hover{filter:brightness(1.08);}
+
 .model-series-image-grid{
   overflow:auto;
   padding:20px;
@@ -397,7 +428,7 @@ body.dark-mode select option:checked{
 .model-series-image-choice:hover{border-color:var(--muted);}
 .model-series-image-choice.selected{
   border-color:var(--link);
-  box-shadow:0 0 0 2px color-mix(in srgb, var(--link) 25%, transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--link) 40%, transparent);
 }
 
 .model-series-thumbnail{
@@ -574,7 +605,11 @@ body.dark-mode select option:checked{
   <div class="model-series-modal-content" role="dialog" aria-modal="true" aria-labelledby="modelSeriesImageModalTitle">
     <div class="model-series-modal-header">
       <div class="model-series-modal-title" id="modelSeriesImageModalTitle">Choose model series by image</div>
-      <button type="button" class="model-series-modal-close" id="modelSeriesImageModalClose" aria-label="Close">×</button>
+      <div class="model-series-modal-actions">
+        <button type="button" class="model-series-modal-action model-series-modal-cancel" id="modelSeriesImageModalCancel">Cancel</button>
+        <button type="button" class="model-series-modal-action model-series-modal-save" id="modelSeriesImageModalSave">Save</button>
+        <button type="button" class="model-series-modal-close" id="modelSeriesImageModalClose" aria-label="Close">×</button>
+      </div>
     </div>
     <div class="model-series-image-grid" id="modelSeriesImageGrid"></div>
   </div>
@@ -616,6 +651,7 @@ let allModelSeries = [];
 let allModelSeriesGuides = [];
 let statusPendingOptionId = null;
 let signedInUserName = "";
+let pendingModelSeriesIds = new Set();
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -834,7 +870,7 @@ function renderModelSeriesImageChoices(){
   const relevant = getRelevantModelSeries();
   const guides = guideByModelSeriesId();
   const isDark = document.body.classList.contains("dark-mode");
-  const selectedIds = new Set(Array.from(select.selectedOptions).map(option => String(option.value)));
+  const selectedIds = pendingModelSeriesIds;
 
   grid.innerHTML = "";
 
@@ -845,8 +881,8 @@ function renderModelSeriesImageChoices(){
 
   relevant.forEach(series => {
     const guide = guides.get(series.id);
-    const lightImage = getFileUrl(guide?.field_8503005);
-    const darkImage = getFileUrl(guide?.field_8509524);
+    const lightImage = getFileUrl(guide?.["Example image"]);
+    const darkImage = getFileUrl(guide?.["Example image Dark"]);
     const imageUrl = isDark ? (darkImage || lightImage) : (lightImage || darkImage);
 
     const button = document.createElement("button");
@@ -877,11 +913,15 @@ function renderModelSeriesImageChoices(){
 
     button.append(thumbnail, name);
     button.addEventListener("click", () => {
-      const option = Array.from(select.options).find(item => String(item.value) === series.id);
-      if(!option) return;
-      option.selected = !option.selected;
-      button.classList.toggle("selected", option.selected);
-      button.setAttribute("aria-pressed", option.selected ? "true" : "false");
+      if(pendingModelSeriesIds.has(series.id)){
+        pendingModelSeriesIds.delete(series.id);
+      } else {
+        pendingModelSeriesIds.add(series.id);
+      }
+
+      const isSelected = pendingModelSeriesIds.has(series.id);
+      button.classList.toggle("selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
 
     grid.appendChild(button);
@@ -889,6 +929,11 @@ function renderModelSeriesImageChoices(){
 }
 
 function openModelSeriesImageModal(){
+  const select = document.getElementById("modelSeriesSelect");
+  pendingModelSeriesIds = new Set(
+    Array.from(select.selectedOptions).map(option => String(option.value))
+  );
+
   renderModelSeriesImageChoices();
   const modal = document.getElementById("modelSeriesImageModal");
   modal.classList.add("open");
@@ -896,12 +941,28 @@ function openModelSeriesImageModal(){
   document.body.style.overflow = "hidden";
 }
 
-function closeModelSeriesImageModal(){
+function hideModelSeriesImageModal(){
   const modal = document.getElementById("modelSeriesImageModal");
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
   document.getElementById("modelSeriesSelect").focus();
+}
+
+function cancelModelSeriesImageModal(){
+  pendingModelSeriesIds = new Set();
+  hideModelSeriesImageModal();
+}
+
+function saveModelSeriesImageModal(){
+  const select = document.getElementById("modelSeriesSelect");
+
+  Array.from(select.options).forEach(option => {
+    option.selected = pendingModelSeriesIds.has(String(option.value));
+  });
+
+  pendingModelSeriesIds = new Set();
+  hideModelSeriesImageModal();
 }
 
 function getSelectedOptionText(select){
@@ -1105,13 +1166,15 @@ fillSelect(
   document.getElementById("brandSelect").addEventListener("change", updateModelSeriesOptions);
   document.getElementById("languageSelect").addEventListener("change", updateMarketFromLanguage);
   document.getElementById("chooseByImageButton").addEventListener("click", openModelSeriesImageModal);
-  document.getElementById("modelSeriesImageModalClose").addEventListener("click", closeModelSeriesImageModal);
+  document.getElementById("modelSeriesImageModalClose").addEventListener("click", cancelModelSeriesImageModal);
+  document.getElementById("modelSeriesImageModalCancel").addEventListener("click", cancelModelSeriesImageModal);
+  document.getElementById("modelSeriesImageModalSave").addEventListener("click", saveModelSeriesImageModal);
   document.getElementById("modelSeriesImageModal").addEventListener("click", event => {
-    if(event.target.id === "modelSeriesImageModal") closeModelSeriesImageModal();
+    if(event.target.id === "modelSeriesImageModal") cancelModelSeriesImageModal();
   });
   document.addEventListener("keydown", event => {
     if(event.key === "Escape" && document.getElementById("modelSeriesImageModal").classList.contains("open")){
-      closeModelSeriesImageModal();
+      cancelModelSeriesImageModal();
     }
   });
 }

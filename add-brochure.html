@@ -428,7 +428,13 @@ body.dark-mode select option:checked{
 .model-series-image-choice:hover{border-color:var(--muted);}
 .model-series-image-choice.selected{
   border-color:var(--link);
-  box-shadow:0 0 0 3px color-mix(in srgb, var(--link) 40%, transparent);
+  outline:3px solid var(--link);
+  outline-offset:-3px;
+  box-shadow:0 0 0 2px var(--card), 0 0 0 5px var(--link);
+}
+
+.model-series-image-choice.selected .model-series-thumbnail{
+  border:3px solid var(--link);
 }
 
 .model-series-thumbnail{
@@ -834,7 +840,10 @@ function getFileUrl(value){
   if(!value) return "";
   const first = Array.isArray(value) ? value[0] : value;
   if(!first || typeof first !== "object") return "";
-  return first.thumbnails?.small?.url || first.thumbnails?.card_cover?.url || first.url || "";
+
+  // Use the original file first. Baserow's generated thumbnails can be cropped,
+  // which prevents the complete example image from being shown.
+  return first.url || first.thumbnails?.large?.url || first.thumbnails?.small?.url || first.thumbnails?.card_cover?.url || "";
 }
 
 function getRelevantModelSeries(){

@@ -596,6 +596,15 @@ function getModelSeriesBrandIds(row){
   return brandLinks.map(item => String(item.id));
 }
 
+function numberOrInfinity(value){
+  if(value === null || value === undefined || value === ""){
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const number = Number(value);
+  return Number.isFinite(number) ? number : Number.POSITIVE_INFINITY;
+}
+
 function updateModelSeriesOptions(){
   const brandId = document.getElementById("brandSelect").value;
   const select = document.getElementById("modelSeriesSelect");
@@ -606,9 +615,18 @@ function updateModelSeriesOptions(){
       if(!brandId) return true;
       return getModelSeriesBrandIds(row).includes(String(brandId));
     })
-    .map(row => ({id: row.id, name: row.field_8384572 || ""}))
+    .map(row => ({
+      id: row.id,
+      name: row.field_8384572 || "",
+      priority: numberOrInfinity(row.field_9900966),
+      yearFrom: numberOrInfinity(row.field_9900818)
+    }))
     .filter(row => row.name)
-    .sort((a,b) => a.name.localeCompare(b.name));
+    .sort((a,b) => {
+      if(a.priority !== b.priority) return a.priority - b.priority;
+      if(a.yearFrom !== b.yearFrom) return a.yearFrom - b.yearFrom;
+      return a.name.localeCompare(b.name);
+    });
 
   relevant.forEach(row => {
     const option = document.createElement("option");

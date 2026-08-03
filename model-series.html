@@ -557,6 +557,9 @@ const allRows = data.results || [];
       example_dark: getFileUrl(item.field_8509816),
       description: item.field_8503087 || "",
       year_from: item.field_9900818 ?? "",
+      priority: Number.isFinite(Number(item.field_9900966)) && String(item.field_9900966 ?? "").trim() !== ""
+        ? Number(item.field_9900966)
+        : Number.POSITIVE_INFINITY,
       active:
         item.field_8501354?.value ||
         item.field_8501354 ||
@@ -568,7 +571,19 @@ const allRows = data.results || [];
       if(!brandFilter) return true;
       return item.brand === brandFilter;
     })
-    .sort((a,b) => a.sort_order - b.sort_order);
+    .sort((a,b) => {
+      if(a.priority !== b.priority) return a.priority - b.priority;
+
+      const aYear = String(a.year_from ?? "").trim() === ""
+        ? Number.POSITIVE_INFINITY
+        : Number(a.year_from);
+      const bYear = String(b.year_from ?? "").trim() === ""
+        ? Number.POSITIVE_INFINITY
+        : Number(b.year_from);
+
+      if(aYear !== bYear) return aYear - bYear;
+      return a.name.localeCompare(b.name);
+    });
 
   guideList.innerHTML = "";
 

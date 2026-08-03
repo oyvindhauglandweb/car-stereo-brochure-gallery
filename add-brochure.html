@@ -433,9 +433,6 @@ body.dark-mode select option:checked{
   box-shadow:0 0 0 2px var(--card), 0 0 0 5px var(--link);
 }
 
-.model-series-image-choice.selected .model-series-thumbnail{
-  border:3px solid var(--link);
-}
 
 .model-series-thumbnail{
   width:100%;
@@ -468,6 +465,13 @@ body.dark-mode select option:checked{
   font-weight:bold;
   line-height:1.25;
   overflow-wrap:anywhere;
+}
+
+.model-series-choice-years{
+  margin-top:4px;
+  font-size:13px;
+  line-height:1.2;
+  color:var(--muted);
 }
 
 .model-series-modal-empty{
@@ -854,7 +858,8 @@ function getRelevantModelSeries(){
       id: String(row.id),
       name: row.field_8384572 || "",
       priority: numberOrInfinity(row.field_9900966),
-      yearFrom: numberOrInfinity(row.field_9900818)
+      yearFrom: numberOrInfinity(row.field_9900818),
+      yearUntil: numberOrInfinity(row.field_9900821)
     }))
     .filter(row => row.name)
     .sort((a,b) => {
@@ -920,7 +925,22 @@ function renderModelSeriesImageChoices(){
     name.className = "model-series-choice-name";
     name.textContent = series.name;
 
+    const years = document.createElement("div");
+    years.className = "model-series-choice-years";
+
+    const hasYearFrom = Number.isFinite(series.yearFrom);
+    const hasYearUntil = Number.isFinite(series.yearUntil);
+
+    if(hasYearFrom){
+      years.textContent = hasYearUntil
+        ? `${series.yearFrom}-${series.yearUntil}`
+        : String(series.yearFrom);
+    }
+
     button.append(thumbnail, name);
+    if(hasYearFrom){
+      button.appendChild(years);
+    }
     button.addEventListener("click", () => {
       if(pendingModelSeriesIds.has(series.id)){
         pendingModelSeriesIds.delete(series.id);

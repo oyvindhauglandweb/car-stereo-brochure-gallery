@@ -126,11 +126,22 @@ body{
   margin-bottom:8px;
 }
 
+.guide-introduced{
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.5;
+  margin-bottom:20px;
+}
+
 .guide-description{
   color:var(--muted);
   font-size:16px;
   line-height:1.5;
   margin-bottom:20px;
+}
+
+.guide-introduced + .guide-description{
+  margin-top:-12px;
 }
 
 .image-row{
@@ -495,6 +506,50 @@ function getLinkedValue(value){
   return value;
 }
 
+function getYearFrom(item){
+  const directValue =
+    item["Year from"] ??
+    item.year_from ??
+    item.yearFrom;
+
+  if(directValue !== undefined && directValue !== null && directValue !== ""){
+    const directYear = Number(directValue?.value ?? directValue);
+    if(Number.isInteger(directYear) && directYear >= 1900 && directYear <= 2100){
+      return directYear;
+    }
+  }
+
+  /*
+    The API normally returns Baserow field IDs instead of field names.
+    "Year from" is the first newly added four-digit year field in the row,
+    so use the first plausible year value not already mapped above.
+  */
+  const knownFields = new Set([
+    "field_8501352",
+    "field_8501353",
+    "field_8503005",
+    "field_8509524",
+    "field_8503078",
+    "field_8509816",
+    "field_8503087",
+    "field_8501354",
+    "field_8503101"
+  ]);
+
+  for(const [key, rawValue] of Object.entries(item)){
+    if(knownFields.has(key)) continue;
+
+    const value = rawValue?.value ?? rawValue;
+    const year = Number(value);
+
+    if(Number.isInteger(year) && year >= 1900 && year <= 2100){
+      return year;
+    }
+  }
+
+  return "";
+}
+
 function getFileUrl(value){
   if (!value) return "";
 
@@ -550,6 +605,7 @@ const allRows = data.results || [];
       example: getFileUrl(item.field_8503078),
       example_dark: getFileUrl(item.field_8509816),
       description: item.field_8503087 || "",
+      year_from: getYearFrom(item),
       active:
         item.field_8501354?.value ||
         item.field_8501354 ||
@@ -590,6 +646,12 @@ const exampleToUse =
       <div class="guide-title">
         ${esc(item.name)}
       </div>
+
+      ${
+        item.year_from
+          ? `<div class="guide-introduced">Introduced in ${esc(item.year_from)}</div>`
+          : ``
+      }
 
       ${
         item.description

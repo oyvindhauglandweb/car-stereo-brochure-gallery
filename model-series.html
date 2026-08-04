@@ -594,16 +594,15 @@ const allRows = data.results || [];
 
  guides.forEach(item => {
 
-  const savedTheme =
-    localStorage.getItem("brochureTheme") || "light";
+  const isDarkMode = document.body.classList.contains("dark-mode");
 
   const logoToUse =
-    savedTheme === "dark" && item.logo_dark
+    isDarkMode && item.logo_dark
       ? item.logo_dark
       : item.logo;
 
   const exampleToUse =
-    savedTheme === "dark" && item.example_dark
+    isDarkMode && item.example_dark
       ? item.example_dark
       : item.example;
 

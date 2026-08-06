@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- V20260806-1903 -->
+<!-- V20260806-2325 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -755,7 +755,7 @@ byId("componentForm").addEventListener("submit", async event => {
 
     const result = await api("/create-collection-item", {
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+      headers:{ "Content-Type":"text/plain;charset=UTF-8" },
       body:JSON.stringify(payload)
     });
 

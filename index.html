@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- V20260806-1903 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -90,10 +91,26 @@ body.dark-mode .tribute-button{
   width:100%;
 }
 
+[hidden]{
+  display:none !important;
+}
+
 .button-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:12px;
+}
+
+#addBrochureButton{grid-column:1;}
+#addComponentButton{grid-column:2;}
+
+@media(max-width:800px){
+  .button-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #addBrochureButton,#addComponentButton{grid-column:auto;}
+}
+
+@media(max-width:520px){
+  .button-grid{grid-template-columns:1fr;}
 }
 
 .portal-button{
@@ -556,14 +573,14 @@ body.dark-mode select option:checked{
 <a class="portal-button"
    id="addBrochureButton"
    href="add-brochure.html"
-   style="display:none;">
+   hidden>
    Add New Brochure
 </a>
 
 <a class="portal-button"
    id="addComponentButton"
    href="add-component.html"
-   style="display:none;">
+   hidden>
    Add New Component
 </a>
 
@@ -756,8 +773,10 @@ function getInitials(nameOrEmail){
   
 async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
-  const addButton = document.getElementById("addBrochureButton");
-  const addComponentButton = document.getElementById("addComponentButton");
+  const memberActionButtons = [
+    document.getElementById("addBrochureButton"),
+    document.getElementById("addComponentButton")
+  ].filter(Boolean);
   const loginStatus = document.getElementById("loginStatus");
   const loginMenu = document.getElementById("loginMenu");
   const loginMenuName = document.getElementById("loginMenuName");
@@ -783,13 +802,9 @@ if(currentUser){
   const displayName =
     currentUser.name || currentUser.email || "Signed in";
 
-    if(addButton){
-      addButton.style.display = "flex";
-    }
-
-    if(addComponentButton){
-      addComponentButton.style.display = "flex";
-    }
+    memberActionButtons.forEach(button => {
+      button.hidden = false;
+    });
 
     loginStatus.textContent = getInitials(displayName);
 
@@ -826,9 +841,9 @@ if(loginMenuName){
 }else{
   loggedInUserRole = "";
 
-  if(addButton){
-    addButton.style.display = "none";
-  }
+  memberActionButtons.forEach(button => {
+    button.hidden = true;
+  });
 
     loginStatus.textContent = "Sign in";
 

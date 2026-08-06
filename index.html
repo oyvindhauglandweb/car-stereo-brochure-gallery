@@ -561,6 +561,13 @@ body.dark-mode select option:checked{
 </a>
 
 <a class="portal-button"
+   id="addComponentButton"
+   href="add-component.html"
+   style="display:none;">
+   Add New Component
+</a>
+
+<a class="portal-button"
    href="request-access.html">
    Request Access
 </a>
@@ -750,6 +757,7 @@ function getInitials(nameOrEmail){
 async function applyLoginVisibility(){
   const currentUser = await fetchCurrentUser();
   const addButton = document.getElementById("addBrochureButton");
+  const addComponentButton = document.getElementById("addComponentButton");
   const loginStatus = document.getElementById("loginStatus");
   const loginMenu = document.getElementById("loginMenu");
   const loginMenuName = document.getElementById("loginMenuName");
@@ -777,6 +785,10 @@ if(currentUser){
 
     if(addButton){
       addButton.style.display = "flex";
+    }
+
+    if(addComponentButton){
+      addComponentButton.style.display = "flex";
     }
 
     loginStatus.textContent = getInitials(displayName);

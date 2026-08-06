@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!-- V20260806-0001 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add New Component - Car Stereo Garage</title>
+<style>
+:root{
+  --bg:#f2f2f2;--card:#ffffff;--text:#333333;--muted:#777777;--border:#cccccc;
+  --soft:#eaeaea;--link:#1f789d;--button:#ffffff;--button-hover:#e9eef2;
+  --soft-surface:rgba(0,0,0,.035);--soft-control:rgba(0,0,0,.055);--soft-control-hover:rgba(0,0,0,.085);
+}
+body.dark-mode{
+  --bg:#151515;--card:#242424;--text:#eeeeee;--muted:#bbbbbb;--border:#555555;
+  --soft:#333333;--link:#7cc7e8;--button:#242424;--button-hover:#3a3a3a;
+  --soft-surface:rgba(255,255,255,.035);--soft-control:rgba(255,255,255,.055);--soft-control-hover:rgba(255,255,255,.085);
+}
+body{margin:0;padding:20px;background:var(--bg);font-family:Arial,sans-serif;color:var(--text)}
+.container{max-width:1000px;margin:auto}.header{text-align:center;margin-bottom:34px}.logo{height:48px;width:auto}
+.top-buttons{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.top-button{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;padding:0;background:var(--soft-control);color:var(--text);text-decoration:none;border:0;border-radius:8px;font-size:26px;font-weight:900;line-height:44px;box-sizing:border-box;cursor:pointer}
+.top-button:hover{background:var(--soft-control-hover)}.icon-back{position:relative;top:-1px;font-size:28px}.icon-home{position:relative;top:-2px;font-size:30px}.theme-icon{font-size:22px;font-weight:700}
+.page-title{text-align:center;margin-bottom:10px;font-size:28px;font-weight:bold}.intro{text-align:center;color:var(--muted);line-height:1.5;margin:0 auto 32px;max-width:760px}
+.form-card{background:var(--soft-surface);border:0;border-radius:14px;padding:24px;box-sizing:border-box}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:18px}.form-field{display:flex;flex-direction:column;gap:7px}.form-field.full{grid-column:1/-1}
+label{font-weight:bold;font-size:15px}.required{color:#c94}
+input,select,textarea{width:100%;min-height:44px;padding:0 14px;border-radius:8px;border:0;background:var(--soft-control);color:var(--text);font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--link);outline-offset:1px}select:disabled,input:disabled{opacity:.55;cursor:not-allowed}
+textarea{min-height:120px;padding:12px 14px;resize:vertical}body.dark-mode select,body.dark-mode option{background:#2f2f2f;color:#eee}
+.section-title{grid-column:1/-1;margin:8px 0 -2px;font-size:19px;font-weight:bold;padding-top:8px;border-top:1px solid var(--border)}
+.signed-in-box,.model-preview,.value-box{width:100%;box-sizing:border-box;padding:14px 16px;border-radius:8px;background:var(--soft-control);color:var(--text);line-height:1.5}
+.model-preview{display:none;grid-template-columns:150px 1fr;gap:18px;align-items:center}.model-preview.visible{display:grid}.model-preview img{width:150px;max-height:110px;object-fit:contain;border-radius:8px;background:var(--card)}
+.model-preview-title{font-size:20px;font-weight:bold;margin-bottom:6px}.model-preview-meta{color:var(--muted);line-height:1.5}.help-text{color:var(--muted);font-size:13px;line-height:1.4}
+.custom-file-input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.custom-file-control{min-height:44px;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:8px;background:var(--soft-control);box-sizing:border-box}.custom-file-button{flex:0 0 auto;min-height:30px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border-radius:6px;background:var(--soft-control-hover);color:var(--text);font-weight:bold;cursor:pointer}.custom-file-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.action-row{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:24px;flex-wrap:wrap}.submit-button,.secondary-button{display:flex;align-items:center;justify-content:center;min-width:160px;height:44px;padding:0 18px;border:0;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;cursor:pointer;box-sizing:border-box}.secondary-button{background:var(--soft-control);color:var(--text)}.secondary-button:hover{background:var(--soft-control-hover)}.submit-button{background:#1f789d;color:#fff}.submit-button:hover{background:#17627f}.status-box{display:none;margin-top:20px;padding:14px 16px;border-radius:8px;background:var(--soft-surface);line-height:1.5}.status-box.success{display:block}.status-box.error{display:block;border-left:4px solid #b85c5c}.disabled{opacity:.55;pointer-events:none}
+.model-not-found{align-self:flex-start;border:0;background:transparent;color:var(--link);font-weight:bold;padding:4px 0;cursor:pointer;text-decoration:underline}
+@media(max-width:800px){body{padding:14px}.form-card{padding:18px}.form-grid{grid-template-columns:1fr}.page-title{font-size:24px}.action-row{justify-content:stretch}.submit-button,.secondary-button{width:100%}.model-preview{grid-template-columns:1fr}.model-preview img{width:100%;height:160px;max-height:160px}}
+</style>
+<script data-goatcounter="https://oyvindhaugland.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Garage">
+    <div class="top-buttons">
+      <a class="top-button" href="index.html" title="Back"><span class="icon-back">←</span></a>
+      <a class="top-button" href="index.html" title="Home"><span class="icon-home">⌂</span></a>
+      <button type="button" class="top-button" onclick="toggleTheme()" id="themeToggle" title="Toggle light/dark mode"><span class="theme-icon">◐</span></button>
+    </div>
+  </div>
+  <div class="page-title">Add New Component</div>
+  <div class="intro">Add a component to your collection. Select the correct brand, country and model, then enter details about your physical item.</div>
+  <div class="form-card">
+    <form id="componentForm">
+      <div class="form-grid">
+        <div class="section-title">Choose model</div>
+        <div class="form-field"><label for="brandSelect">Brand <span class="required">*</span></label><select id="brandSelect" required><option value="">Loading brands...</option></select></div>
+        <div class="form-field"><label for="countrySelect">Country <span class="required">*</span></label><select id="countrySelect" required disabled><option value="">Choose brand first...</option></select></div>
+        <div class="form-field full"><label for="modelSelect">Model <span class="required">*</span></label><select id="modelSelect" required disabled><option value="">Choose brand and country first...</option></select><button type="button" class="model-not-found" id="modelNotFoundButton">Model not found</button></div>
+        <div class="form-field full"><div class="model-preview" id="modelPreview"><img id="modelPreviewImage" alt="Selected model"><div><div class="model-preview-title" id="modelPreviewTitle"></div><div class="model-preview-meta" id="modelPreviewMeta"></div></div></div></div>
+        <div class="form-field full"><label>Signed in user</label><div class="signed-in-box" id="signedInText">Loading signed-in user...</div></div>
+
+        <div class="section-title">Condition and value</div>
+        <div class="form-field"><label for="conditionSelect">Condition <span class="required">*</span></label><select id="conditionSelect" required><option value="">Choose condition...</option><option>100%</option><option>80%</option><option>60%</option><option>40%</option><option>20%</option></select></div>
+        <div class="form-field"><label for="serialNumberInput">Serial Number</label><input id="serialNumberInput" type="text" placeholder="Optional"></div>
+        <div class="form-field full"><label>Calculated Value</label><div class="value-box" id="calculatedValueBox">Choose a model and condition to calculate the value.</div></div>
+        <div class="form-field full"><label for="conditionNotesInput">Condition Notes</label><textarea id="conditionNotesInput" placeholder="Wear, missing parts, defects, repairs or restoration"></textarea></div>
+
+        <div class="section-title">Ownership</div>
+        <div class="form-field"><label for="visibilitySelect">Ownership Visibility <span class="required">*</span></label><select id="visibilitySelect" required><option value="Private">Private</option><option value="Members" selected>Members</option><option value="Public">Public</option></select></div>
+
+        <div class="section-title">Sale</div>
+        <div class="form-field"><label for="saleStatusSelect">Sale Status <span class="required">*</span></label><select id="saleStatusSelect" required><option>Not for Sale</option><option>For Sale</option><option>Reserved</option><option>Sold</option></select></div>
+        <div class="form-field"><label for="askingPriceInput">Asking Price</label><input id="askingPriceInput" type="number" min="0" step="1" disabled></div>
+        <div class="form-field"><label for="askingCurrencySelect">Asking Price Currency</label><select id="askingCurrencySelect" disabled><option value="">Choose currency...</option><option>EUR</option><option>USD</option><option>JPY</option><option>GBP</option><option>SEK</option><option>NOK</option><option>DKK</option><option>AUD</option></select></div>
+        <div class="form-field full"><label for="saleNotesInput">Sale Notes</label><textarea id="saleNotesInput" disabled placeholder="Shipping, included accessories and sale terms"></textarea></div>
+
+        <div class="section-title">Purchase information</div>
+        <div class="form-field"><label for="purchaseDateInput">Purchase Date</label><input id="purchaseDateInput" type="date"></div>
+        <div class="form-field"><label for="purchasePriceInput">Purchase Price</label><input id="purchasePriceInput" type="number" min="0" step="1"></div>
+        <div class="form-field"><label for="purchaseCurrencySelect">Purchase Currency</label><select id="purchaseCurrencySelect"><option value="">Choose currency...</option><option>EUR</option><option>USD</option><option>JPY</option><option>GBP</option><option>SEK</option><option>NOK</option><option>DKK</option><option>AUD</option></select></div>
+
+        <div class="section-title">Images and notes</div>
+        <div class="form-field full"><label for="imagesInput">Images</label><input class="custom-file-input" id="imagesInput" type="file" accept="image/*" multiple><div class="custom-file-control"><label class="custom-file-button" for="imagesInput">Choose files</label><span class="custom-file-name" id="imagesFileName">No files selected</span></div><div class="help-text">Upload photos of your actual component, not the catalog image.</div></div>
+        <div class="form-field full"><label for="notesInput">Notes</label><textarea id="notesInput" placeholder="Ownership history and other information"></textarea></div>
+      </div>
+      <div class="action-row"><a class="secondary-button" href="index.html">Cancel</a><button class="submit-button" id="submitButton" type="submit">Add Component</button></div>
+      <div id="statusBox" class="status-box"></div>
+    </form>
+  </div>
+</div>
+<script>
+const API_BASE="https://api.carstereogarage.com";
+let currentUser=null, modelRows=[], selectedModel=null;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function applySavedTheme(){const saved=localStorage.getItem("theme");const dark=saved? saved==="dark" : window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;document.body.classList.toggle("dark-mode",dark)}
+function toggleTheme(){const dark=document.body.classList.toggle("dark-mode");localStorage.setItem("theme",dark?"dark":"light")}
+function showStatus(message,type){const box=document.getElementById("statusBox");box.className=`status-box ${type}`;box.innerHTML=message}
+function setLoading(loading){document.getElementById("submitButton").disabled=loading;document.getElementById("componentForm").classList.toggle("disabled",loading)}
+async function api(path,options={}){const res=await fetch(`${API_BASE}${path}`,{credentials:"include",cache:"no-store",...options});if(!res.ok)throw new Error((await res.text())||`Request failed (${res.status})`);return res.json()}
+function fillSelect(select,items,placeholder){select.innerHTML=`<option value="">${placeholder}</option>`;items.forEach(item=>{const o=document.createElement("option");o.value=item.value;o.textContent=item.label;select.appendChild(o)})}
+async function loadInitialData(){applySavedTheme();currentUser=await api("/whoami");document.getElementById("signedInText").textContent=`You are signed in as ${currentUser.name||currentUser.email||"signed-in user"}. This component will be added to your collection.`;const data=await api("/collection-model-options");const brands=(data.brands||[]).map(x=>({value:x.code||x.id||x.name,label:x.name}));fillSelect(document.getElementById("brandSelect"),brands,"Choose brand...");window.collectionModelData=data}
+function onBrandChange(){const brand=document.getElementById("brandSelect").value;selectedModel=null;renderPreview();const countries=(window.collectionModelData.countries||[]).filter(x=>!x.brandCode||x.brandCode===brand).map(x=>({value:x.id,label:x.name}));const s=document.getElementById("countrySelect");fillSelect(s,countries,"Choose country...");s.disabled=!brand;const m=document.getElementById("modelSelect");fillSelect(m,[],"Choose brand and country first...");m.disabled=true}
+async function onCountryChange(){const brand=document.getElementById("brandSelect").value,countryId=document.getElementById("countrySelect").value;const s=document.getElementById("modelSelect");selectedModel=null;renderPreview();if(!brand||!countryId){s.disabled=true;return}fillSelect(s,[],"Loading models...");s.disabled=true;const data=await api(`/collection-models?brand=${encodeURIComponent(brand)}&country_id=${encodeURIComponent(countryId)}`);modelRows=data.results||[];fillSelect(s,modelRows.map((m,i)=>({value:String(i),label:[m.model,m.country,m.yearFrom&&m.yearUntil?`${m.yearFrom}–${m.yearUntil}`:(m.yearFrom||m.yearUntil||"")].filter(Boolean).join(" — ")})),"Choose model...");s.disabled=false}
+function onModelChange(){const i=document.getElementById("modelSelect").value;selectedModel=i===""?null:modelRows[Number(i)];renderPreview();updateCalculatedValue()}
+function renderPreview(){const p=document.getElementById("modelPreview");if(!selectedModel){p.classList.remove("visible");return}document.getElementById("modelPreviewImage").src=selectedModel.mainImageUrl||"Car Stereo Garage0_1.png";document.getElementById("modelPreviewTitle").textContent=`${selectedModel.brand||""} ${selectedModel.model||""}`.trim();document.getElementById("modelPreviewMeta").innerHTML=[selectedModel.country,selectedModel.modelSeries,selectedModel.yearFrom&&selectedModel.yearUntil?`${selectedModel.yearFrom}–${selectedModel.yearUntil}`:(selectedModel.yearFrom||selectedModel.yearUntil),selectedModel.unitType].filter(Boolean).map(esc).join("<br>");p.classList.add("visible")}
+function updateCalculatedValue(){const condition=document.getElementById("conditionSelect").value;const box=document.getElementById("calculatedValueBox");if(!selectedModel||!condition){box.textContent="Choose a model and condition to calculate the value.";return}const factor=Number(condition.replace("%",""))/100;const base=Number(selectedModel.estimatedValue100||0);if(!base){box.textContent="No 100% model value is currently registered.";return}const value=Math.round(base*factor);box.textContent=`${selectedModel.valueCurrency||"EUR"} ${value.toLocaleString()} — based on ${condition} condition`;box.dataset.value=String(value);box.dataset.currency=selectedModel.valueCurrency||"EUR"}
+function updateSaleFields(){const active=["For Sale","Reserved"].includes(document.getElementById("saleStatusSelect").value);["askingPriceInput","askingCurrencySelect","saleNotesInput"].forEach(id=>document.getElementById(id).disabled=!active)}
+async function uploadImages(){const files=[...document.getElementById("imagesInput").files];const result=[];for(const file of files){const fd=new FormData();fd.append("file",file);result.push(await api("/upload-file",{method:"POST",body:fd}))}return result}
+document.getElementById("brandSelect").addEventListener("change",onBrandChange);document.getElementById("countrySelect").addEventListener("change",onCountryChange);document.getElementById("modelSelect").addEventListener("change",onModelChange);document.getElementById("conditionSelect").addEventListener("change",updateCalculatedValue);document.getElementById("saleStatusSelect").addEventListener("change",updateSaleFields);document.getElementById("imagesInput").addEventListener("change",e=>{const n=e.target.files.length;document.getElementById("imagesFileName").textContent=n?`${n} file${n===1?"":"s"} selected`:"No files selected"});document.getElementById("modelNotFoundButton").addEventListener("click",()=>showStatus("The model-not-found flow requires the Model Import Queue endpoint in the API worker.","error"));
+document.getElementById("componentForm").addEventListener("submit",async e=>{e.preventDefault();if(!selectedModel){showStatus("Choose the correct model before saving.","error");return}try{setLoading(true);showStatus("Uploading images and saving component...","success");const images=await uploadImages();const valueBox=document.getElementById("calculatedValueBox");const payload={modelReference:{workspaceCode:selectedModel.workspaceCode,modelId:selectedModel.modelId,countryId:selectedModel.countryId,globalModelGroupId:selectedModel.globalModelGroupId},cachedModel:{brand:selectedModel.brand,model:selectedModel.model,country:selectedModel.country,modelSeries:selectedModel.modelSeries,mainImageUrl:selectedModel.mainImageUrl},owner:{userId:currentUser.id||currentUser.email,displayName:currentUser.name||currentUser.email},condition:document.getElementById("conditionSelect").value,conditionNotes:document.getElementById("conditionNotesInput").value.trim(),calculatedValue:Number(valueBox.dataset.value||0)||null,valueCurrency:valueBox.dataset.currency||null,ownershipVisibility:document.getElementById("visibilitySelect").value,saleStatus:document.getElementById("saleStatusSelect").value,askingPrice:Number(document.getElementById("askingPriceInput").value)||null,askingPriceCurrency:document.getElementById("askingCurrencySelect").value||null,saleNotes:document.getElementById("saleNotesInput").value.trim(),serialNumber:document.getElementById("serialNumberInput").value.trim(),purchaseDate:document.getElementById("purchaseDateInput").value||null,purchasePrice:Number(document.getElementById("purchasePriceInput").value)||null,purchaseCurrency:document.getElementById("purchaseCurrencySelect").value||null,notes:document.getElementById("notesInput").value.trim(),images};await api("/create-collection-item",{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(payload)});showStatus("Component added successfully.","success");e.target.reset();selectedModel=null;renderPreview();updateSaleFields();updateCalculatedValue()}catch(err){console.error(err);showStatus(`Could not add component.<br><br>${esc(err.message)}`,"error")}finally{setLoading(false)}});
+loadInitialData().catch(err=>{console.error(err);showStatus(`Could not load component form.<br><br>${esc(err.message)}`,"error")});
+</script>
+</body>
+</html>

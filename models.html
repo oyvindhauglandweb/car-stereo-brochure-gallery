@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0150 -->
+<!-- V20260808-0160 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -21,7 +21,7 @@
   <div class="header">
     <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Garage">
     <div class="top-buttons">
-      <a class="top-button" id="menuBackButton" href="gallery.html" title="Back to brochures">←</a>
+      <a class="top-button" id="menuBackButton" href="index.html" title="Back">←</a>
       <a class="top-button" href="index.html" title="Home">⌂</a>
       <button type="button" class="top-button" id="viewToggle" title="Switch to thumbnail view" aria-label="Switch to thumbnail view">▦</button>
       <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
@@ -342,9 +342,20 @@ function updateMenuBackButton(){
     button.title="Back to models";
     button.setAttribute("aria-label","Back to models");
   }else{
-    button.href="gallery.html";
-    button.title="Back to brochures";
-    button.setAttribute("aria-label","Back to brochures");
+    button.href="index.html";
+    button.title="Back";
+    button.setAttribute("aria-label","Back");
+  }
+}
+
+function canReturnToPreviousPage(){
+  if(!document.referrer) return false;
+
+  try{
+    const previous=new URL(document.referrer);
+    return previous.origin===window.location.origin;
+  }catch(error){
+    return false;
   }
 }
 
@@ -424,6 +435,12 @@ $("menuBackButton").addEventListener("click",event=>{
   if($("detailView").classList.contains("active")){
     event.preventDefault();
     backToModels();
+    return;
+  }
+
+  if(canReturnToPreviousPage()){
+    event.preventDefault();
+    history.back();
   }
 });
 

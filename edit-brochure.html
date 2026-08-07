@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Brochure - Car Stereo Garage</title>
+<title>Add New Brochure - Car Stereo Brochures</title>
 
 <style>
 :root{
@@ -139,37 +139,70 @@ input,select,textarea{
 
 select[multiple]{min-height:150px;padding:10px 14px;}
 textarea{min-height:120px;padding:12px 14px;resize:vertical;}
-
-.current-cover-wrap{
-  display:none;
-  max-width:520px;
-  margin:0 auto 22px;
-  text-align:center;
-}
-
-.current-cover-title{
-  font-weight:bold;
-  font-size:15px;
-  margin-bottom:8px;
-  color:var(--muted);
-}
-
-.current-cover-img{
-  display:block;
-  max-width:100%;
-  max-height:360px;
-  margin:0 auto;
-  border-radius:10px;
-  object-fit:contain;
-  background:rgba(0,0,0,.08);
-}
-
-body.dark-mode .current-cover-img{
-  background:rgba(255,255,255,.05);
-}
-
 input[type="file"]{padding:10px 14px;}
 .help-text{color:var(--muted);font-size:13px;line-height:1.4;}
+
+.custom-file-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+.model-import-box{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  background:var(--card);
+}
+.model-import-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.model-import-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  background:var(--button);
+  color:var(--text);
+  font-weight:bold;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+.model-import-button:hover{background:var(--button-hover);}
+.model-import-file-name{
+  color:var(--muted);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.model-import-summary{
+  display:none;
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  line-height:1.5;
+}
+.model-import-summary.visible{display:block;}
+.model-import-summary.ok{border-left:4px solid #2e9d57;}
+.model-import-summary.warning{border-left:4px solid #c48a1b;}
+.model-import-summary.error{border-left:4px solid #c94b4b;}
+.model-import-summary strong{color:var(--text);}
+.model-import-details{margin-top:7px;color:var(--muted);font-size:13px;}
+
 
 .action-row{
   display:flex;
@@ -213,6 +246,7 @@ input[type="file"]{padding:10px 14px;}
   line-height:1.5;
 }
 .status-box.success{display:block;border-color:#4f8f5f;}
+.status-box.warning{display:block;border-color:#c48a1b;}
 .status-box.error{display:block;border-color:#b85c5c;}
 .disabled{opacity:.55;pointer-events:none;}
 
@@ -355,11 +389,6 @@ body.dark-mode select option:checked{
   </div>
 
   <div class="form-card">
-
-    <div class="current-cover-wrap" id="currentCoverWrap">
-      <div class="current-cover-title">Current cover image</div>
-      <img class="current-cover-img" id="currentCoverPreview" src="" alt="Current cover image">
-    </div>
     <form id="brochureForm">
       <div class="form-grid">
         <div class="form-field">
@@ -421,6 +450,21 @@ body.dark-mode select option:checked{
           <div class="help-text">Optional. Paste all model numbers at once. Space, comma, semicolon and new lines are accepted. Duplicates are removed automatically.</div>
         </div>
 
+        <div class="form-field full">
+          <label>Model data import</label>
+          <div class="model-import-box">
+            <input class="custom-file-input" id="modelImportInput" type="file" accept=".xlsx,.xls">
+            <div class="model-import-top">
+              <label class="model-import-button" for="modelImportInput">Import model data file</label>
+              <span class="model-import-file-name" id="modelImportFileName">No file selected</span>
+              <button type="button" class="model-import-button" id="removeModelImportButton" style="display:none;">Remove file</button>
+            </div>
+            <div class="help-text" style="margin-top:8px;">Optional. Select a Car Stereo Garage model import Excel file. The file is validated locally first; no model data is written during this step.</div>
+            <div class="model-import-summary" id="modelImportSummary"></div>
+          </div>
+        </div>
+
+
         <div class="form-field">
           <label for="coverInput">Replace cover image</label>
           <input id="coverInput" type="file" accept="image/*">
@@ -448,6 +492,8 @@ body.dark-mode select option:checked{
     </form>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
 const API_BASE = "https://api.carstereogarage.com";
@@ -485,6 +531,7 @@ let allModelSeries = [];
 let currentBrochure = null;
 let currentUser = null;
 let selectedModelSeriesIds = [];
+let pendingModelImport = null;
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -652,8 +699,191 @@ function updateMarketFromLanguage(){
   if(suggestedMarket) setSelectByVisibleText("marketSelect", suggestedMarket);
 }
 
+
+
+function setModelImportSummary(message, type = "ok"){
+  const box = document.getElementById("modelImportSummary");
+  box.className = `model-import-summary visible ${type}`;
+  box.innerHTML = message;
+}
+
+function clearModelImport(){
+  pendingModelImport = null;
+  const input = document.getElementById("modelImportInput");
+  if(input) input.value = "";
+  document.getElementById("modelImportFileName").textContent = "No file selected";
+  document.getElementById("removeModelImportButton").style.display = "none";
+  const summary = document.getElementById("modelImportSummary");
+  summary.className = "model-import-summary";
+  summary.innerHTML = "";
+}
+
+function normalizeHeader(value){
+  return String(value ?? "").trim();
+}
+
+function normalizeExcelCell(value){
+  if(value === undefined || value === null) return "";
+  const text = String(value).trim();
+  if(["nan", "null", "n/a"].includes(text.toLowerCase())) return "";
+  return value;
+}
+
+function findImportSheetName(workbook){
+  const exact = workbook.SheetNames.find(name => name.trim().toLowerCase() === "import");
+  return exact || workbook.SheetNames[0] || "";
+}
+
+async function readModelImportFile(file){
+  if(typeof XLSX === "undefined"){
+    throw new Error("Excel reader could not be loaded. Check the internet connection and try again.");
+  }
+
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, {type:"array", cellDates:false});
+  const sheetName = findImportSheetName(workbook);
+  if(!sheetName) throw new Error("The Excel file does not contain a worksheet.");
+
+  const sheet = workbook.Sheets[sheetName];
+  const matrix = XLSX.utils.sheet_to_json(sheet, {header:1, defval:"", raw:false, blankrows:false});
+  if(!matrix.length) throw new Error("The selected worksheet is empty.");
+
+  // The standard template has group headings on row 1, helper text on row 2 and field names on row 3.
+  // Also accept a plain file where field names are on row 1.
+  let headerRowIndex = matrix.findIndex(row => {
+    const headers = row.map(normalizeHeader);
+    return headers.includes("Brand") && headers.includes("Model");
+  });
+
+  if(headerRowIndex < 0){
+    throw new Error('Could not find a header row containing both "Brand" and "Model".');
+  }
+
+  const headers = matrix[headerRowIndex].map(normalizeHeader);
+  const brandIndex = headers.indexOf("Brand");
+  const modelIndex = headers.indexOf("Model");
+  const marketsIndex = headers.indexOf("Markets");
+
+  const rows = matrix.slice(headerRowIndex + 1)
+    .map((row, sourceIndex) => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        if(header) obj[header] = normalizeExcelCell(row[index]);
+      });
+      obj.__sourceRow = headerRowIndex + 2 + sourceIndex;
+      return obj;
+    })
+    .filter(row => Object.entries(row).some(([key, value]) => key !== "__sourceRow" && String(value ?? "").trim() !== ""));
+
+  if(!rows.length) throw new Error("No model rows were found in the import file.");
+
+  const errors = [];
+  const warnings = [];
+  const models = [];
+  const seenModels = new Set();
+
+  rows.forEach(row => {
+    const brand = String(row.Brand || "").trim();
+    const model = String(row.Model || "").trim();
+    const markets = String(row.Markets || "").trim();
+
+    if(!brand) errors.push(`Row ${row.__sourceRow}: Brand is missing.`);
+    if(!model) errors.push(`Row ${row.__sourceRow}: Model is missing.`);
+    if(!markets && marketsIndex >= 0) warnings.push(`Row ${row.__sourceRow}: Markets is empty.`);
+
+    if(model){
+      const normalized = model.toUpperCase();
+      if(!seenModels.has(normalized)){
+        seenModels.add(normalized);
+        models.push(model);
+      }
+    }
+  });
+
+  const selectedBrandOption = document.getElementById("brandSelect")?.selectedOptions?.[0];
+  const selectedBrand = selectedBrandOption && selectedBrandOption.value ? selectedBrandOption.textContent.trim() : "";
+  const selectedTypeOption = document.getElementById("typeSelect")?.selectedOptions?.[0];
+  const selectedType = selectedTypeOption && selectedTypeOption.value ? selectedTypeOption.textContent.trim() : "";
+  const isOemBrochure = /^oem(?:\b|\s|[-_/])/i.test(selectedType) || selectedType.toLowerCase() === "oem";
+  const fileBrands = Array.from(new Set(rows.map(row => String(row.Brand || "").trim()).filter(Boolean)));
+
+  // Normal brochures keep the existing brand checks. OEM brochures are the
+  // deliberate exception because one OEM brochure may contain components from
+  // several actual manufacturers.
+  if(!isOemBrochure){
+    if(fileBrands.length > 1){
+      warnings.push(`The file contains more than one brand: ${fileBrands.join(", ")}.`);
+    }
+    if(selectedBrand && fileBrands.length === 1 && selectedBrand.toLowerCase() !== fileBrands[0].toLowerCase()){
+      errors.push(`Selected brochure brand is ${selectedBrand}, but the import file contains ${fileBrands[0]}.`);
+    }
+  }
+
+  return {file, sheetName, headers, rows, models, errors, warnings, fileBrands};
+}
+
+async function handleModelImportFile(file){
+  if(!file){
+    clearModelImport();
+    return;
+  }
+
+  document.getElementById("modelImportFileName").textContent = file.name;
+  document.getElementById("removeModelImportButton").style.display = "inline-flex";
+  setModelImportSummary("Reading and validating Excel file...", "ok");
+
+  try{
+    const result = await readModelImportFile(file);
+    pendingModelImport = result;
+
+    if(result.models.length){
+      const modelNumbersInput = document.getElementById("modelNumbersInput");
+      modelNumbersInput.value = normalizeModelNumbers(`${modelNumbersInput.value || ""} ${result.models.join(" ")}`);
+    }
+
+    const lines = [
+      `<strong>${result.rows.length} model row${result.rows.length === 1 ? "" : "s"} found</strong>`,
+      `Worksheet: ${esc(result.sheetName)}`,
+      `${result.models.length} unique model number${result.models.length === 1 ? "" : "s"} copied to Model numbers`
+    ];
+
+    if(result.errors.length){
+      lines.push(`<div class="model-import-details"><strong>${result.errors.length} error${result.errors.length === 1 ? "" : "s"}:</strong><br>${result.errors.slice(0,10).map(esc).join("<br>")}${result.errors.length > 10 ? "<br>…" : ""}</div>`);
+      setModelImportSummary(lines.join("<br>"), "error");
+    } else if(result.warnings.length){
+      lines.push(`<div class="model-import-details"><strong>${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"}:</strong><br>${result.warnings.slice(0,10).map(esc).join("<br>")}${result.warnings.length > 10 ? "<br>…" : ""}</div>`);
+      setModelImportSummary(lines.join("<br>"), "warning");
+    } else {
+      lines.push(`<div class="model-import-details">Local validation passed. The model data will be checked against the Model Database when changes are saved.</div>`);
+      setModelImportSummary(lines.join("<br>"), "ok");
+    }
+  }catch(error){
+    pendingModelImport = null;
+    setModelImportSummary(`<strong>Could not read model import file.</strong><div class="model-import-details">${esc(error.message)}</div>`, "error");
+  }
+}
+
+async function uploadFile(file){
+  const formData = new FormData();
+  formData.append("file", file);
+
+const res = await fetch(`${API_BASE}/upload-file`, {
+  method:"POST",
+  credentials:"include",
+  body:formData
+});
+
+  if(!res.ok){
+    const text = await res.text();
+    throw new Error("File upload failed: " + text);
+  }
+
+  return await res.json();
+}
+
 function normalizeModelNumbers(value){
   const seen = new Set();
+
   return String(value || "")
     .toUpperCase()
     .split(/[\s,;]+/)
@@ -667,13 +897,69 @@ function normalizeModelNumbers(value){
     .join(" ");
 }
 
-async function uploadFile(file){
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_BASE}/upload-file`, {method:"POST", credentials:"include", body:formData});
-  if(!res.ok) throw new Error("File upload failed: " + await res.text());
-  return await res.json();
+
+
+async function importBrochureModels(rows, options = {}){
+  const res = await fetch(`${API_BASE}/import-brochure-models`, {
+    method:"POST",
+    credentials:"include",
+    headers:{
+      "Content-Type":"text/plain;charset=UTF-8"
+    },
+    body:JSON.stringify({
+      rows,
+      dryRun:options.dryRun === true,
+      brochureId:options.brochureId || null
+    })
+  });
+
+  const responseText = await res.text();
+  let data = null;
+  try{
+    data = responseText ? JSON.parse(responseText) : {};
+  }catch(_){
+    data = {error:responseText || `Request failed (${res.status})`};
+  }
+
+  if(!res.ok){
+    const detail = data?.detail ? ` ${typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)}` : "";
+    throw new Error((data?.error || `Model import failed (${res.status})`) + detail);
+  }
+
+  return data;
 }
+
+function modelImportResultHtml(result, prefix = "Model import"){
+  const parts = [
+    `<strong>${esc(prefix)}</strong>`,
+    `${Number(result?.total || 0)} row${Number(result?.total || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.created || 0)} new model${Number(result?.created || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.enriched || 0)} existing model${Number(result?.enriched || 0) === 1 ? "" : "s"} enriched`,
+    `${Number(result?.unchanged || 0)} unchanged`,
+    `${Number(result?.conflicts || 0)} conflict${Number(result?.conflicts || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.failed || 0)} failed`
+  ];
+
+  if(result?.schema?.marketField){
+    parts.push(`Market field: ${esc(result.schema.marketField.name)} (${esc(result.schema.marketField.type)})`);
+  }
+
+  const noteworthy = (result?.rows || [])
+    .filter(row => row.action === "failed" || row.action === "conflict" || (row.conflicts && row.conflicts.length))
+    .slice(0, 8)
+    .map(row => {
+      const label = [row.brand, row.model].filter(Boolean).join(" ");
+      const message = row.error || `${row.conflicts?.length || 0} existing value conflict(s)`;
+      return `${esc(label || `Row ${row.sourceRow || "?"}`)}: ${esc(typeof message === "string" ? message : JSON.stringify(message))}`;
+    });
+
+  if(noteworthy.length){
+    parts.push(`<div class="model-import-details">${noteworthy.join("<br>")}</div>`);
+  }
+
+  return parts.join("<br>");
+}
+
 
 async function updateBrochureRow(brochureId, payload){
   const res = await fetch(`${API_BASE}/update-brochure`, {
@@ -694,34 +980,6 @@ function userCanEdit(row){
   return role === "admin" || role === "administrator" || owners.includes(userId) || submittedBy.includes(userId);
 }
 
-function baserowFileUrl(file){
-  if(!file) return "";
-  return file.url || file.thumbnails?.card_cover?.url || file.thumbnails?.small?.url || file.thumbnails?.tiny?.url || "";
-}
-
-function setCoverPreview(url){
-  const wrap = document.getElementById("currentCoverWrap");
-  const img = document.getElementById("currentCoverPreview");
-  if(!wrap || !img) return;
-
-  if(url){
-    img.src = url;
-    wrap.style.display = "block";
-  } else {
-    img.removeAttribute("src");
-    wrap.style.display = "none";
-  }
-}
-
-function previewSelectedCoverFile(){
-  const input = document.getElementById("coverInput");
-  const file = input?.files?.[0];
-  if(!file) return;
-
-  const objectUrl = URL.createObjectURL(file);
-  setCoverPreview(objectUrl);
-}
-
 function populateForm(row){
   document.getElementById("brandSelect").value = linkedId(row, FIELDS.brand);
   document.getElementById("titleInput").value = row[FIELDS.title] || "";
@@ -738,7 +996,6 @@ function populateForm(row){
 
   const cover = row[FIELDS.coverImage]?.[0];
   const pdf = row[FIELDS.brochureFile]?.[0];
-  setCoverPreview(baserowFileUrl(cover));
   document.getElementById("currentCoverText").textContent = cover ? "Existing cover image will be kept unless you select a new file." : "No existing cover image found.";
   document.getElementById("currentPdfText").textContent = pdf ? "Existing PDF will be kept unless you select a new file." : "No existing PDF found.";
 }
@@ -799,7 +1056,10 @@ async function loadFormData(){
     selectedModelSeriesIds = Array.from(this.selectedOptions).map(option => String(option.value));
   });
   document.getElementById("languageSelect").addEventListener("change", updateMarketFromLanguage);
-  document.getElementById("coverInput").addEventListener("change", previewSelectedCoverFile);
+  document.getElementById("modelImportInput").addEventListener("change", function(){
+    handleModelImportFile(this.files?.[0] || null);
+  });
+  document.getElementById("removeModelImportButton").addEventListener("click", clearModelImport);
 }
 
 document.getElementById("brochureForm").addEventListener("submit", async function(event){
@@ -820,9 +1080,11 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   const notes = document.getElementById("notesInput").value.trim();
   const modelNumbers = normalizeModelNumbers(document.getElementById("modelNumbersInput").value);
 
+  let brochureWasUpdated = false;
+
   try{
     setLoading(true);
-    showStatus("Saving changes...", "success");
+    showStatus("Saving brochure changes...", "success");
 
     const payload = {};
     payload[FIELDS.brand] = [Number(brandId)];
@@ -849,13 +1111,66 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
 
     showStatus("Updating brochure entry...", "success");
     await updateBrochureRow(brochureId, payload);
+    brochureWasUpdated = true;
 
-    showStatus("Brochure updated successfully. Returning to gallery...", "success");
-    window.location.href = getReturnUrl();
-    return;
+    let importResult = null;
+    let importWarning = "";
+
+    if(pendingModelImport?.rows?.length){
+      if(pendingModelImport.errors?.length){
+        importWarning = `Model import was skipped because the Excel file has ${pendingModelImport.errors.length} local validation error(s).`;
+        setModelImportSummary(
+          `<strong>Model import not performed</strong><div class="model-import-details">${esc(importWarning)}</div>`,
+          "error"
+        );
+      } else {
+        try{
+          showStatus("Brochure updated. Validating model data...", "success");
+          const preview = await importBrochureModels(pendingModelImport.rows, {
+            dryRun:true,
+            brochureId:Number(brochureId)
+          });
+
+          if(Number(preview.failed || 0) > 0){
+            importWarning = `${Number(preview.failed || 0)} model row(s) failed database validation. Model data was not imported.`;
+            setModelImportSummary(modelImportResultHtml(preview, "Model database validation"), "error");
+          } else {
+            setModelImportSummary(
+              modelImportResultHtml(preview, "Ready to import") +
+              '<div class="model-import-details">Existing values will not be overwritten automatically. Safe empty fields and year/market extensions will be applied.</div>',
+              Number(preview.conflicts || 0) > 0 ? "warning" : "ok"
+            );
+
+            showStatus("Brochure updated. Importing model data...", "success");
+            importResult = await importBrochureModels(pendingModelImport.rows, {
+              dryRun:false,
+              brochureId:Number(brochureId)
+            });
+
+            setModelImportSummary(
+              modelImportResultHtml(importResult, "Model import completed"),
+              Number(importResult.failed || 0) > 0 || Number(importResult.conflicts || 0) > 0 ? "warning" : "ok"
+            );
+          }
+        }catch(importError){
+          console.error(importError);
+          importWarning = `Model import failed: ${importError.message}`;
+          setModelImportSummary(
+            `<strong>Model import failed</strong><div class="model-import-details">${esc(importError.message)}</div>`,
+            "error"
+          );
+        }
+      }
+    }
+
+    const importMessage = importResult
+      ? `<br><br>Model import: ${Number(importResult.created || 0)} new model(s), ${Number(importResult.enriched || 0)} existing model(s) enriched, ${Number(importResult.conflicts || 0)} conflict(s), ${Number(importResult.failed || 0)} failed.`
+      : (importWarning ? `<br><br><strong>Brochure changes were saved, but ${esc(importWarning)}</strong>` : "");
+
+    showStatus(`Brochure updated successfully.${importMessage}<br><br><a href="${esc(getReturnUrl())}" style="color:var(--link);font-weight:bold;">Back to gallery</a>`, importWarning ? "warning" : "success");
   }catch(error){
     console.error(error);
-    showStatus("Update failed.<br><br>" + esc(error.message), "error");
+    showStatus((brochureWasUpdated ? "Brochure was updated, but a later step failed." : "Update failed.") + "<br><br>" + esc(error.message), "error");
   }finally{
     setLoading(false);
   }
@@ -867,5 +1182,6 @@ loadFormData().catch(error => {
 });
 </script>
 
+<!-- V20260807-1425 -->
 </body>
 </html>

@@ -208,7 +208,30 @@ async function openModel(modelId){
     $("detailTitle").textContent=`${m.brand} ${m.model}`;
     document.title=`${m.brand} ${m.model} – Car Stereo Garage`;
     const img=$("modelImage"), ph=$("imagePlaceholder");
-    if(m.mainImageUrl){img.src=m.mainImageUrl;img.style.display="block";ph.style.display="none";}else{img.removeAttribute("src");img.style.display="none";ph.style.display="block";}
+    const automaticImageUrl = m.modelId
+      ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}`
+      : "";
+    const selectedImageUrl = m.mainImageUrl || automaticImageUrl;
+
+    img.onload = function(){
+      img.style.display="block";
+      ph.style.display="none";
+    };
+    img.onerror = function(){
+      img.removeAttribute("src");
+      img.style.display="none";
+      ph.style.display="block";
+    };
+
+    if(selectedImageUrl){
+      ph.style.display="none";
+      img.style.display="none";
+      img.src=selectedImageUrl;
+    }else{
+      img.removeAttribute("src");
+      img.style.display="none";
+      ph.style.display="block";
+    }
     const summary=[
       ["Brand",m.brand],["Model",m.model],["Model Series",m.modelSeries],["Market",marketsText(m)],["Years",yearText(m)],["Unit Type",m.unitType],["Functions",functionsText(m)]
     ].filter(x=>x[1]);

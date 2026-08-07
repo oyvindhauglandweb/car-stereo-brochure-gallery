@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0170 -->
+<!-- V20260808-0180 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -197,7 +197,7 @@ async function updateAiImageWarning(imageUrl, warning){
     // Image display must never depend on the optional AI metadata check.
   }
 }
-function loadModelImage(img, imageUrl, placeholder, warning){
+function loadModelImage(img, imageUrl, placeholder, warning, loadingText="No image available"){
   if(warning) warning.style.display="none";
 
   img.onload=null;
@@ -206,8 +206,16 @@ function loadModelImage(img, imageUrl, placeholder, warning){
   if(!imageUrl){
     img.removeAttribute("src");
     img.style.display="none";
-    if(placeholder) placeholder.style.display="block";
+    if(placeholder){
+      placeholder.textContent="No image available";
+      placeholder.style.display="block";
+    }
     return;
+  }
+
+  if(placeholder){
+    placeholder.textContent=loadingText;
+    placeholder.style.display="block";
   }
 
   img.onload=function(){
@@ -219,11 +227,13 @@ function loadModelImage(img, imageUrl, placeholder, warning){
   img.onerror=function(){
     img.removeAttribute("src");
     img.style.display="none";
-    if(placeholder) placeholder.style.display="block";
+    if(placeholder){
+      placeholder.textContent="No image available";
+      placeholder.style.display="block";
+    }
     if(warning) warning.style.display="none";
   };
 
-  if(placeholder) placeholder.style.display="none";
   img.style.display="block";
   img.src=imageUrl;
 }
@@ -370,6 +380,7 @@ async function openModel(modelId){
   detailImg.onerror=null;
   detailImg.removeAttribute("src");
   detailImg.style.display="none";
+  detailPlaceholder.textContent="Loading image...";
   detailPlaceholder.style.display="block";
   detailAiWarning.style.display="none";
 
@@ -391,7 +402,7 @@ async function openModel(modelId){
     ph.style.display=selectedImageUrl ? "none" : "block";
     img.style.display="none";
     aiWarning.style.display="none";
-    loadModelImage(img,selectedImageUrl,ph,null);
+    loadModelImage(img,selectedImageUrl,ph,null,"Loading image...");
     if(m.modelId && modelImageIndex[m.modelId]){
       setAiWarningForModel(m.modelId,aiWarning);
     }else{
@@ -442,6 +453,7 @@ function backToModels(){
   detailImg.onerror=null;
   detailImg.removeAttribute("src");
   detailImg.style.display="none";
+  $("imagePlaceholder").textContent="No image available";
   $("imagePlaceholder").style.display="block";
   $("imageAiWarning").style.display="none";
 

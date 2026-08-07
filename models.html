@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0120 -->
+<!-- V20260808-0125 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -195,7 +195,7 @@ function loadModelImage(img, imageUrl, placeholder, warning){
   };
 
   if(placeholder) placeholder.style.display="none";
-  img.style.display="none";
+  img.style.display="block";
   img.src=imageUrl;
 }
 function renderList(){
@@ -210,7 +210,7 @@ function renderList(){
       return `
         <div class="model-card" data-model-id="${esc(m.modelId)}">
           <div class="thumb-image">
-            <img loading="lazy" data-image-url="${esc(imageUrl)}" alt="${esc(m.brand)} ${esc(m.model)}" style="display:none">
+            <img data-image-url="${esc(imageUrl)}" alt="${esc(m.brand)} ${esc(m.model)}">
             <div class="thumb-placeholder"${imageUrl?' style="display:none"':""}>No image available</div>
           </div>
           <div class="ai-image-warning" style="display:none">AI-generated: Do not trust the details</div>

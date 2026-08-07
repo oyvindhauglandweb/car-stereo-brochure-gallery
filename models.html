@@ -155,18 +155,49 @@ function groupFor(name){
   return "Other specifications";
 }
 function displayValue(value){
-  if(Array.isArray(value)) return value.join(", ");
+  if(Array.isArray(value)) return value.filter(isMeaningful).join(", ");
   if(value === true) return "Yes";
-  if(value === false) return "No";
+  if(value === false) return "";
   return String(value ?? "");
 }
 function isMeaningful(value){
   if(value === null || value === undefined || value === "") return false;
-  // Negative boolean values describe features the model does not have.
-  // Hide them from the public specification view instead of showing "No".
+  // Public model presentation focuses on features/specifications the model has.
+  // Negative booleans and explicit None values are therefore omitted.
   if(value === false) return false;
-  if(Array.isArray(value)) return value.length>0;
+  if(typeof value === "string" && value.trim().toLowerCase() === "none") return false;
+  if(Array.isArray(value)) return value.some(isMeaningful);
   return true;
+}
+function compactNumber(value){
+  const text=String(value ?? "").trim();
+  if(!/^-?\d+(?:\.\d+)?$/.test(text)) return text;
+  const n=Number(text);
+  return Number.isFinite(n) ? String(n) : text;
+}
+function fieldDisplayValue(name,value,details){
+  const raw=compactNumber(displayValue(value));
+  const units={
+    "Amplifier Power per Channel":"W",
+    "Preamplifier Output Voltage":"mV",
+    "Cassette Signal-to-Noise Ratio":"dB",
+    "Width":"mm",
+    "Height":"mm",
+    "Depth":"mm"
+  };
+  if(name === "Cassette THD") return `${raw}%`;
+  if(name === "Original Price"){
+    const currency=details?.["Original Currency"];
+    return isMeaningful(currency) ? `${raw} ${displayValue(currency)}` : raw;
+  }
+  return units[name] ? `${raw} ${units[name]}` : displayValue(value);
+}
+function publicFieldLabel(name,group){
+  const prefix=`${group} `;
+  if(group !== "Dimensions" && group !== "Other specifications" && String(name).startsWith(prefix)){
+    return String(name).slice(prefix.length);
+  }
+  return String(name);
 }
 async function openModel(modelId){
   $("browserView").style.display="none"; $("detailView").classList.add("active");
@@ -191,6 +222,9 @@ async function openModel(modelId){
     for(const [name,value] of Object.entries(details)){
       if(coreFields.has(name)||!isMeaningful(value)||consumed.has(name)) continue;
 
+      // Currency is metadata for its price value, not a standalone public specification.
+      if(name === "Original Currency") continue;
+
       const match=String(name).match(/^(.*?)(?:\s+)?Frequency Response Low$/i);
       if(match){
         const prefix=match[1].trim();
@@ -209,7 +243,7 @@ async function openModel(modelId){
       const group=groupFor(name); (groups[group] ||= []).push([name,value]);
     }
     const order=["Cassette","Tuner","Preamplifier","Amplifier","Equalizer","Speaker","Crossover","Dimensions","Other specifications"];
-    $("specSections").innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<section class="spec-section"><div class="spec-title">${esc(g)}</div><div class="spec-grid">${groups[g].map(([n,v])=>`<div class="spec-row${n === "Source Notes" ? " full-width" : ""}"><div class="spec-label">${esc(n)}</div><div class="spec-value">${esc(displayValue(v))}</div></div>`).join("")}</div></section>`).join("");
+    $("specSections").innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<section class="spec-section"><div class="spec-title">${esc(g)}</div><div class="spec-grid">${groups[g].map(([n,v])=>{const label=publicFieldLabel(n,g);const shown=fieldDisplayValue(n,v,details);return `<div class="spec-row${n === "Source Notes" ? " full-width" : ""}"><div class="spec-label">${esc(label)}</div><div class="spec-value">${esc(shown)}</div></div>`;}).join("")}</div></section>`).join("");
     history.replaceState(null,"",`models.html?model_id=${encodeURIComponent(m.modelId)}`);
     scrollTo(0,0);
   }catch(err){$("detailTitle").textContent="Could not load model";$("specSections").innerHTML=`<div class="status">${esc(err.message)}</div>`;}

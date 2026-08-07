@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0140 -->
+<!-- V20260808-0150 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -21,7 +21,7 @@
   <div class="header">
     <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Garage">
     <div class="top-buttons">
-      <a class="top-button" href="gallery.html" title="Brochures">←</a>
+      <a class="top-button" id="menuBackButton" href="gallery.html" title="Back to brochures">←</a>
       <a class="top-button" href="index.html" title="Home">⌂</a>
       <button type="button" class="top-button" id="viewToggle" title="Switch to thumbnail view" aria-label="Switch to thumbnail view">▦</button>
       <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
@@ -45,7 +45,6 @@
   </section>
 
   <section id="detailView" class="detail">
-    <div class="back-row"><button class="back-button" id="backButton">← Back to models</button></div>
     <div class="detail-title" id="detailTitle"></div>
     <div class="image-panel">
       <img id="modelImage" alt="Model image">
@@ -334,8 +333,24 @@ function publicFieldLabel(name,group){
   }
   return String(name);
 }
+function updateMenuBackButton(){
+  const button=$("menuBackButton");
+  const inDetail=$("detailView").classList.contains("active");
+
+  if(inDetail){
+    button.href="models.html";
+    button.title="Back to models";
+    button.setAttribute("aria-label","Back to models");
+  }else{
+    button.href="gallery.html";
+    button.title="Back to brochures";
+    button.setAttribute("aria-label","Back to brochures");
+  }
+}
+
 async function openModel(modelId){
   $("browserView").style.display="none"; $("detailView").classList.add("active");
+  updateMenuBackButton();
   $("detailTitle").textContent="Loading model..."; $("summaryGrid").innerHTML=""; $("specSections").innerHTML="";
   try{
     const data=await fetchJson(`${API_BASE}/models?model_id=${encodeURIComponent(modelId)}&summary=0`);
@@ -397,11 +412,23 @@ async function openModel(modelId){
   }catch(err){$("detailTitle").textContent="Could not load model";$("specSections").innerHTML=`<div class="status">${esc(err.message)}</div>`;}
 }
 function backToModels(){
-  $("detailView").classList.remove("active"); $("browserView").style.display="block"; document.title="Models – Car Stereo Garage"; history.replaceState(null,"","models.html"); scrollTo(0,0);
+  $("detailView").classList.remove("active");
+  $("browserView").style.display="block";
+  document.title="Models – Car Stereo Garage";
+  history.replaceState(null,"","models.html");
+  updateMenuBackButton();
+  scrollTo(0,0);
 }
-$("backButton").addEventListener("click",backToModels);
+
+$("menuBackButton").addEventListener("click",event=>{
+  if($("detailView").classList.contains("active")){
+    event.preventDefault();
+    backToModels();
+  }
+});
 
 async function init(){
+  updateMenuBackButton();
   try{
     const data=await fetchJson(`${API_BASE}/models?summary=1`); allModels=data.results||[]; setupFilters(); applyUrlFilters(); applyFilters();
     const p=new URLSearchParams(location.search); const modelId=p.get("model_id");

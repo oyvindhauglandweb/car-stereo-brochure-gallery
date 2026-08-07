@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<!-- V20260807-0215 -->
+<!-- V20260807-0225 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1334,7 +1334,7 @@ async function handleModelImportFile(file){
       lines.push(`<div class="model-import-details"><strong>${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"}:</strong><br>${result.warnings.slice(0,10).map(esc).join("<br>")}${result.warnings.length > 10 ? "<br>…" : ""}</div>`);
       setModelImportSummary(lines.join("<br>"), "warning");
     } else {
-      lines.push(`<div class="model-import-details">Validation passed. No model data has been written yet.</div>`);
+      lines.push(`<div class="model-import-details">Local validation passed. The model data will be checked against the Model Database when the brochure is submitted.</div>`);
       setModelImportSummary(lines.join("<br>"), "ok");
     }
   }catch(error){
@@ -1393,6 +1393,68 @@ const res = await fetch(`${API_BASE}/create-brochure`, {
   }
 
   return await res.json();
+}
+
+
+async function importBrochureModels(rows, options = {}){
+  const res = await fetch(`${API_BASE}/import-brochure-models`, {
+    method:"POST",
+    credentials:"include",
+    headers:{
+      "Content-Type":"text/plain;charset=UTF-8"
+    },
+    body:JSON.stringify({
+      rows,
+      dryRun:options.dryRun === true,
+      brochureId:options.brochureId || null
+    })
+  });
+
+  const responseText = await res.text();
+  let data = null;
+  try{
+    data = responseText ? JSON.parse(responseText) : {};
+  }catch(_){
+    data = {error:responseText || `Request failed (${res.status})`};
+  }
+
+  if(!res.ok){
+    const detail = data?.detail ? ` ${typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)}` : "";
+    throw new Error((data?.error || `Model import failed (${res.status})`) + detail);
+  }
+
+  return data;
+}
+
+function modelImportResultHtml(result, prefix = "Model import"){
+  const parts = [
+    `<strong>${esc(prefix)}</strong>`,
+    `${Number(result?.total || 0)} row${Number(result?.total || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.created || 0)} new model${Number(result?.created || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.enriched || 0)} existing model${Number(result?.enriched || 0) === 1 ? "" : "s"} enriched`,
+    `${Number(result?.unchanged || 0)} unchanged`,
+    `${Number(result?.conflicts || 0)} conflict${Number(result?.conflicts || 0) === 1 ? "" : "s"}`,
+    `${Number(result?.failed || 0)} failed`
+  ];
+
+  if(result?.schema?.marketField){
+    parts.push(`Market field: ${esc(result.schema.marketField.name)} (${esc(result.schema.marketField.type)})`);
+  }
+
+  const noteworthy = (result?.rows || [])
+    .filter(row => row.action === "failed" || row.action === "conflict" || (row.conflicts && row.conflicts.length))
+    .slice(0, 8)
+    .map(row => {
+      const label = [row.brand, row.model].filter(Boolean).join(" ");
+      const message = row.error || `${row.conflicts?.length || 0} existing value conflict(s)`;
+      return `${esc(label || `Row ${row.sourceRow || "?"}`)}: ${esc(typeof message === "string" ? message : JSON.stringify(message))}`;
+    });
+
+  if(noteworthy.length){
+    parts.push(`<div class="model-import-details">${noteworthy.join("<br>")}</div>`);
+  }
+
+  return parts.join("<br>");
 }
 
 async function loadFormData(){
@@ -1514,6 +1576,28 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
 
   try{
     setLoading(true);
+
+    if(pendingModelImport?.errors?.length){
+      throw new Error(`The model import file has ${pendingModelImport.errors.length} validation error(s). Correct the file before submitting the brochure.`);
+    }
+
+    let modelImportPreview = null;
+    if(pendingModelImport?.rows?.length){
+      showStatus("Validating model data against the Model Database...", "success");
+      modelImportPreview = await importBrochureModels(pendingModelImport.rows, {dryRun:true});
+
+      if(Number(modelImportPreview.failed || 0) > 0){
+        setModelImportSummary(modelImportResultHtml(modelImportPreview, "Model database validation"), "error");
+        throw new Error(`${modelImportPreview.failed} model row(s) failed database validation. No brochure has been created.`);
+      }
+
+      setModelImportSummary(
+        modelImportResultHtml(modelImportPreview, "Ready to import") +
+        '<div class="model-import-details">Existing values will not be overwritten automatically. Safe empty fields will be filled.</div>',
+        Number(modelImportPreview.conflicts || 0) > 0 ? "warning" : "ok"
+      );
+    }
+
     showStatus("Uploading files...", "success");
 
     const uploadedCover = await uploadFile(coverFile);
@@ -1537,11 +1621,37 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
     if(uploadedPdf) payload[FIELDS.brochureFile] = [uploadedPdf];
 
     showStatus("Creating brochure entry...", "success");
-    await createBrochureRow(payload);
+    const createdBrochure = await createBrochureRow(payload);
 
-    showStatus(`Brochure submitted successfully. It is now listed as Pending.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`, "success");
+    let finalImportResult = null;
+    if(pendingModelImport?.rows?.length){
+      if(!createdBrochure?.id){
+        throw new Error("The brochure was created, but no Brochure ID was returned. Model import was not started.");
+      }
+
+      showStatus("Brochure created. Importing model data...", "success");
+      finalImportResult = await importBrochureModels(pendingModelImport.rows, {
+        dryRun:false,
+        brochureId:createdBrochure.id
+      });
+
+      setModelImportSummary(
+        modelImportResultHtml(finalImportResult, "Model import completed"),
+        Number(finalImportResult.failed || 0) > 0 || Number(finalImportResult.conflicts || 0) > 0 ? "warning" : "ok"
+      );
+    }
+
+    const importMessage = finalImportResult
+      ? `<br><br>${Number(finalImportResult.created || 0)} new model(s), ${Number(finalImportResult.enriched || 0)} existing model(s) enriched, ${Number(finalImportResult.conflicts || 0)} conflict(s).`
+      : "";
+
+    showStatus(`Brochure submitted successfully. It is now listed as Pending.${importMessage}<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`, "success");
     document.getElementById("brochureForm").reset();
-    clearModelImport();
+    pendingModelImport = null;
+    const modelImportInput = document.getElementById("modelImportInput");
+    if(modelImportInput) modelImportInput.value = "";
+    document.getElementById("modelImportFileName").textContent = "No file selected";
+    document.getElementById("removeModelImportButton").style.display = "none";
     updateCustomFileName("coverInput", "coverFileName");
     updateCustomFileName("pdfInput", "pdfFileName");
     updateModelSeriesOptions();

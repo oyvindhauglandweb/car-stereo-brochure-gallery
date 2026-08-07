@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<!-- V20260804-0009 -->
+<!-- V20260807-0215 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -190,6 +190,55 @@ input[type="file"]{padding:10px 14px;}
   outline-offset:2px;
 }
 .help-text{color:var(--muted);font-size:13px;line-height:1.4;}
+
+.model-import-box{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  background:var(--card);
+}
+.model-import-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.model-import-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  background:var(--button);
+  color:var(--text);
+  font-weight:bold;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+.model-import-button:hover{background:var(--button-hover);}
+.model-import-file-name{
+  color:var(--muted);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.model-import-summary{
+  display:none;
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  line-height:1.5;
+}
+.model-import-summary.visible{display:block;}
+.model-import-summary.ok{border-left:4px solid #2e9d57;}
+.model-import-summary.warning{border-left:4px solid #c48a1b;}
+.model-import-summary.error{border-left:4px solid #c94b4b;}
+.model-import-summary strong{color:var(--text);}
+.model-import-details{margin-top:7px;color:var(--muted);font-size:13px;}
 
 .action-row{
   display:flex;
@@ -636,6 +685,20 @@ body:not(.dark-mode) .model-series-modal-save{
           <div class="help-text">Optional. Paste all model numbers at once. Space, comma, semicolon and new lines are accepted. Duplicates are removed automatically.</div>
         </div>
 
+        <div class="form-field full">
+          <label>Model data import</label>
+          <div class="model-import-box">
+            <input class="custom-file-input" id="modelImportInput" type="file" accept=".xlsx,.xls">
+            <div class="model-import-top">
+              <label class="model-import-button" for="modelImportInput">Import model data file</label>
+              <span class="model-import-file-name" id="modelImportFileName">No file selected</span>
+              <button type="button" class="model-import-button" id="removeModelImportButton" style="display:none;">Remove file</button>
+            </div>
+            <div class="help-text" style="margin-top:8px;">Optional. Select a Car Stereo Garage model import Excel file. The file is validated locally first; no model data is written during this step.</div>
+            <div class="model-import-summary" id="modelImportSummary"></div>
+          </div>
+        </div>
+
         <div class="form-field">
           <label for="coverInput">Cover image <span class="required">*</span></label>
           <input class="custom-file-input" id="coverInput" type="file" accept="image/*" required>
@@ -685,6 +748,7 @@ body:not(.dark-mode) .model-series-modal-save{
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const API_BASE = "https://api.carstereogarage.com";
 
@@ -722,6 +786,7 @@ let allModelSeriesGuides = [];
 let statusPendingOptionId = null;
 let signedInUserName = "";
 let pendingModelSeriesIds = new Set();
+let pendingModelImport = null;
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -1125,6 +1190,159 @@ function updateMarketFromLanguage(){
   setSelectByVisibleText("marketSelect", suggestedMarket);
 }
 
+function setModelImportSummary(message, type = "ok"){
+  const box = document.getElementById("modelImportSummary");
+  box.className = `model-import-summary visible ${type}`;
+  box.innerHTML = message;
+}
+
+function clearModelImport(){
+  pendingModelImport = null;
+  const input = document.getElementById("modelImportInput");
+  if(input) input.value = "";
+  document.getElementById("modelImportFileName").textContent = "No file selected";
+  document.getElementById("removeModelImportButton").style.display = "none";
+  const summary = document.getElementById("modelImportSummary");
+  summary.className = "model-import-summary";
+  summary.innerHTML = "";
+}
+
+function normalizeHeader(value){
+  return String(value ?? "").trim();
+}
+
+function normalizeExcelCell(value){
+  if(value === undefined || value === null) return "";
+  const text = String(value).trim();
+  if(["nan", "null", "n/a"].includes(text.toLowerCase())) return "";
+  return value;
+}
+
+function findImportSheetName(workbook){
+  const exact = workbook.SheetNames.find(name => name.trim().toLowerCase() === "import");
+  return exact || workbook.SheetNames[0] || "";
+}
+
+async function readModelImportFile(file){
+  if(typeof XLSX === "undefined"){
+    throw new Error("Excel reader could not be loaded. Check the internet connection and try again.");
+  }
+
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, {type:"array", cellDates:false});
+  const sheetName = findImportSheetName(workbook);
+  if(!sheetName) throw new Error("The Excel file does not contain a worksheet.");
+
+  const sheet = workbook.Sheets[sheetName];
+  const matrix = XLSX.utils.sheet_to_json(sheet, {header:1, defval:"", raw:false, blankrows:false});
+  if(!matrix.length) throw new Error("The selected worksheet is empty.");
+
+  // The standard template has group headings on row 1, helper text on row 2 and field names on row 3.
+  // Also accept a plain file where field names are on row 1.
+  let headerRowIndex = matrix.findIndex(row => {
+    const headers = row.map(normalizeHeader);
+    return headers.includes("Brand") && headers.includes("Model");
+  });
+
+  if(headerRowIndex < 0){
+    throw new Error('Could not find a header row containing both "Brand" and "Model".');
+  }
+
+  const headers = matrix[headerRowIndex].map(normalizeHeader);
+  const brandIndex = headers.indexOf("Brand");
+  const modelIndex = headers.indexOf("Model");
+  const marketsIndex = headers.indexOf("Markets");
+
+  const rows = matrix.slice(headerRowIndex + 1)
+    .map((row, sourceIndex) => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        if(header) obj[header] = normalizeExcelCell(row[index]);
+      });
+      obj.__sourceRow = headerRowIndex + 2 + sourceIndex;
+      return obj;
+    })
+    .filter(row => Object.entries(row).some(([key, value]) => key !== "__sourceRow" && String(value ?? "").trim() !== ""));
+
+  if(!rows.length) throw new Error("No model rows were found in the import file.");
+
+  const errors = [];
+  const warnings = [];
+  const models = [];
+  const seenModels = new Set();
+
+  rows.forEach(row => {
+    const brand = String(row.Brand || "").trim();
+    const model = String(row.Model || "").trim();
+    const markets = String(row.Markets || "").trim();
+
+    if(!brand) errors.push(`Row ${row.__sourceRow}: Brand is missing.`);
+    if(!model) errors.push(`Row ${row.__sourceRow}: Model is missing.`);
+    if(!markets && marketsIndex >= 0) warnings.push(`Row ${row.__sourceRow}: Markets is empty.`);
+
+    if(model){
+      const normalized = model.toUpperCase();
+      if(!seenModels.has(normalized)){
+        seenModels.add(normalized);
+        models.push(model);
+      }
+    }
+  });
+
+  const selectedBrandOption = document.getElementById("brandSelect")?.selectedOptions?.[0];
+  const selectedBrand = selectedBrandOption && selectedBrandOption.value ? selectedBrandOption.textContent.trim() : "";
+  const fileBrands = Array.from(new Set(rows.map(row => String(row.Brand || "").trim()).filter(Boolean)));
+
+  if(fileBrands.length > 1){
+    warnings.push(`The file contains more than one brand: ${fileBrands.join(", ")}.`);
+  }
+  if(selectedBrand && fileBrands.length === 1 && selectedBrand.toLowerCase() !== fileBrands[0].toLowerCase()){
+    errors.push(`Selected brochure brand is ${selectedBrand}, but the import file contains ${fileBrands[0]}.`);
+  }
+
+  return {file, sheetName, headers, rows, models, errors, warnings, fileBrands};
+}
+
+async function handleModelImportFile(file){
+  if(!file){
+    clearModelImport();
+    return;
+  }
+
+  document.getElementById("modelImportFileName").textContent = file.name;
+  document.getElementById("removeModelImportButton").style.display = "inline-flex";
+  setModelImportSummary("Reading and validating Excel file...", "ok");
+
+  try{
+    const result = await readModelImportFile(file);
+    pendingModelImport = result;
+
+    if(result.models.length){
+      document.getElementById("modelNumbersInput").value = normalizeModelNumbers(result.models.join(" "));
+    }
+
+    const lines = [
+      `<strong>${result.rows.length} model row${result.rows.length === 1 ? "" : "s"} found</strong>`,
+      `Worksheet: ${esc(result.sheetName)}`,
+      `${result.models.length} unique model number${result.models.length === 1 ? "" : "s"} copied to Model numbers`
+    ];
+
+    if(result.errors.length){
+      lines.push(`<div class="model-import-details"><strong>${result.errors.length} error${result.errors.length === 1 ? "" : "s"}:</strong><br>${result.errors.slice(0,10).map(esc).join("<br>")}${result.errors.length > 10 ? "<br>…" : ""}</div>`);
+      setModelImportSummary(lines.join("<br>"), "error");
+    } else if(result.warnings.length){
+      lines.push(`<div class="model-import-details"><strong>${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"}:</strong><br>${result.warnings.slice(0,10).map(esc).join("<br>")}${result.warnings.length > 10 ? "<br>…" : ""}</div>`);
+      setModelImportSummary(lines.join("<br>"), "warning");
+    } else {
+      lines.push(`<div class="model-import-details">Validation passed. No model data has been written yet.</div>`);
+      setModelImportSummary(lines.join("<br>"), "ok");
+    }
+  }catch(error){
+    pendingModelImport = null;
+    setModelImportSummary(`<strong>Could not read model import file.</strong><div class="model-import-details">${esc(error.message)}</div>`, "error");
+  }
+}
+
 async function uploadFile(file){
   const formData = new FormData();
   formData.append("file", file);
@@ -1323,6 +1541,7 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
 
     showStatus(`Brochure submitted successfully. It is now listed as Pending.<br><br><a href="gallery.html" style="color:var(--link);font-weight:bold;">Open gallery</a>`, "success");
     document.getElementById("brochureForm").reset();
+    clearModelImport();
     updateCustomFileName("coverInput", "coverFileName");
     updateCustomFileName("pdfInput", "pdfFileName");
     updateModelSeriesOptions();
@@ -1334,6 +1553,18 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   }
 });
 
+
+document.getElementById("modelImportInput").addEventListener("change", event => {
+  handleModelImportFile(event.target.files?.[0] || null);
+});
+
+document.getElementById("removeModelImportButton").addEventListener("click", clearModelImport);
+
+document.getElementById("brandSelect").addEventListener("change", () => {
+  if(pendingModelImport?.file){
+    handleModelImportFile(pendingModelImport.file);
+  }
+});
 
 function updateCustomFileName(inputId, outputId){
   const input = document.getElementById(inputId);

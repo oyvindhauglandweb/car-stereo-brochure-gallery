@@ -82,7 +82,7 @@ function toggleTheme(){
 $("themeToggle").addEventListener("click", toggleTheme); applyTheme();
 
 async function fetchJson(url){
-  const res = await fetch(url, {credentials:"include"});
+  const res = await fetch(url, {credentials:"omit", mode:"cors"});
   const text = await res.text();
   let data = null; try{data=text?JSON.parse(text):null}catch(_){data=text}
   if(!res.ok) throw new Error(data?.detail || data?.error || text || `HTTP ${res.status}`);

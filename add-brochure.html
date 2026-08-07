@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<!-- V20260807-0225 -->
+<!-- V20260807-0405 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1291,13 +1291,21 @@ async function readModelImportFile(file){
 
   const selectedBrandOption = document.getElementById("brandSelect")?.selectedOptions?.[0];
   const selectedBrand = selectedBrandOption && selectedBrandOption.value ? selectedBrandOption.textContent.trim() : "";
+  const selectedTypeOption = document.getElementById("typeSelect")?.selectedOptions?.[0];
+  const selectedType = selectedTypeOption && selectedTypeOption.value ? selectedTypeOption.textContent.trim() : "";
+  const isOemBrochure = /^oem(?:\b|\s|[-_/])/i.test(selectedType) || selectedType.toLowerCase() === "oem";
   const fileBrands = Array.from(new Set(rows.map(row => String(row.Brand || "").trim()).filter(Boolean)));
 
-  if(fileBrands.length > 1){
-    warnings.push(`The file contains more than one brand: ${fileBrands.join(", ")}.`);
-  }
-  if(selectedBrand && fileBrands.length === 1 && selectedBrand.toLowerCase() !== fileBrands[0].toLowerCase()){
-    errors.push(`Selected brochure brand is ${selectedBrand}, but the import file contains ${fileBrands[0]}.`);
+  // Normal brochures keep the existing brand checks. OEM brochures are the
+  // deliberate exception because one OEM brochure may contain components from
+  // several actual manufacturers.
+  if(!isOemBrochure){
+    if(fileBrands.length > 1){
+      warnings.push(`The file contains more than one brand: ${fileBrands.join(", ")}.`);
+    }
+    if(selectedBrand && fileBrands.length === 1 && selectedBrand.toLowerCase() !== fileBrands[0].toLowerCase()){
+      errors.push(`Selected brochure brand is ${selectedBrand}, but the import file contains ${fileBrands[0]}.`);
+    }
   }
 
   return {file, sheetName, headers, rows, models, errors, warnings, fileBrands};
@@ -1663,6 +1671,12 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
   }
 });
 
+
+document.getElementById("typeSelect").addEventListener("change", () => {
+  const modelImportInput = document.getElementById("modelImportInput");
+  const file = modelImportInput?.files?.[0];
+  if(file) handleModelImportFile(file);
+});
 
 document.getElementById("modelImportInput").addEventListener("change", event => {
   handleModelImportFile(event.target.files?.[0] || null);

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0105 -->
+<!-- V20260808-0120 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -154,8 +154,26 @@ function modelImageUrl(m){
   if(m.mainImageUrl) return m.mainImageUrl;
   return m.modelId ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}` : "";
 }
-async function loadModelImage(img, imageUrl, placeholder, warning){
+async function updateAiImageWarning(imageUrl, warning){
+  if(!warning) return;
+  warning.style.display="none";
+  if(!imageUrl || !imageUrl.startsWith(API_BASE)) return;
+
+  try{
+    const response=await fetch(imageUrl,{method:"HEAD",cache:"no-store"});
+    if(response.ok && response.headers.get("X-Model-Image-AI")==="1"){
+      warning.style.display="block";
+    }
+  }catch(error){
+    // Image display must never depend on the optional AI metadata check.
+  }
+}
+function loadModelImage(img, imageUrl, placeholder, warning){
   if(warning) warning.style.display="none";
+
+  img.onload=null;
+  img.onerror=null;
+
   if(!imageUrl){
     img.removeAttribute("src");
     img.style.display="none";
@@ -163,33 +181,22 @@ async function loadModelImage(img, imageUrl, placeholder, warning){
     return;
   }
 
-  try{
-    const response=await fetch(imageUrl,{cache:"default"});
-    if(!response.ok) throw new Error(`Image ${response.status}`);
-    const aiGenerated=response.headers.get("X-Model-Image-AI")==="1";
-    const blob=await response.blob();
-    const objectUrl=URL.createObjectURL(blob);
+  img.onload=function(){
+    img.style.display="block";
+    if(placeholder) placeholder.style.display="none";
+    updateAiImageWarning(imageUrl,warning);
+  };
 
-    img.onload=function(){
-      img.style.display="block";
-      if(placeholder) placeholder.style.display="none";
-      if(warning) warning.style.display=aiGenerated ? "block" : "none";
-      setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
-    };
-    img.onerror=function(){
-      URL.revokeObjectURL(objectUrl);
-      img.removeAttribute("src");
-      img.style.display="none";
-      if(placeholder) placeholder.style.display="block";
-      if(warning) warning.style.display="none";
-    };
-    img.src=objectUrl;
-  }catch(error){
+  img.onerror=function(){
     img.removeAttribute("src");
     img.style.display="none";
     if(placeholder) placeholder.style.display="block";
     if(warning) warning.style.display="none";
-  }
+  };
+
+  if(placeholder) placeholder.style.display="none";
+  img.style.display="none";
+  img.src=imageUrl;
 }
 function renderList(){
   $("listStatus").style.display="none";
@@ -307,7 +314,7 @@ async function openModel(modelId){
     ph.style.display=selectedImageUrl ? "none" : "block";
     img.style.display="none";
     aiWarning.style.display="none";
-    await loadModelImage(img,selectedImageUrl,ph,aiWarning);
+    loadModelImage(img,selectedImageUrl,ph,aiWarning);
     const summary=[
       ["Brand",m.brand],["Model",m.model],["Model Series",m.modelSeries],["Market",marketsText(m)],["Years",yearText(m)],["Unit Type",m.unitType],["Functions",functionsText(m)]
     ].filter(x=>x[1]);

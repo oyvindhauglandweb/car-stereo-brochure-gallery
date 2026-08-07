@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0160 -->
+<!-- V20260808-0170 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -360,7 +360,21 @@ function canReturnToPreviousPage(){
 }
 
 async function openModel(modelId){
-  $("browserView").style.display="none"; $("detailView").classList.add("active");
+  // Clear the previous detail image immediately so it cannot flash while
+  // the next model and image are loading.
+  const detailImg=$("modelImage");
+  const detailPlaceholder=$("imagePlaceholder");
+  const detailAiWarning=$("imageAiWarning");
+
+  detailImg.onload=null;
+  detailImg.onerror=null;
+  detailImg.removeAttribute("src");
+  detailImg.style.display="none";
+  detailPlaceholder.style.display="block";
+  detailAiWarning.style.display="none";
+
+  $("browserView").style.display="none";
+  $("detailView").classList.add("active");
   updateMenuBackButton();
   $("detailTitle").textContent="Loading model..."; $("summaryGrid").innerHTML=""; $("specSections").innerHTML="";
   try{
@@ -423,6 +437,14 @@ async function openModel(modelId){
   }catch(err){$("detailTitle").textContent="Could not load model";$("specSections").innerHTML=`<div class="status">${esc(err.message)}</div>`;}
 }
 function backToModels(){
+  const detailImg=$("modelImage");
+  detailImg.onload=null;
+  detailImg.onerror=null;
+  detailImg.removeAttribute("src");
+  detailImg.style.display="none";
+  $("imagePlaceholder").style.display="block";
+  $("imageAiWarning").style.display="none";
+
   $("detailView").classList.remove("active");
   $("browserView").style.display="block";
   document.title="Models – Car Stereo Garage";

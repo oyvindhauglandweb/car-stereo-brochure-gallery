@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0110 -->
+<!-- V20260809-0130 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -52,7 +52,83 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .secondary{color:var(--muted);margin-top:4px;font-size:12px}
 .value-yes{font-weight:700}
 .version{margin:24px 0 8px;text-align:center;font-size:11px;color:var(--muted);opacity:.75}
-@media(max-width:700px){.container{padding:12px}.logo{width:220px;max-width:90vw}.page-title{font-size:26px}}
+@media(max-width:700px){
+  .container{padding:12px}
+  .logo{width:220px;max-width:90vw}
+  .page-title{font-size:26px}
+
+  /* On phones the image column must scroll away. Keeping both Image + Model
+     sticky consumes almost the entire viewport. Only the model identity stays. */
+  .compare-table th:nth-child(1),
+  .compare-table td:nth-child(1){
+    position:static;
+    left:auto;
+    z-index:auto;
+  }
+
+  .compare-table th:nth-child(2),
+  .compare-table td:nth-child(2){
+    position:sticky;
+    left:0;
+    z-index:6;
+    width:42px;
+    min-width:42px;
+    max-width:42px;
+    padding:5px 3px;
+    background:var(--surface);
+    text-align:center;
+  }
+
+  .compare-table th:nth-child(2){
+    z-index:8;
+    background:var(--soft);
+    font-size:0;
+  }
+
+  /* Small vertical "Model" label in the sticky header. */
+  .compare-table th:nth-child(2)::after{
+    content:"Model";
+    display:inline-block;
+    font-size:11px;
+    color:var(--text);
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    letter-spacing:.2px;
+  }
+
+  .compare-model-col{
+    width:42px;
+    min-width:42px;
+  }
+
+  .model-name{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    width:100%;
+    min-height:96px;
+    font-size:12px;
+    white-space:nowrap;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+  }
+
+  .model-brand,
+  .model-number{
+    display:inline;
+  }
+
+  .compare-image-col{
+    width:112px;
+    min-width:112px;
+  }
+
+  .compare-image{
+    width:96px;
+    height:54px;
+  }
+}
 </style>
 </head>
 <body>
@@ -77,7 +153,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0110</div>
+  <div class="version">models-compare.html V20260809-0130</div>
 </div>
 
 <script>
@@ -283,7 +359,7 @@ function render(models){
     const cells=columns.map(column=>{
       if(column.key==="__image") return `<td>${image}</td>`;
       if(column.key==="__model"){
-        return `<td><div class="model-name">${esc(m.brand)} ${esc(m.model)}</div></td>`;
+        return `<td><div class="model-name"><span class="model-brand">${esc(m.brand)}</span> <span class="model-number">${esc(m.model)}</span></div></td>`;
       }
 
       const value=comparisonValue(m,column);

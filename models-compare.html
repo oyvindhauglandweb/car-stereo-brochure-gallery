@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0325 -->
+<!-- V20260809-0340 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -189,7 +189,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0325</div>
+  <div class="version">models-compare.html V20260809-0340</div>
 </div>
 
 <script>
@@ -379,12 +379,24 @@ function comparisonValue(model,column){
 
 function visibleComparisonColumns(models){
   return comparisonColumns.filter(column=>{
-    if(column.currencyRequiresPrice){
-      // Currency is useful only where at least one compared model has
-      // an Original Price. The price itself remains hidden as requested.
-      return models.some(model=>isMeaningful(detailValue(model,"Original Price")));
+    // Image and Model are structural columns and must always be visible.
+    if(column.key === "__image" || column.key === "__model"){
+      return true;
     }
-    return true;
+
+    // Original Currency is relevant only when at least one compared model
+    // actually has an Original Price.
+    if(column.currencyRequiresPrice){
+      const hasOriginalPrice = models.some(
+        model => isMeaningful(detailValue(model,"Original Price"))
+      );
+      if(!hasOriginalPrice) return false;
+    }
+
+    // Hide any specification column where every compared model is empty.
+    // Keep zero/false-like numeric values that are meaningful; comparisonValue
+    // already normalizes the displayed value for synthetic columns.
+    return models.some(model => isMeaningful(comparisonValue(model,column)));
   });
 }
 

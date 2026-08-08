@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-2200 -->
+<!-- V20260808-2230 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -10,6 +10,29 @@
 :root[data-theme="light"]{--bg:#f2f3f5;--surface:#fff;--card:#fff;--soft:#f1f3f5;--border:#d7dbe0;--text:#171717;--muted:#666;--link:#006da0;--accent:#1f789d;--danger:#a94442}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.container{max-width:1280px;margin:auto;padding:24px}.header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-bottom:28px}.logo{width:260px;max-width:58vw;margin:0 auto}.top-buttons{display:flex;justify-content:center;gap:10px}.top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr .75fr 1.4fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
 .model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:hidden}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.thumb-name{font-size:17px;font-weight:700;min-width:0}.thumb-year{color:var(--muted);white-space:nowrap}.ai-image-warning{font-size:9px;line-height:1;color:var(--muted);text-align:center;margin:1px 0 0}.thumbnail-view .ai-image-warning{margin:-8px 0 3px}.detail-ai-warning{margin-top:-8px;margin-bottom:12px}.status{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.model-card{position:relative}
+.model-image-path-tooltip{
+  position:absolute;
+  z-index:40;
+  left:10px;
+  right:10px;
+  bottom:calc(100% + 6px);
+  display:none;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  background:var(--surface);
+  color:var(--text);
+  font-size:12px;
+  line-height:1.35;
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+  text-align:left;
+  word-break:break-all;
+  pointer-events:none;
+}
+.model-card:hover .model-image-path-tooltip{display:block}
+.model-image-path-tooltip .tip-label{color:var(--muted);font-weight:700}
+.model-image-path-tooltip .tip-file{font-weight:700}
 .detail{display:none}.detail.active{display:block}.detail-heading-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}.detail-title{font-size:30px;font-weight:700;margin:0}.detail-functions{font-size:16px;color:var(--text);text-align:right;line-height:1.3}.image-panel{width:100%;min-height:230px;max-height:380px;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:18px;margin-bottom:18px}.image-panel img{display:none;max-width:100%;max-height:340px;object-fit:contain}.image-placeholder{color:var(--muted);font-size:17px}.back-row{margin-bottom:14px}.back-button{border:0;border-radius:7px;background:var(--soft);color:var(--text);padding:10px 14px;font-weight:700;cursor:pointer}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}.summary-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}.summary-label{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:4px}.summary-value{font-size:16px}.spec-section{margin:14px 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}.spec-title{font-size:18px;font-weight:700;padding:13px 15px;background:var(--soft)}.spec-grid{display:block}.spec-pair{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}.spec-pair.full-width{grid-template-columns:1fr}.spec-row{display:grid;grid-template-columns:minmax(170px,42%) 1fr;gap:10px;padding:10px 15px}.spec-row.full-width{grid-template-columns:minmax(170px,21%) 1fr}.spec-label{font-weight:700}.spec-value{word-break:break-word}.muted{color:var(--muted)}
 @media(max-width:950px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spec-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.container{padding:14px}.logo{width:220px;max-width:90vw}.top-buttons{width:100%}.filters{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:1fr}.model-card{grid-template-columns:1fr;gap:4px}.model-functions{grid-column:1}.model-meta{grid-column:1}.summary-grid{grid-template-columns:1fr}.image-panel{min-height:160px;max-height:270px}.image-panel img{max-height:235px}.detail-heading-row{align-items:flex-start;gap:10px}.detail-title{font-size:26px}.detail-functions{font-size:14px;max-width:55%}.spec-pair{grid-template-columns:1fr}.spec-pair:not(.full-width) .spec-row + .spec-row{border-top:1px solid var(--border)}.spec-row,.spec-row.full-width{grid-template-columns:1fr;gap:4px}}
@@ -257,6 +280,59 @@ function loadModelImage(img, imageUrl, placeholder, warning, loadingText="No ima
   img.style.display="block";
   img.src=imageUrl;
 }
+
+function modelImageDiagnostic(m){
+  const indexed = m?.modelId ? modelImageIndex[m.modelId] : null;
+
+  if(indexed?.fileName){
+    const folder = String(indexed.folderPath || "").replace(/\/+$/,"");
+    const fullPath = folder ? `${folder}/${indexed.fileName}` : indexed.fileName;
+    return {
+      source:"OneDrive image index",
+      path:fullPath,
+      file:indexed.fileName
+    };
+  }
+
+  const markets = Array.isArray(m?.markets) ? m.markets.filter(Boolean) : [];
+  const market = markets[0] || "";
+  const brand = String(m?.brand || "");
+  const model = String(m?.model || "");
+
+  if(market && brand && model){
+    return {
+      source:"Expected standard path",
+      path:`ModellImages/${market}/${brand}/${model}.*`,
+      file:`${model}.*`
+    };
+  }
+
+  if(m?.mainImageUrl){
+    return {
+      source:"Main Image URL fallback",
+      path:String(m.mainImageUrl),
+      file:String(m.mainImageUrl).split("/").pop() || ""
+    };
+  }
+
+  return {
+    source:"No image source resolved",
+    path:"—",
+    file:"—"
+  };
+}
+
+function modelImageTooltipHtml(m){
+  const info = modelImageDiagnostic(m);
+  return `
+    <div class="model-image-path-tooltip">
+      <div><span class="tip-label">Source:</span> ${esc(info.source)}</div>
+      <div><span class="tip-label">Path:</span> ${esc(info.path)}</div>
+      <div><span class="tip-label">File:</span> <span class="tip-file">${esc(info.file)}</span></div>
+      <div><span class="tip-label">Model ID:</span> ${esc(m?.modelId || "—")}</div>
+    </div>`;
+}
+
 async function renderList(){
   $("listStatus").style.display="none";
 
@@ -274,6 +350,7 @@ async function renderList(){
       const imageUrl=modelImageUrl(m);
       return `
         <div class="model-card" data-model-id="${esc(m.modelId)}">
+          ${modelImageTooltipHtml(m)}
           <div class="thumb-image">
             <img data-image-url="${esc(imageUrl)}" alt="${esc(m.brand)} ${esc(m.model)}">
             <div class="thumb-placeholder"${imageUrl?' style="display:none"':""}>No image available</div>
@@ -298,6 +375,7 @@ async function renderList(){
   }else{
     list.innerHTML = filteredModels.map(m=>`
       <div class="model-card" data-model-id="${esc(m.modelId)}">
+        ${modelImageTooltipHtml(m)}
         <div class="model-name">${esc(m.brand)} ${esc(m.model)}</div>
         <div class="model-functions">${esc(functionsText(m))}</div>
         <div class="model-meta">${m.modelSeries?`${esc(m.modelSeries)} · `:""}${esc(marketsText(m))}${yearText(m)?` · ${esc(yearText(m))}`:""}</div>

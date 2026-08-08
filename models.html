@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0215 -->
+<!-- V20260809-0235 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -108,13 +108,14 @@
 
 @media(max-width:720px){
   .compare-actions{
-    top:auto;
-    right:12px;
-    left:auto;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 88px);
-    width:auto;
+    top:0;
+    right:auto;
+    bottom:auto;
+    left:50%;
+    transform:translateX(-50%);
+    width:max-content;
     max-width:calc(100vw - 24px);
-    justify-content:flex-end;
+    justify-content:center;
     gap:7px;
     padding:6px;
   }
@@ -238,6 +239,16 @@ $("compareToggle").addEventListener("click", ()=>{
     startCompareMode();
   }
 });
+
+window.addEventListener("resize", ()=>{
+  if(compareMode) positionCompareActions();
+});
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", ()=>{
+    if(compareMode) positionCompareActions();
+  });
+}
+
 updateCompareUi();
 
 async function fetchJson(url){
@@ -448,6 +459,36 @@ function modelImageTooltipHtml(m){
 }
 
 
+
+function positionCompareActions(){
+  const actions = $("compareActions");
+  const toggle = $("compareToggle");
+  if(!actions || !toggle) return;
+
+  if(window.matchMedia("(max-width:720px)").matches){
+    // Anchor the floating controls directly below the square Compare button.
+    // Because the panel itself is fixed, it stays at this screen position
+    // even after the page is scrolled.
+    const rect = toggle.getBoundingClientRect();
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    const panelHeight = actions.offsetHeight || 44;
+    const preferredTop = rect.bottom + 10;
+    const maxTop = Math.max(12, viewportHeight - panelHeight - 12);
+
+    actions.style.top = `${Math.min(preferredTop, maxTop)}px`;
+    actions.style.right = "auto";
+    actions.style.bottom = "auto";
+    actions.style.left = "50%";
+    actions.style.transform = "translateX(-50%)";
+  }else{
+    actions.style.top = "";
+    actions.style.right = "";
+    actions.style.bottom = "";
+    actions.style.left = "";
+    actions.style.transform = "";
+  }
+}
+
 function updateCompareUi(){
   const count = selectedCompareRows.size;
   const compareButton = $("compareButton");
@@ -455,6 +496,10 @@ function updateCompareUi(){
 
   actions.classList.toggle("compare-mode", compareMode);
   compareButton.classList.toggle("active", compareMode);
+
+  if(compareMode){
+    requestAnimationFrame(positionCompareActions);
+  }
   const compareToggle = $("compareToggle");
   if(compareToggle) compareToggle.classList.toggle("active", compareMode);
 
@@ -952,6 +997,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0215</div>
+">models.html V20260809-0235</div>
 </body>
 </html>

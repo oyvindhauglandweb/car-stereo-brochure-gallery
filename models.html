@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-2320 -->
+<!-- V20260808-2345 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -559,7 +559,8 @@ function renderSpecGroup(items, groupName){
 
 let detailsForRender = null;
 
-async function openModel(modelId){
+async function openModel(modelId, options = {}){
+  const historyMode = options.historyMode || "push";
   // Clear the previous detail image immediately so it cannot flash while
   // the next model and image are loading.
   const detailImg=$("modelImage");
@@ -648,11 +649,17 @@ async function openModel(modelId){
       .map(g=>`<section class="spec-section"><div class="spec-title">${esc(g)}</div><div class="spec-grid">${renderSpecGroup(groups[g],g)}</div></section>`)
       .join("");
     detailsForRender = null;
-    history.replaceState(null,"",`models.html?model_id=${encodeURIComponent(m.modelId)}`);
+    const detailUrl = `models.html?model_id=${encodeURIComponent(m.modelId)}`;
+    if(historyMode === "push"){
+      history.pushState({view:"detail", modelId:m.modelId}, "", detailUrl);
+    }else if(historyMode === "replace"){
+      history.replaceState({view:"detail", modelId:m.modelId}, "", detailUrl);
+    }
     scrollTo(0,0);
   }catch(err){$("detailTitle").textContent="Could not load model";$("detailFunctions").textContent="";$("specSections").innerHTML=`<div class="status">${esc(err.message)}</div>`;}
 }
-function backToModels(){
+function backToModels(options = {}){
+  const historyMode = options.historyMode || "replace";
   const detailImg=$("modelImage");
   detailImg.onload=null;
   detailImg.onerror=null;
@@ -665,7 +672,11 @@ function backToModels(){
   $("detailView").classList.remove("active");
   $("browserView").style.display="block";
   document.title="Models – Car Stereo Garage";
-  history.replaceState(null,"","models.html");
+  if(historyMode === "replace"){
+    history.replaceState({view:"list"}, "", "models.html");
+  }else if(historyMode === "push"){
+    history.pushState({view:"list"}, "", "models.html");
+  }
   updateMenuBackButton();
   scrollTo(0,0);
 }
@@ -673,7 +684,12 @@ function backToModels(){
 $("menuBackButton").addEventListener("click",event=>{
   if($("detailView").classList.contains("active")){
     event.preventDefault();
-    backToModels();
+
+    if(history.state?.view === "detail" && history.length > 1){
+      history.back();
+    }else{
+      backToModels({historyMode:"replace"});
+    }
     return;
   }
 
@@ -688,14 +704,36 @@ async function init(){
   try{
     const data=await fetchJson(`${API_BASE}/models?summary=1`); allModels=data.results||[]; setupFilters(); applyUrlFilters(); applyFilters();
     const p=new URLSearchParams(location.search); const modelId=p.get("model_id");
-    if(modelId){await openModel(modelId);return;}
+
+    if(modelId){
+      history.replaceState({view:"detail", modelId}, "", location.href);
+      await openModel(modelId, {historyMode:"none"});
+      return;
+    }
+
+    history.replaceState({view:"list"}, "", location.href);
+
     const model=p.get("model"), brand=p.get("brand"), market=p.get("market");
     if(model && brand){
       const exact=allModels.filter(m=>normalized(m.brand)===normalized(brand) && normalized(m.model)===normalized(model) && (!market || (m.markets||[]).some(x=>normalized(x)===normalized(market))));
-      if(exact.length===1) await openModel(exact[0].modelId);
+      if(exact.length===1){
+        await openModel(exact[0].modelId, {historyMode:"push"});
+      }
     }
   }catch(err){$("listStatus").textContent=`Could not load models: ${err.message}`;}
 }
+
+window.addEventListener("popstate", async ()=>{
+  const p = new URLSearchParams(location.search);
+  const modelId = p.get("model_id");
+
+  if(modelId){
+    await openModel(modelId, {historyMode:"none"});
+  }else{
+    backToModels({historyMode:"none"});
+  }
+});
+
 init();
 </script>
 
@@ -705,6 +743,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260808-2320</div>
+">models.html V20260808-2345</div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0255 -->
+<!-- V20260809-0325 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -21,7 +21,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
   position:fixed;
   z-index:1000;
   top:18px;
-  right:18px;
+  right:auto;
+  left:50%;
+  transform:translateX(-50%);
   display:none;
   justify-content:center;
   gap:10px;
@@ -73,9 +75,12 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
   .container{padding:12px}
   .compare-actions{
     top:auto;
-    right:12px;
-    bottom:12px;
-    left:12px;
+    right:auto;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 88px);
+    left:50%;
+    transform:translateX(-50%);
+    width:max-content;
+    max-width:calc(100vw - 24px);
     justify-content:center;
   }
   .logo{width:220px;max-width:90vw}
@@ -184,7 +189,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0255</div>
+  <div class="version">models-compare.html V20260809-0325</div>
 </div>
 
 <script>

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0305 -->
+<!-- V20260809-0320 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -14,7 +14,9 @@
   position:fixed;
   z-index:1000;
   top:18px;
-  right:18px;
+  right:auto;
+  left:50%;
+  transform:translateX(-50%);
   display:none;
   justify-content:center;
   gap:10px;
@@ -37,7 +39,7 @@
   cursor:pointer;
 }
 .compare-button.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.compare-button:disabled{opacity:.55;cursor:default}
+.compare-button:disabled{opacity:1;cursor:default}
 .cancel-compare-button{display:inline-block}
 .model-card.compare-selected{
   border-color:var(--link);
@@ -490,10 +492,10 @@ function positionCompareActions(){
     const finalTop = Math.max(safeTop, Math.min(preferredTop, maxTop));
 
     actions.style.top = `${finalTop}px`;
-    actions.style.right = "12px";
+    actions.style.right = "auto";
     actions.style.bottom = "auto";
-    actions.style.left = "auto";
-    actions.style.transform = "none";
+    actions.style.left = "50%";
+    actions.style.transform = "translateX(-50%)";
   }else{
     actions.style.top = "";
     actions.style.right = "";
@@ -1011,6 +1013,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0305</div>
+">models.html V20260809-0320</div>
 </body>
 </html>

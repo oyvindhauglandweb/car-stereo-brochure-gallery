@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0200 -->
+<!-- V20260809-0220 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,6 +16,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .top-buttons{display:flex;justify-content:center;gap:10px}
 .top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}
 .top-button.active{background:var(--accent);color:#fff}
+#compareControlsToggle.compare-active{background:#00B050;color:#fff}
 .compare-actions{
   position:fixed;
   z-index:1000;
@@ -183,13 +184,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0200</div>
+  <div class="version">models-compare.html V20260809-0220</div>
 </div>
 
 <script>
 const API_BASE = "https://api.carstereogarage.com";
 let selectedRowIds = [];
-let compareControlsVisible = false;
+let compareControlsVisible = true;
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -206,7 +207,11 @@ $("themeToggle").addEventListener("click", toggleTheme);
 
 function updateCompareControls(){
   $("compareActions").classList.toggle("active", compareControlsVisible);
-  $("compareControlsToggle").classList.toggle("active", compareControlsVisible);
+
+  // A comparison is active for the entire lifetime of this page.
+  // Green indicates active Compare mode; clicking the button only shows/hides
+  // the floating Reselect/Cancel controls.
+  $("compareControlsToggle").classList.add("compare-active");
 }
 
 $("compareControlsToggle").addEventListener("click", ()=>{

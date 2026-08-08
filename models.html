@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0190 -->
+<!-- V20260808-0210 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -291,6 +291,8 @@ async function renderList(){
 const coreFields = new Set(["Brand","Model","Model Series","Market","Unit Type","Source Unit Functions","Sold From Year","Sold Until Year","Main Image URL","Description"]);
 function groupFor(name){
   const n=String(name);
+  if(n.startsWith("CD ")) return "CD";
+  if(n.startsWith("MD ")) return "MD";
   if(n.startsWith("Cassette ")) return "Cassette";
   if(n.startsWith("Tuner ")) return "Tuner";
   if(n.startsWith("Preamplifier ")) return "Preamplifier";
@@ -322,21 +324,80 @@ function compactNumber(value){
   const n=Number(text);
   return Number.isFinite(n) ? String(n) : text;
 }
+function sortedNoiseReductionSystems(value){
+  const values = Array.isArray(value)
+    ? value.map(v=>String(v).trim()).filter(Boolean)
+    : String(value ?? "").split(/[,;]+/).map(v=>v.trim()).filter(Boolean);
+
+  const order = new Map([
+    ["dolby b", 10],
+    ["dolby c", 20],
+    ["dolby s", 30],
+    ["dbx", 40]
+  ]);
+
+  return values
+    .map((v,index)=>({v,index,rank:order.get(v.toLowerCase()) ?? 1000}))
+    .sort((a,b)=>a.rank-b.rank || a.index-b.index)
+    .map(x=>x.v)
+    .join(", ");
+}
+
+function currencySymbol(currency){
+  const code=String(currency ?? "").trim().toUpperCase();
+  const symbols={
+    EUR:"€",
+    USD:"$",
+    GBP:"£",
+    JPY:"¥",
+    CNY:"¥",
+    KRW:"₩",
+    NOK:"kr",
+    SEK:"kr",
+    DKK:"kr",
+    CHF:"CHF",
+    CAD:"C$",
+    AUD:"A$",
+    NZD:"NZ$"
+  };
+  return symbols[code] || code;
+}
+
 function fieldDisplayValue(name,value,details){
+  if(name === "Cassette Noise Reduction Systems"){
+    return sortedNoiseReductionSystems(value);
+  }
+
   const raw=compactNumber(displayValue(value));
   const units={
     "Amplifier Power per Channel":"W",
+    "Amplifier Signal-to-Noise Ratio":"dB",
     "Preamplifier Output Voltage":"mV",
     "Cassette Signal-to-Noise Ratio":"dB",
+    "Equalizer Signal-to-Noise Ratio":"dB",
+    "Speaker Sensitivity":"dB",
+    "Speaker Maximum RMS Power":"W",
+    "Speaker Maximum Music Power":"W",
+    "CD Signal-to-Noise Ratio":"dB",
+    "MD Signal-to-Noise Ratio":"dB",
     "Width":"mm",
     "Height":"mm",
     "Depth":"mm"
   };
-  if(name === "Cassette THD") return `${raw}%`;
+
+  if(["Cassette THD","CD THD","MD THD"].includes(name)) return `${raw}%`;
+
   if(name === "Original Price"){
     const currency=details?.["Original Currency"];
     return isMeaningful(currency) ? `${raw} ${displayValue(currency)}` : raw;
   }
+
+  if(/^Estimated Value \d+%$/i.test(name)){
+    const currency=details?.["Original Currency"];
+    const symbol=isMeaningful(currency) ? currencySymbol(currency) : "";
+    return symbol ? `${raw} ${symbol}` : raw;
+  }
+
   return units[name] ? `${raw} ${units[name]}` : displayValue(value);
 }
 function publicFieldLabel(name,group){
@@ -449,7 +510,7 @@ async function openModel(modelId){
       if(/Frequency Response High$/i.test(String(name)) && consumed.has(name)) continue;
       const group=groupFor(name); (groups[group] ||= []).push([name,value]);
     }
-    const order=["Cassette","Tuner","Preamplifier","Amplifier","Equalizer","Speaker","Crossover","Dimensions","Other specifications"];
+    const order=["CD","MD","Cassette","Tuner","Preamplifier","Amplifier","Equalizer","Speaker","Crossover","Dimensions","Other specifications"];
     $("specSections").innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<section class="spec-section"><div class="spec-title">${esc(g)}</div><div class="spec-grid">${groups[g].map(([n,v])=>{const label=publicFieldLabel(n,g);const shown=fieldDisplayValue(n,v,details);return `<div class="spec-row${n === "Source Notes" ? " full-width" : ""}"><div class="spec-label">${esc(label)}</div><div class="spec-value">${esc(shown)}</div></div>`;}).join("")}</div></section>`).join("");
     history.replaceState(null,"",`models.html?model_id=${encodeURIComponent(m.modelId)}`);
     scrollTo(0,0);

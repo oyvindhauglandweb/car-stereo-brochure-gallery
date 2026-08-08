@@ -222,6 +222,50 @@ input[type="file"]{padding:10px 14px;}
   color:var(--text);
   background:var(--soft);
   user-select:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.model-conflict-summary-title{
+  min-width:0;
+}
+.model-force-variant{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.model-force-variant input{
+  width:18px;
+  height:18px;
+  min-height:18px;
+  margin:0;
+  padding:0;
+  cursor:pointer;
+}
+.model-import-actions{
+  margin-top:14px;
+  display:flex;
+  justify-content:flex-end;
+}
+.model-import-continue{
+  min-height:40px;
+  padding:0 16px;
+  border:0;
+  border-radius:8px;
+  background:var(--link);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+.model-import-continue:hover{filter:brightness(1.08);}
+.model-import-continue:disabled{
+  opacity:.55;
+  cursor:default;
 }
 .model-conflict-card[open] summary{
   border-bottom:1px solid var(--border);
@@ -619,6 +663,8 @@ let currentBrochure = null;
 let currentUser = null;
 let selectedModelSeriesIds = [];
 let pendingModelImport = null;
+let pendingModelDatabasePreview = null;
+let pendingModelBrochureId = null;
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -796,6 +842,8 @@ function setModelImportSummary(message, type = "ok"){
 
 function clearModelImport(){
   pendingModelImport = null;
+  pendingModelDatabasePreview = null;
+  pendingModelBrochureId = null;
   const input = document.getElementById("modelImportInput");
   if(input) input.value = "";
   document.getElementById("modelImportFileName").textContent = "No file selected";
@@ -1059,10 +1107,17 @@ function modelConflictComparisonHtml(row){
 
   return `
     <details class="model-conflict-card" open>
-      <summary>${esc(label)} — ${conflicts.length} conflict${conflicts.length === 1 ? "" : "s"}</summary>
+      <summary>
+        <span class="model-conflict-summary-title">${esc(label)} — ${conflicts.length} conflict${conflicts.length === 1 ? "" : "s"}</span>
+        <label class="model-force-variant" title="Create the imported row as a separate protected variant instead of merging it into the existing model.">
+          <input type="checkbox" class="model-force-variant-checkbox" data-source-row="${esc(row.sourceRow || "")}">
+          Forced Variant
+        </label>
+      </summary>
       <div class="model-conflict-help">
         Red rows differ between the existing database model and the import file.
-        The existing database value is retained automatically; the import value is not written for these fields.
+        Leave <strong>Forced Variant</strong> unchecked to keep the existing model and only apply safe non-conflicting enrichment.
+        Check it to create the imported row as a separate protected variant.
       </div>
       <div class="model-conflict-table-wrap">
         <table class="model-conflict-table">
@@ -1117,6 +1172,104 @@ function modelImportResultHtml(result, prefix = "Model import"){
   }
 
   return parts.join("<br>");
+}
+
+
+function rowsWithForcedVariantChoices(rows){
+  const selectedRows = new Set(
+    Array.from(document.querySelectorAll(".model-force-variant-checkbox:checked"))
+      .map(input => String(input.dataset.sourceRow || ""))
+      .filter(Boolean)
+  );
+
+  return (rows || []).map(row => {
+    const copy = {...row};
+    const sourceRow = String(copy.__sourceRow || "");
+    if(sourceRow && selectedRows.has(sourceRow)){
+      copy["Force New Variant"] = true;
+    }
+    return copy;
+  });
+}
+
+function addModelImportContinueButton(){
+  const box = document.getElementById("modelImportSummary");
+  if(!box || !pendingModelDatabasePreview || !pendingModelImport?.rows?.length) return;
+
+  const actions = document.createElement("div");
+  actions.className = "model-import-actions";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "model-import-continue";
+  button.id = "continueModelImportButton";
+  button.textContent = "Import model data";
+  button.addEventListener("click", continueModelImportAfterReview);
+
+  actions.appendChild(button);
+  box.appendChild(actions);
+}
+
+async function continueModelImportAfterReview(){
+  if(!pendingModelImport?.rows?.length || !pendingModelBrochureId) return;
+
+  const button = document.getElementById("continueModelImportButton");
+  if(button){
+    button.disabled = true;
+    button.textContent = "Validating...";
+  }
+
+  try{
+    const selectedRows = rowsWithForcedVariantChoices(pendingModelImport.rows);
+
+    // Re-run the dry run with the user's Forced Variant choices applied.
+    const preview = await importBrochureModels(selectedRows, {
+      dryRun:true,
+      brochureId:Number(pendingModelBrochureId)
+    });
+
+    if(Number(preview.failed || 0) > 0){
+      setModelImportSummary(modelImportResultHtml(preview, "Model database validation"), "error");
+      pendingModelDatabasePreview = preview;
+      addModelImportContinueButton();
+      return;
+    }
+
+    if(button){
+      button.textContent = "Importing...";
+    }
+
+    const result = await importBrochureModels(selectedRows, {
+      dryRun:false,
+      brochureId:Number(pendingModelBrochureId)
+    });
+
+    pendingModelDatabasePreview = null;
+    pendingModelBrochureId = null;
+
+    setModelImportSummary(
+      modelImportResultHtml(result, "Model import completed"),
+      Number(result.failed || 0) > 0 || Number(result.conflicts || 0) > 0 ? "warning" : "ok"
+    );
+
+    showStatus(
+      `Model import completed: ${Number(result.created || 0)} new model(s), ${Number(result.enriched || 0)} existing model(s) enriched, ${Number(result.conflicts || 0)} conflict(s), ${Number(result.failed || 0)} failed.<br><br><a href="${esc(getReturnUrl())}" style="color:var(--link);font-weight:bold;">Back to gallery</a>`,
+      Number(result.failed || 0) > 0 ? "warning" : "success"
+    );
+  }catch(error){
+    console.error(error);
+    setModelImportSummary(
+      `<strong>Model import failed</strong><div class="model-import-details">${esc(error.message)}</div>`,
+      "error"
+    );
+    showStatus("Brochure is saved, but model import failed.<br><br>" + esc(error.message), "warning");
+  }finally{
+    const currentButton = document.getElementById("continueModelImportButton");
+    if(currentButton){
+      currentButton.disabled = false;
+      currentButton.textContent = "Import model data";
+    }
+  }
 }
 
 
@@ -1219,6 +1372,12 @@ async function loadFormData(){
     handleModelImportFile(this.files?.[0] || null);
   });
   document.getElementById("removeModelImportButton").addEventListener("click", clearModelImport);
+
+  document.getElementById("modelImportSummary").addEventListener("click", event => {
+    if(event.target.closest(".model-force-variant")){
+      event.stopPropagation();
+    }
+  });
 }
 
 document.getElementById("brochureForm").addEventListener("submit", async function(event){
@@ -1293,11 +1452,25 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
           if(Number(preview.failed || 0) > 0){
             importWarning = `${Number(preview.failed || 0)} model row(s) failed database validation. Model data was not imported.`;
             setModelImportSummary(modelImportResultHtml(preview, "Model database validation"), "error");
+          } else if(Number(preview.conflicts || 0) > 0){
+            // Conflicts require an explicit review before any model rows are written.
+            // The user can mark individual conflict rows as Forced Variant.
+            pendingModelDatabasePreview = preview;
+            pendingModelBrochureId = Number(brochureId);
+
+            setModelImportSummary(
+              modelImportResultHtml(preview, "Ready to import") +
+              '<div class="model-import-details"><strong>Review the conflicts above.</strong> Check Forced Variant on any model that should be stored as a separate protected variant, then click Import model data.</div>',
+              "warning"
+            );
+            addModelImportContinueButton();
+
+            importWarning = "Model data is waiting for conflict review. No model rows have been written yet.";
           } else {
             setModelImportSummary(
               modelImportResultHtml(preview, "Ready to import") +
-              '<div class="model-import-details">Existing values will not be overwritten automatically. Safe empty fields and year/market extensions will be applied.</div>',
-              Number(preview.conflicts || 0) > 0 ? "warning" : "ok"
+              '<div class="model-import-details">No conflicts found. Importing model data automatically.</div>',
+              "ok"
             );
 
             showStatus("Brochure updated. Importing model data...", "success");
@@ -1341,6 +1514,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1730 -->
+<!-- V20260808-1810 -->
 </body>
 </html>

@@ -203,6 +203,83 @@ input[type="file"]{padding:10px 14px;}
 .model-import-summary strong{color:var(--text);}
 .model-import-details{margin-top:7px;color:var(--muted);font-size:13px;}
 
+.model-conflict-list{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.model-conflict-card{
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  background:var(--card);
+}
+.model-conflict-card summary{
+  cursor:pointer;
+  padding:10px 12px;
+  font-weight:bold;
+  color:var(--text);
+  background:var(--soft);
+  user-select:none;
+}
+.model-conflict-card[open] summary{
+  border-bottom:1px solid var(--border);
+}
+.model-conflict-help{
+  padding:9px 12px;
+  font-size:12px;
+  color:var(--muted);
+  border-bottom:1px solid var(--border);
+}
+.model-conflict-table-wrap{
+  overflow-x:auto;
+}
+.model-conflict-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.model-conflict-table th,
+.model-conflict-table td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  vertical-align:top;
+  overflow-wrap:anywhere;
+}
+.model-conflict-table tr:last-child td{border-bottom:0;}
+.model-conflict-table th{
+  color:var(--text);
+  background:var(--soft);
+  white-space:nowrap;
+}
+.model-conflict-field{
+  font-weight:bold;
+  min-width:160px;
+}
+.model-conflict-value{
+  min-width:190px;
+}
+.model-conflict-row{
+  background:rgba(201,75,75,.12);
+}
+.model-conflict-row .model-conflict-field{
+  color:#e36b6b;
+}
+html:not([data-theme="dark"]) .model-conflict-row{
+  background:#fff0f0;
+}
+html:not([data-theme="dark"]) .model-conflict-row .model-conflict-field{
+  color:#a22;
+}
+.model-safe-fields{
+  padding:9px 12px;
+  font-size:12px;
+  color:var(--muted);
+  border-top:1px solid var(--border);
+}
+
 
 .action-row{
   display:flex;
@@ -929,6 +1006,70 @@ async function importBrochureModels(rows, options = {}){
   return data;
 }
 
+function displayModelImportValue(value){
+  if(value === null || value === undefined || value === "") return "—";
+
+  if(Array.isArray(value)){
+    const parts = value
+      .map(item => displayModelImportValue(item))
+      .filter(item => item && item !== "—");
+    return parts.length ? parts.join("; ") : "—";
+  }
+
+  if(typeof value === "object"){
+    if(value.value !== undefined && value.value !== null) return displayModelImportValue(value.value);
+    if(value.name !== undefined && value.name !== null) return displayModelImportValue(value.name);
+    if(value.label !== undefined && value.label !== null) return displayModelImportValue(value.label);
+    return JSON.stringify(value);
+  }
+
+  if(typeof value === "boolean") return value ? "Yes" : "No";
+  return String(value);
+}
+
+function modelConflictComparisonHtml(row){
+  const conflicts = Array.isArray(row?.conflicts) ? row.conflicts : [];
+  if(!conflicts.length) return "";
+
+  const label = [row.brand, row.model].filter(Boolean).join(" ") || `Row ${row.sourceRow || "?"}`;
+  const rowsHtml = conflicts.map(conflict => {
+    const reason = conflict?.reason ? `<div class="model-import-details">${esc(conflict.reason)}</div>` : "";
+    return `
+      <tr class="model-conflict-row">
+        <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${reason}</td>
+        <td class="model-conflict-value">${esc(displayModelImportValue(conflict?.existing))}</td>
+        <td class="model-conflict-value">${esc(displayModelImportValue(conflict?.incoming))}</td>
+      </tr>`;
+  }).join("");
+
+  const safeFields = Array.isArray(row?.fields) ? row.fields.filter(Boolean) : [];
+  const safeHtml = safeFields.length
+    ? `<div class="model-safe-fields"><strong>Non-conflicting fields that will be added/updated automatically:</strong> ${safeFields.map(esc).join(", ")}</div>`
+    : "";
+
+  return `
+    <details class="model-conflict-card" open>
+      <summary>${esc(label)} — ${conflicts.length} conflict${conflicts.length === 1 ? "" : "s"}</summary>
+      <div class="model-conflict-help">
+        Red rows differ between the existing database model and the import file.
+        The existing database value is retained automatically; the import value is not written for these fields.
+      </div>
+      <div class="model-conflict-table-wrap">
+        <table class="model-conflict-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Existing model</th>
+              <th>Import file</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      ${safeHtml}
+    </details>`;
+}
+
 function modelImportResultHtml(result, prefix = "Model import"){
   const parts = [
     `<strong>${esc(prefix)}</strong>`,
@@ -944,17 +1085,25 @@ function modelImportResultHtml(result, prefix = "Model import"){
     parts.push(`Market field: ${esc(result.schema.marketField.name)} (${esc(result.schema.marketField.type)})`);
   }
 
-  const noteworthy = (result?.rows || [])
-    .filter(row => row.action === "failed" || row.action === "conflict" || (row.conflicts && row.conflicts.length))
-    .slice(0, 8)
+  const failedOrStructural = (result?.rows || [])
+    .filter(row => row.action === "failed" || (row.action === "conflict" && !(row.conflicts && row.conflicts.length)))
     .map(row => {
       const label = [row.brand, row.model].filter(Boolean).join(" ");
-      const message = row.error || `${row.conflicts?.length || 0} existing value conflict(s)`;
+      const message = row.error || "Migration conflict";
       return `${esc(label || `Row ${row.sourceRow || "?"}`)}: ${esc(typeof message === "string" ? message : JSON.stringify(message))}`;
     });
 
-  if(noteworthy.length){
-    parts.push(`<div class="model-import-details">${noteworthy.join("<br>")}</div>`);
+  if(failedOrStructural.length){
+    parts.push(`<div class="model-import-details">${failedOrStructural.join("<br>")}</div>`);
+  }
+
+  const conflictCards = (result?.rows || [])
+    .filter(row => Array.isArray(row.conflicts) && row.conflicts.length)
+    .map(modelConflictComparisonHtml)
+    .join("");
+
+  if(conflictCards){
+    parts.push(`<div class="model-conflict-list">${conflictCards}</div>`);
   }
 
   return parts.join("<br>");
@@ -1182,6 +1331,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260807-1425 -->
+<!-- V20260808-1715 -->
 </body>
 </html>

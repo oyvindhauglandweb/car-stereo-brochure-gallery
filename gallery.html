@@ -734,6 +734,14 @@ body.dark-mode select option:checked{
       <div id="modalDetails"></div>
 
       <div class="button-row">
+<a id="editButton"
+   class="claim-button"
+   target="_blank"
+   style="display:none;"
+   title="Edit this brochure">
+  Edit brochure
+</a>
+
 <a id="claimButton"
    class="claim-button"
    target="_blank"
@@ -1343,11 +1351,30 @@ ${modelSeriesLinks}
     <div class="detail-row"><span class="detail-label">Notes:</span> ${esc(b.notes)}</div>
   `;
 
+const editButton = document.getElementById("editButton");
 const claimButton = document.getElementById("claimButton");
 
 const currentOwner = currentUser
   ? b.owners.find(owner => Number(owner.id) === Number(currentUser.id))
   : null;
+
+const currentSubmittedBy = currentUser
+  ? (b.submitted_by_users || []).find(user => Number(user.id) === Number(currentUser.id))
+  : null;
+
+const roleValue = String(currentUser?.role || "").toLowerCase();
+const canEditBrochure = !!currentUser && (
+  !!currentOwner ||
+  !!currentSubmittedBy ||
+  roleValue === "admin" ||
+  roleValue === "administrator"
+);
+
+editButton.style.display = "none";
+if(canEditBrochure){
+  editButton.href = `edit-brochure.html?brochure_id=${encodeURIComponent(b.id)}&returnUrl=${encodeURIComponent(window.location.href)}`;
+  editButton.style.display = "flex";
+}
 
 claimButton.style.display = "none";
 
@@ -1649,5 +1676,6 @@ loadBrochures().catch(error => {
     `Could not load gallery.<br><br>${esc(error.message)}`;
 });
 </script>
+<!-- V20260808-1428 -->
 </body>
 </html>

@@ -1,0 +1,265 @@
+<!doctype html>
+<!-- V20260808-0010 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compare Models – Car Stereo Garage</title>
+<style>
+:root{--bg:#111;--surface:#1b1b1b;--card:#222;--soft:#2a2a2a;--border:#3d3d3d;--text:#f4f4f4;--muted:#bdbdbd;--link:#5cc4f3;--accent:#1f789d}
+:root[data-theme="light"]{--bg:#f2f3f5;--surface:#fff;--card:#fff;--soft:#f1f3f5;--border:#d7dbe0;--text:#171717;--muted:#666;--link:#006da0;--accent:#1f789d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+.container{max-width:1600px;margin:auto;padding:24px}
+.header{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:26px}
+.logo{width:260px;max-width:58vw}
+.top-buttons{display:flex;justify-content:center;gap:10px}
+.top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}
+.page-title{font-size:30px;font-weight:700;margin-bottom:7px}
+.intro{color:var(--muted);margin-bottom:18px}
+.status{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.compare-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.compare-table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%;font-size:13px}
+.compare-table th,.compare-table td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 10px;vertical-align:top;max-width:220px}
+.compare-table th{position:sticky;top:0;z-index:5;background:var(--soft);text-align:left;white-space:nowrap}
+.compare-table tr:last-child td{border-bottom:0}
+.compare-table th:last-child,.compare-table td:last-child{border-right:0}
+.compare-image-col{width:130px;min-width:130px}
+.compare-model-col{width:150px;min-width:150px}
+.compare-table th:nth-child(1),.compare-table td:nth-child(1){position:sticky;left:0;z-index:4;background:var(--surface)}
+.compare-table th:nth-child(2),.compare-table td:nth-child(2){position:sticky;left:130px;z-index:4;background:var(--surface)}
+.compare-table th:nth-child(1),.compare-table th:nth-child(2){z-index:7;background:var(--soft)}
+.compare-image{width:110px;height:58px;display:flex;align-items:center;justify-content:center;background:var(--soft);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.compare-image img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.compare-image-placeholder{font-size:10px;color:var(--muted);text-align:center;padding:5px}
+.model-name{font-weight:700;font-size:15px}
+.secondary{color:var(--muted);margin-top:4px;font-size:12px}
+.value-yes{font-weight:700}
+.version{margin:24px 0 8px;text-align:center;font-size:11px;color:var(--muted);opacity:.75}
+@media(max-width:700px){.container{padding:12px}.logo{width:220px;max-width:90vw}.page-title{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Garage">
+    <div class="top-buttons">
+      <a class="top-button" href="models.html" title="Back to models">←</a>
+      <a class="top-button" href="index.html" title="Home">⌂</a>
+      <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
+    </div>
+  </div>
+
+  <div class="page-title">Compare Models</div>
+  <div class="intro" id="intro">Loading selected models...</div>
+  <div id="status" class="status">Loading model data...</div>
+  <div id="compareWrap" class="compare-wrap" style="display:none">
+    <table class="compare-table" id="compareTable"></table>
+  </div>
+
+  <div class="version">models-compare.html V20260808-0010</div>
+</div>
+
+<script>
+const API_BASE = "https://api.carstereogarage.com";
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function applyTheme(){
+  const saved = localStorage.getItem("theme") || "dark";
+  document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+}
+function toggleTheme(){
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  localStorage.setItem("theme", next);
+  applyTheme();
+}
+$("themeToggle").addEventListener("click", toggleTheme);
+applyTheme();
+
+async function fetchJson(url){
+  const res = await fetch(url, {credentials:"omit", mode:"cors"});
+  const text = await res.text();
+  let data = null;
+  try{data=text?JSON.parse(text):null}catch(_){data=text}
+  if(!res.ok) throw new Error(data?.detail || data?.error || text || `HTTP ${res.status}`);
+  return data;
+}
+
+function isMeaningful(value){
+  if(value === null || value === undefined || value === "") return false;
+  if(value === false) return false;
+  if(typeof value === "string" && value.trim().toLowerCase() === "none") return false;
+  if(Array.isArray(value)) return value.some(isMeaningful);
+  return true;
+}
+
+function displayValue(value){
+  if(Array.isArray(value)) return value.filter(isMeaningful).join(", ");
+  if(value === true) return "Yes";
+  if(value === false) return "";
+  return String(value ?? "");
+}
+
+function compactNumber(value){
+  const text=String(value ?? "").trim();
+  if(!/^-?\d+(?:\.\d+)?$/.test(text)) return text;
+  const n=Number(text);
+  return Number.isFinite(n) ? String(n) : text;
+}
+
+function fieldDisplayValue(name,value){
+  let raw=compactNumber(displayValue(value));
+  if(!raw) return "";
+
+  const unitRules=[
+    [/^(Width|Height|Depth)$/i," mm"],
+    [/Power per Channel$/i," W"],
+    [/Maximum Music Power$/i," W"],
+    [/Maximum RMS Power$/i," W"],
+    [/Output Voltage$/i," mV"],
+    [/Signal-to-Noise Ratio$/i," dB"],
+    [/Sensitivity$/i," dB"],
+    [/THD$/i," %"],
+    [/Frequency Response (Low|High)$/i," Hz"]
+  ];
+
+  for(const [pattern,unit] of unitRules){
+    if(pattern.test(name) && /^-?\d+(?:\.\d+)?$/.test(raw)) return `${raw}${unit}`;
+  }
+  return raw;
+}
+
+function yearText(m){
+  const from=Number(m.yearFrom)||null, until=Number(m.yearUntil)||null;
+  if(from && until && from!==until) return `${from}–${until}`;
+  return from ? String(from) : (until ? String(until) : "");
+}
+function marketsText(m){return Array.isArray(m.markets) ? m.markets.join(", ") : String(m.markets || "");}
+function functionsText(m){return Array.isArray(m.sourceUnitFunctions) ? m.sourceUnitFunctions.join(", ") : "";}
+
+const excludedDetailFields = new Set([
+  "Brand","Model","Model Series","Markets","Market","Unit Type","Source Unit Functions",
+  "Sold From Year","Sold Until Year","Main Image URL","Description"
+]);
+
+function fieldRank(name){
+  const n=String(name);
+  const groups=[
+    ["Description",5],
+    ["Preamplifier ",10],
+    ["CD ",20],
+    ["MD ",30],
+    ["Cassette ",40],
+    ["Tuner ",50],
+    ["Equalizer ",60],
+    ["Amplifier ",70],
+    ["Crossover ",80],
+    ["Speaker ",90],
+    ["Width",100],["Height",101],["Depth",102],["DIN Size",103],
+    ["Original Price",110],["Estimated Value",120],["Sale Availability",130],
+    ["Source Notes",900]
+  ];
+  for(const [prefix,rank] of groups){
+    if(n === prefix || n.startsWith(prefix)) return rank;
+  }
+  return 500;
+}
+
+function collectFields(models){
+  const set=new Set();
+  for(const m of models){
+    const details=m.details||{};
+    if(isMeaningful(m.description)) set.add("Description");
+    for(const [name,value] of Object.entries(details)){
+      if(excludedDetailFields.has(name) || !isMeaningful(value)) continue;
+      set.add(name);
+    }
+  }
+  return [...set].sort((a,b)=>fieldRank(a)-fieldRank(b) || a.localeCompare(b,"en",{numeric:true,sensitivity:"base"}));
+}
+
+function detailValue(model,field){
+  if(field==="Description") return model.description || model.details?.Description || "";
+  return model.details?.[field];
+}
+
+function modelImageUrl(m){
+  return m?.rowId ? `${API_BASE}/models/image?row_id=${encodeURIComponent(m.rowId)}` : "";
+}
+
+function render(models){
+  const fields=collectFields(models);
+  $("intro").textContent=`Comparing ${models.length} models. Scroll horizontally to compare specifications.`;
+
+  const headers=[
+    '<th class="compare-image-col">Image</th>',
+    '<th class="compare-model-col">Model</th>',
+    '<th>Market</th>',
+    '<th>Year</th>',
+    '<th>Model Series</th>',
+    '<th>Unit Type</th>',
+    '<th>Functions</th>',
+    ...fields.map(field=>`<th>${esc(field)}</th>`)
+  ].join("");
+
+  const rows=models.map(m=>{
+    const imageUrl=modelImageUrl(m);
+    const image=`<div class="compare-image">
+      ${imageUrl
+        ? `<img src="${esc(imageUrl)}" alt="${esc(m.brand)} ${esc(m.model)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="compare-image-placeholder" style="display:none">No image</div>`
+        : '<div class="compare-image-placeholder">No image</div>'}
+    </div>`;
+
+    const cells=[
+      `<td>${image}</td>`,
+      `<td><div class="model-name">${esc(m.brand)} ${esc(m.model)}</div><div class="secondary">Row ${esc(m.rowId)}</div></td>`,
+      `<td>${esc(marketsText(m))}</td>`,
+      `<td>${esc(yearText(m))}</td>`,
+      `<td>${esc(m.modelSeries || "")}</td>`,
+      `<td>${esc(m.unitType || "")}</td>`,
+      `<td>${esc(functionsText(m))}</td>`,
+      ...fields.map(field=>{
+        const val=fieldDisplayValue(field,detailValue(m,field));
+        return `<td>${esc(val)}</td>`;
+      })
+    ];
+    return `<tr>${cells.join("")}</tr>`;
+  }).join("");
+
+  $("compareTable").innerHTML=`<thead><tr>${headers}</tr></thead><tbody>${rows}</tbody>`;
+  $("status").style.display="none";
+  $("compareWrap").style.display="block";
+}
+
+async function init(){
+  const p=new URLSearchParams(location.search);
+  const rows=[...new Set(
+    String(p.get("rows")||"")
+      .split(/[|,;]+/)
+      .map(x=>Number(x))
+      .filter(Number.isFinite)
+  )];
+
+  if(rows.length<2){
+    $("status").textContent="Select at least two models to compare.";
+    return;
+  }
+
+  try{
+    const data=await fetchJson(`${API_BASE}/models?row_ids=${encodeURIComponent(rows.join("|"))}&summary=0`);
+    const models=Array.isArray(data.results) ? data.results : (data.result ? [data.result] : []);
+
+    const byRow=new Map(models.map(m=>[Number(m.rowId),m]));
+    const ordered=rows.map(id=>byRow.get(id)).filter(Boolean);
+
+    if(ordered.length<2) throw new Error("Could not load all selected models.");
+    render(ordered);
+  }catch(error){
+    $("status").textContent=`Could not compare models: ${error.message}`;
+  }
+}
+init();
+</script>
+</body>
+</html>

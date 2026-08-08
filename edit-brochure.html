@@ -306,6 +306,34 @@ input[type="file"]{padding:10px 14px;}
   min-width:190px;
   color:var(--text);
 }
+.model-conflict-edit{
+  width:100%;
+  min-width:180px;
+  min-height:34px;
+  box-sizing:border-box;
+  padding:6px 8px;
+  border:1px solid transparent;
+  border-radius:5px;
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font:inherit;
+  line-height:1.35;
+  resize:vertical;
+}
+.model-conflict-edit:hover,
+.model-conflict-edit:focus{
+  border-color:var(--link);
+  outline:none;
+  background:var(--card);
+}
+.model-conflict-edit-note{
+  margin-top:4px;
+  font-size:11px;
+  color:var(--muted);
+}
+body:not(.dark-mode) .model-conflict-edit{
+  background:rgba(0,0,0,.025);
+}
 body.dark-mode .model-conflict-row{
   background:rgba(170,45,45,.22);
 }
@@ -671,6 +699,7 @@ let selectedModelSeriesIds = [];
 let pendingModelImport = null;
 let pendingModelDatabasePreview = null;
 let pendingModelBrochureId = null;
+let pendingExistingModelEdits = new Map();
 
 function applySavedTheme(){
   const savedTheme = localStorage.getItem("brochureTheme") || "dark";
@@ -850,6 +879,7 @@ function clearModelImport(){
   pendingModelImport = null;
   pendingModelDatabasePreview = null;
   pendingModelBrochureId = null;
+  pendingExistingModelEdits = new Map();
   const input = document.getElementById("modelImportInput");
   if(input) input.value = "";
   document.getElementById("modelImportFileName").textContent = "No file selected";
@@ -1049,6 +1079,7 @@ async function importBrochureModels(rows, options = {}){
     },
     body:JSON.stringify({
       rows,
+      existingEdits:Array.isArray(options.existingEdits) ? options.existingEdits : [],
       dryRun:options.dryRun === true,
       brochureId:options.brochureId || null
     })
@@ -1191,6 +1222,118 @@ function filteredSourceNotesForDisplay(value, row){
   return kept.join("; ");
 }
 
+
+function editedConflictValue(field, sourceRow, currentValue){
+  const importRow = (pendingModelImport?.rows || []).find(
+    item => String(item?.__sourceRow || "") === String(sourceRow || "")
+  );
+  if(!importRow) return currentValue;
+  return Object.prototype.hasOwnProperty.call(importRow, field) ? importRow[field] : currentValue;
+}
+
+function parseConflictEditorValue(text, originalValue){
+  const trimmed = String(text ?? "").trim();
+  if(trimmed === "") return "";
+
+  if(typeof originalValue === "number"){
+    const normalized = trimmed.replace(",", ".");
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : trimmed;
+  }
+
+  if(typeof originalValue === "boolean"){
+    const key = trimmed.toLowerCase();
+    if(["true","yes","1","y"].includes(key)) return true;
+    if(["false","no","0","n"].includes(key)) return false;
+  }
+
+  return trimmed;
+}
+
+function updatePendingImportConflictValue(sourceRow, field, rawText){
+  const importRow = (pendingModelImport?.rows || []).find(
+    item => String(item?.__sourceRow || "") === String(sourceRow || "")
+  );
+  if(!importRow || !field) return;
+
+  const original = importRow[field];
+  importRow[field] = parseConflictEditorValue(rawText, original);
+
+  const button = document.getElementById("continueModelImportButton");
+  if(button){
+    button.textContent = "Revalidate & import model data";
+  }
+}
+
+
+function existingEditKey(rowId){
+  return String(rowId || "");
+}
+
+function editedExistingValue(rowId, field, fallback){
+  const edit = pendingExistingModelEdits.get(existingEditKey(rowId));
+  if(!edit || !edit.values || !Object.prototype.hasOwnProperty.call(edit.values, field)){
+    return fallback;
+  }
+  return edit.values[field];
+}
+
+function updatePendingExistingConflictValue(rowId, field, rawText){
+  const key = existingEditKey(rowId);
+  if(!key || !field) return;
+
+  const current = pendingExistingModelEdits.get(key) || {rowId:Number(rowId), values:{}};
+  current.values[field] = rawText;
+  pendingExistingModelEdits.set(key, current);
+
+  const button = document.getElementById("continueModelImportButton");
+  if(button){
+    button.textContent = "Revalidate & import model data";
+  }
+}
+
+function currentExistingEdits(){
+  return Array.from(pendingExistingModelEdits.values())
+    .filter(edit => edit?.rowId && edit?.values && Object.keys(edit.values).length)
+    .map(edit => ({rowId:edit.rowId, values:{...edit.values}}));
+}
+
+function conflictExistingEditorHtml(row, conflict){
+  const field = String(conflict?.field || "");
+  const rowId = Number(row?.rowId || 0);
+  const rawValue = editedExistingValue(rowId, field, conflict?.existing);
+  const value = displayModelImportValue(rawValue);
+
+  return `
+    <textarea
+      class="model-conflict-edit model-conflict-existing-edit"
+      data-row-id="${esc(rowId)}"
+      data-field="${esc(field)}"
+      rows="${field === "Description" || field === "Source Notes" ? 4 : 1}"
+      spellcheck="false"
+      title="Edit the value already stored in the database."
+    >${esc(value === "—" ? "" : value)}</textarea>
+    <div class="model-conflict-edit-note">Editable database value</div>`;
+}
+
+function conflictImportEditorHtml(row, conflict, displayValue){
+  const field = String(conflict?.field || "");
+  const sourceRow = String(row?.sourceRow || "");
+  const rawValue = editedConflictValue(field, sourceRow, conflict?.incoming);
+  const value = displayModelImportValue(rawValue);
+
+  return `
+    <textarea
+      class="model-conflict-edit"
+      data-source-row="${esc(sourceRow)}"
+      data-field="${esc(field)}"
+      rows="${field === "Description" || field === "Source Notes" ? 4 : 1}"
+      spellcheck="false"
+      title="Edit the value from the import file before importing."
+    >${esc(value === "—" ? "" : value)}</textarea>
+    <div class="model-conflict-edit-note">Editable import value</div>`;
+}
+
 function modelConflictComparisonHtml(row){
   const conflicts = Array.isArray(row?.conflicts) ? row.conflicts : [];
   if(!conflicts.length) return "";
@@ -1212,8 +1355,8 @@ function modelConflictComparisonHtml(row){
     return `
       <tr class="model-conflict-row">
         <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${filterNote}${reason}</td>
-        <td class="model-conflict-value">${esc(existingDisplay)}</td>
-        <td class="model-conflict-value">${esc(incomingDisplay)}</td>
+        <td class="model-conflict-value">${conflictExistingEditorHtml(row, conflict)}</td>
+        <td class="model-conflict-value">${conflictImportEditorHtml(row, conflict, incomingDisplay)}</td>
       </tr>`;
   }).join("");
 
@@ -1233,8 +1376,10 @@ function modelConflictComparisonHtml(row){
       </summary>
       <div class="model-conflict-help">
         Red rows differ between the existing database model and the import file.
-        Leave <strong>Forced Variant</strong> unchecked to keep the existing model and only apply safe non-conflicting enrichment.
-        Check it to create the imported row as a separate protected variant.
+        Values in both <strong>Existing model</strong> and <strong>Import file</strong> can be edited directly before import.
+        Edits under Existing model update the stored database row; edits under Import file change the incoming row.
+        Leave <strong>Forced Variant</strong> unchecked to keep one merged model and only apply safe non-conflicting enrichment.
+        Check it to create the edited import row as a separate protected variant.
       </div>
       <div class="model-conflict-table-wrap">
         <table class="model-conflict-table">
@@ -1340,9 +1485,12 @@ async function continueModelImportAfterReview(){
     const selectedRows = rowsWithForcedVariantChoices(pendingModelImport.rows);
 
     // Re-run the dry run with the user's Forced Variant choices applied.
+    const existingEdits = currentExistingEdits();
+
     const preview = await importBrochureModels(selectedRows, {
       dryRun:true,
-      brochureId:Number(pendingModelBrochureId)
+      brochureId:Number(pendingModelBrochureId),
+      existingEdits
     });
 
     if(Number(preview.failed || 0) > 0){
@@ -1358,7 +1506,8 @@ async function continueModelImportAfterReview(){
 
     const result = await importBrochureModels(selectedRows, {
       dryRun:false,
-      brochureId:Number(pendingModelBrochureId)
+      brochureId:Number(pendingModelBrochureId),
+      existingEdits
     });
 
     pendingModelDatabasePreview = null;
@@ -1494,6 +1643,18 @@ async function loadFormData(){
     if(event.target.closest(".model-force-variant")){
       event.stopPropagation();
     }
+  });
+
+  document.getElementById("modelImportSummary").addEventListener("input", event => {
+    const existingEditor = event.target.closest(".model-conflict-existing-edit");
+    if(existingEditor){
+      updatePendingExistingConflictValue(existingEditor.dataset.rowId, existingEditor.dataset.field, existingEditor.value);
+      return;
+    }
+
+    const editor = event.target.closest(".model-conflict-edit");
+    if(!editor) return;
+    updatePendingImportConflictValue(editor.dataset.sourceRow, editor.dataset.field, editor.value);
   });
 }
 
@@ -1631,6 +1792,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1845 -->
+<!-- V20260808-1920 -->
 </body>
 </html>

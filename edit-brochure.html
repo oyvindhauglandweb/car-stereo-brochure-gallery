@@ -321,6 +321,12 @@ body.dark-mode .model-conflict-row .model-conflict-value{
 .model-conflict-row .model-conflict-field{
   color:#e36b6b;
 }
+.model-source-notes-filtered{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:normal;
+  margin-top:3px;
+}
 body:not(.dark-mode) .model-conflict-row{
   background:#fff0f0;
 }
@@ -1085,6 +1091,97 @@ function displayModelImportValue(value){
   return String(value);
 }
 
+
+function normalizeSourceNoteFragment(value){
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[×x]/g, "x")
+    .replace(/[–—]/g, "-")
+    .replace(/[^\p{L}\p{N}%+./-]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function sourceRowForPreview(row){
+  const sourceRow = String(row?.sourceRow || "");
+  return (pendingModelImport?.rows || []).find(item => String(item?.__sourceRow || "") === sourceRow) || null;
+}
+
+function structuredContextForConflict(row){
+  const values = [];
+  const importRow = sourceRowForPreview(row);
+
+  if(importRow){
+    Object.entries(importRow).forEach(([field, value]) => {
+      if(["Source Notes","Description","Variant Notes","Source Brochure IDs","Source Brochure Page"].includes(field)) return;
+      if(value === null || value === undefined || value === "") return;
+      values.push(displayModelImportValue(value));
+    });
+  }
+
+  (row?.conflicts || []).forEach(conflict => {
+    if(["Source Notes","Description"].includes(conflict?.field)) return;
+    values.push(displayModelImportValue(conflict?.existing));
+    values.push(displayModelImportValue(conflict?.incoming));
+  });
+
+  return normalizeSourceNoteFragment(values.join(" ; "));
+}
+
+function sourceNoteFragmentIsRedundant(fragment, structuredContext){
+  const f = normalizeSourceNoteFragment(fragment);
+  if(!f) return true;
+
+  const has = term => structuredContext.includes(normalizeSourceNoteFragment(term));
+
+  // Pure feature wording already represented by structured feature/select fields.
+  if(f.includes("bass/treble") && has("Bass/Treble") && !/[+-]\s*\d|\d+\s*db/.test(f)) return true;
+  if(/\bfader\b/.test(f) && has("Fader") && !/\d+\s*db/.test(f)) return true;
+  if(f.includes("power-level indicator") && (has("Level Indicator") || has("Power Level Indicator"))) return true;
+  if(f.includes("level indicator") && has("Level Indicator")) return true;
+  if(f.includes("loudness switch") && has("Loudness")) return true;
+  if(f.includes("5-band graphic equalizer") && (has("Equalizer") || has("5"))) return true;
+  if(f.includes("graphic equalizer") && has("Equalizer") && !/\d+\s*hz|\d+\s*khz/.test(f)) return true;
+  if((f.includes("metal tape") || f.includes("metal tape position")) && has("Metal")) return true;
+  if(f.includes("cr02") && has("CrO2")) return true;
+  if(f.includes("auto reverse") && has("Auto Reverse") && !f.includes("direction")) return true;
+  if(f.includes("music sensor") && has("Music Sensor")) return true;
+
+  // The current import schema stores wow/flutter in Cassette THD. Hide the
+  // note fragment only when its numeric value is already present structurally.
+  const wow = f.match(/wow\/flutter\s*([0-9]+(?:\.[0-9]+)?)\s*%/);
+  if(wow){
+    const n = Number(wow[1]);
+    const candidates = [...structuredContext.matchAll(/\b0?\.\d+\b/g)].map(m => Number(m[0]));
+    if(candidates.some(v => Number.isFinite(v) && Math.abs(v - n) <= 1e-9)) return true;
+  }
+
+  // If a very short fragment is literally contained in the structured context,
+  // it adds no useful information in the comparison.
+  if(f.length <= 40 && structuredContext.includes(f)) return true;
+
+  return false;
+}
+
+function filteredSourceNotesForDisplay(value, row){
+  const raw = displayModelImportValue(value);
+  if(!raw || raw === "—") return raw;
+
+  const structuredContext = structuredContextForConflict(row);
+
+  // Split at sentence and semicolon boundaries so unique technical facts can
+  // survive even when nearby feature wording is redundant.
+  const fragments = raw
+    .split(/(?<=[.!?])\s+|;\s*/g)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  const kept = fragments.filter(fragment => !sourceNoteFragmentIsRedundant(fragment, structuredContext));
+  if(!kept.length) return "No unique source-note information after filtering.";
+
+  return kept.join("; ");
+}
+
 function modelConflictComparisonHtml(row){
   const conflicts = Array.isArray(row?.conflicts) ? row.conflicts : [];
   if(!conflicts.length) return "";
@@ -1092,11 +1189,22 @@ function modelConflictComparisonHtml(row){
   const label = [row.brand, row.model].filter(Boolean).join(" ") || `Row ${row.sourceRow || "?"}`;
   const rowsHtml = conflicts.map(conflict => {
     const reason = conflict?.reason ? `<div class="model-import-details">${esc(conflict.reason)}</div>` : "";
+    const isSourceNotes = String(conflict?.field || "").toLowerCase() === "source notes";
+    const existingDisplay = isSourceNotes
+      ? filteredSourceNotesForDisplay(conflict?.existing, row)
+      : displayModelImportValue(conflict?.existing);
+    const incomingDisplay = isSourceNotes
+      ? filteredSourceNotesForDisplay(conflict?.incoming, row)
+      : displayModelImportValue(conflict?.incoming);
+    const filterNote = isSourceNotes
+      ? '<div class="model-source-notes-filtered">Redundant information already represented by structured fields is hidden here.</div>'
+      : "";
+
     return `
       <tr class="model-conflict-row">
-        <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${reason}</td>
-        <td class="model-conflict-value">${esc(displayModelImportValue(conflict?.existing))}</td>
-        <td class="model-conflict-value">${esc(displayModelImportValue(conflict?.incoming))}</td>
+        <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${filterNote}${reason}</td>
+        <td class="model-conflict-value">${esc(existingDisplay)}</td>
+        <td class="model-conflict-value">${esc(incomingDisplay)}</td>
       </tr>`;
   }).join("");
 
@@ -1514,6 +1622,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1810 -->
+<!-- V20260808-1830 -->
 </body>
 </html>

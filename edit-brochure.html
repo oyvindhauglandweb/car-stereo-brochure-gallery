@@ -1134,6 +1134,15 @@ function sourceNoteFragmentIsRedundant(fragment, structuredContext){
 
   const has = term => structuredContext.includes(normalizeSourceNoteFragment(term));
 
+  // Permanent Source Notes exclusions: these are either intentionally
+  // low-value or already have dedicated structured fields.
+  if(/channel separation\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
+  if(/loudness\s*[+±-]?\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
+  if(/bass\/treble\s*[+±-]?\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
+  if(/low-level output/.test(f) && /\d+(?:\.\d+)?\s*mv/.test(f)) return true;
+  if(/preamplifier output/.test(f) && /\d+(?:\.\d+)?\s*mv/.test(f)) return true;
+  if(/\bfecr\b/.test(f) && (f.includes("support") || f.includes("tape"))) return true;
+
   // Pure feature wording already represented by structured feature/select fields.
   if(f.includes("bass/treble") && has("Bass/Treble") && !/[+-]\s*\d|\d+\s*db/.test(f)) return true;
   if(/\bfader\b/.test(f) && has("Fader") && !/\d+\s*db/.test(f)) return true;
@@ -1622,6 +1631,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1830 -->
+<!-- V20260808-1845 -->
 </body>
 </html>

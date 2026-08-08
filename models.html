@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-2245 -->
+<!-- V20260808-2300 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -9,14 +9,15 @@
 :root{--bg:#111;--surface:#1b1b1b;--card:#222;--soft:#2a2a2a;--border:#3d3d3d;--text:#f4f4f4;--muted:#bdbdbd;--link:#5cc4f3;--accent:#1f789d;--danger:#b85c5c}
 :root[data-theme="light"]{--bg:#f2f3f5;--surface:#fff;--card:#fff;--soft:#f1f3f5;--border:#d7dbe0;--text:#171717;--muted:#666;--link:#006da0;--accent:#1f789d;--danger:#a94442}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.container{max-width:1280px;margin:auto;padding:24px}.header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-bottom:28px}.logo{width:260px;max-width:58vw;margin:0 auto}.top-buttons{display:flex;justify-content:center;gap:10px}.top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr .75fr 1.4fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
-.model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:hidden}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.thumb-name{font-size:17px;font-weight:700;min-width:0}.thumb-year{color:var(--muted);white-space:nowrap}.ai-image-warning{font-size:9px;line-height:1;color:var(--muted);text-align:center;margin:1px 0 0}.thumbnail-view .ai-image-warning{margin:-8px 0 3px}.detail-ai-warning{margin-top:-8px;margin-bottom:12px}.status{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:visible}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.thumb-name{font-size:17px;font-weight:700;min-width:0}.thumb-year{color:var(--muted);white-space:nowrap}.ai-image-warning{font-size:9px;line-height:1;color:var(--muted);text-align:center;margin:1px 0 0}.thumbnail-view .ai-image-warning{margin:-8px 0 3px}.detail-ai-warning{margin-top:-8px;margin-bottom:12px}.status{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
 .model-card{position:relative}
 .model-image-path-tooltip{
   position:absolute;
   z-index:40;
   left:10px;
   right:10px;
-  bottom:calc(100% + 6px);
+  top:calc(100% + 6px);
+  bottom:auto;
   display:none;
   padding:8px 10px;
   border:1px solid var(--border);
@@ -701,6 +702,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260808-2245</div>
+">models.html V20260808-2300</div>
 </body>
 </html>

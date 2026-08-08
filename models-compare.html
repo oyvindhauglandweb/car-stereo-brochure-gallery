@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0340 -->
+<!-- V20260809-0355 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -74,9 +74,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 @media(max-width:700px){
   .container{padding:12px}
   .compare-actions{
-    top:auto;
+    top:0;
     right:auto;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 88px);
+    bottom:auto;
     left:50%;
     transform:translateX(-50%);
     width:max-content;
@@ -189,7 +189,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0340</div>
+  <div class="version">models-compare.html V20260809-0355</div>
 </div>
 
 <script>
@@ -210,13 +210,47 @@ function toggleTheme(){
 }
 $("themeToggle").addEventListener("click", toggleTheme);
 
+function positionCompareActions(){
+  const actions = $("compareActions");
+  const toggle = $("compareControlsToggle");
+  if(!actions || !toggle || !compareControlsVisible) return;
+
+  if(window.matchMedia("(max-width:700px)").matches){
+    const rect = toggle.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const viewportTop = viewport?.offsetTop || 0;
+    const viewportHeight = viewport?.height || window.innerHeight;
+    const panelHeight = actions.offsetHeight || 44;
+
+    // Prefer directly below the active Compare button, but clamp the panel
+    // inside Safari's actually visible viewport.
+    const safeTop = viewportTop + 12;
+    const safeBottom = viewportTop + viewportHeight - 12;
+    const preferredTop = rect.bottom + 10;
+    const maxTop = Math.max(safeTop, safeBottom - panelHeight);
+    const finalTop = Math.max(safeTop, Math.min(preferredTop, maxTop));
+
+    actions.style.top = `${finalTop}px`;
+    actions.style.right = "auto";
+    actions.style.bottom = "auto";
+    actions.style.left = "50%";
+    actions.style.transform = "translateX(-50%)";
+  }else{
+    actions.style.top = "";
+    actions.style.right = "";
+    actions.style.bottom = "";
+    actions.style.left = "";
+    actions.style.transform = "";
+  }
+}
+
 function updateCompareControls(){
   $("compareActions").classList.toggle("active", compareControlsVisible);
-
-  // A comparison is active for the entire lifetime of this page.
-  // Green indicates active Compare mode; clicking the button only shows/hides
-  // the floating Reselect/Cancel controls.
   $("compareControlsToggle").classList.add("compare-active");
+
+  if(compareControlsVisible){
+    requestAnimationFrame(positionCompareActions);
+  }
 }
 
 $("compareControlsToggle").addEventListener("click", ()=>{
@@ -244,6 +278,22 @@ $("cancelCompareButton").addEventListener("click", ()=>{
   // Cancel means the compare session is finished: return with no selection.
   location.href = "models.html";
 });
+
+window.addEventListener("resize", ()=>{
+  if(compareControlsVisible) positionCompareActions();
+});
+window.addEventListener("scroll", ()=>{
+  if(compareControlsVisible) positionCompareActions();
+}, {passive:true});
+
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", ()=>{
+    if(compareControlsVisible) positionCompareActions();
+  });
+  window.visualViewport.addEventListener("scroll", ()=>{
+    if(compareControlsVisible) positionCompareActions();
+  });
+}
 
 applyTheme();
 updateCompareControls();

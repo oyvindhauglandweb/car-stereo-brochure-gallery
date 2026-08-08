@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-2430 -->
+<!-- V20260809-0105 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -836,10 +836,37 @@ $("menuBackButton").addEventListener("click",event=>{
   }
 });
 
+
+function restoreCompareSelectionFromUrl(){
+  const p = new URLSearchParams(location.search);
+  const raw = String(p.get("compare_rows") || "").trim();
+  if(!raw) return false;
+
+  const availableRows = new Set(allModels.map(model => String(model.rowId)));
+  const rows = raw
+    .split(/[|,;]+/)
+    .map(value => String(value).trim())
+    .filter(value => value && availableRows.has(value));
+
+  if(!rows.length) return false;
+
+  compareMode = true;
+  selectedCompareRows.clear();
+  rows.forEach(rowId => selectedCompareRows.add(rowId));
+  updateCompareUi();
+  return true;
+}
+
 async function init(){
   updateMenuBackButton();
   try{
-    const data=await fetchJson(`${API_BASE}/models?summary=1`); allModels=data.results||[]; setupFilters(); applyUrlFilters(); applyFilters();
+    const data=await fetchJson(`${API_BASE}/models?summary=1`);
+    allModels=data.results||[];
+    setupFilters();
+    applyUrlFilters();
+    restoreCompareSelectionFromUrl();
+    applyFilters();
+
     const p=new URLSearchParams(location.search); const modelId=p.get("model_id");
 
     if(modelId){
@@ -880,6 +907,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260808-2430</div>
+">models.html V20260809-0105</div>
 </body>
 </html>

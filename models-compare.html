@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0055 -->
+<!-- V20260809-0110 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -15,6 +15,22 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .logo{width:260px;max-width:58vw}
 .top-buttons{display:flex;justify-content:center;gap:10px}
 .top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}
+.compare-actions{display:flex;justify-content:center;gap:10px}
+.compare-action-button{
+  min-height:36px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:7px 15px;
+  background:var(--soft);
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+}
+.compare-action-button.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
 .page-title{font-size:30px;font-weight:700;margin-bottom:7px}
 .intro{color:var(--muted);margin-bottom:18px}
 .status{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
@@ -48,6 +64,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
       <a class="top-button" href="index.html" title="Home">⌂</a>
       <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
     </div>
+    <div class="compare-actions">
+      <button type="button" class="compare-action-button primary" id="reselectModelsButton">Reselect models</button>
+      <button type="button" class="compare-action-button" id="cancelCompareButton">Cancel Compare</button>
+    </div>
   </div>
 
   <div class="page-title">Compare Models</div>
@@ -57,11 +77,12 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0055</div>
+  <div class="version">models-compare.html V20260809-0110</div>
 </div>
 
 <script>
 const API_BASE = "https://api.carstereogarage.com";
+let selectedRowIds = [];
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -82,6 +103,19 @@ $("backButton").addEventListener("click", ()=>{
     location.href = "models.html";
   }
 });
+
+$("reselectModelsButton").addEventListener("click", ()=>{
+  const rows = selectedRowIds.join("|");
+  location.href = rows
+    ? `models.html?compare_rows=${encodeURIComponent(rows)}`
+    : "models.html";
+});
+
+$("cancelCompareButton").addEventListener("click", ()=>{
+  // Cancel means the compare session is finished: return with no selection.
+  location.href = "models.html";
+});
+
 applyTheme();
 
 async function fetchJson(url){
@@ -269,8 +303,10 @@ async function init(){
     String(p.get("rows")||"")
       .split(/[|,;]+/)
       .map(x=>Number(x))
-      .filter(Number.isFinite)
+      .filter(value=>Number.isFinite(value) && value > 0)
   )];
+
+  selectedRowIds = rows.slice();
 
   if(rows.length<2){
     $("status").textContent="Select at least two models to compare.";

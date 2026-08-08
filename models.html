@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-2300 -->
+<!-- V20260808-2320 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -190,14 +190,13 @@ function applyFilters(){
   renderList();
 }
 function modelImageUrl(m){
-  // Standard image resolution is authoritative:
-  // Models image index -> /models/image -> Main Image URL fallback.
-  //
-  // This prevents an old/stale Main Image URL from overriding the correct
-  // Market/Brand/Model image in OneDrive. A manually created database row
-  // without Model ID can still use Main Image URL as a fallback.
-  const indexed = m.modelId ? modelImageIndex[m.modelId] : null;
+  // Image resolution is tied to the unique Baserow row id, not Model ID.
+  // This prevents duplicate/copied Model IDs from causing one row's image
+  // to overwrite another row's image.
+  const rowKey = m?.rowId !== null && m?.rowId !== undefined ? String(m.rowId) : "";
+  const indexed = rowKey ? modelImageIndex[rowKey] : null;
   if(indexed?.url) return indexed.url;
+  if(rowKey) return `${API_BASE}/models/image?row_id=${encodeURIComponent(rowKey)}`;
   if(m.modelId) return `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}`;
   return m.mainImageUrl || "";
 }
@@ -221,9 +220,10 @@ async function ensureModelImageIndex(){
   return modelImageIndexPromise;
 }
 
-function setAiWarningForModel(modelId, warning){
+function setAiWarningForModel(rowId, warning){
   if(!warning) return;
-  const info = modelImageIndex[modelId];
+  const key = rowId !== null && rowId !== undefined ? String(rowId) : "";
+  const info = key ? modelImageIndex[key] : null;
   warning.style.display = info?.aiGenerated ? "block" : "none";
 }
 
@@ -283,7 +283,8 @@ function loadModelImage(img, imageUrl, placeholder, warning, loadingText="No ima
 }
 
 function modelImageDiagnostic(m){
-  const indexed = m?.modelId ? modelImageIndex[m.modelId] : null;
+  const rowKey = m?.rowId !== null && m?.rowId !== undefined ? String(m.rowId) : "";
+  const indexed = rowKey ? modelImageIndex[rowKey] : null;
 
   if(indexed?.fileName){
     const folder = String(indexed.folderPath || "").replace(/\/+$/,"");
@@ -330,6 +331,7 @@ function modelImageTooltipHtml(m){
       <div><span class="tip-label">Source:</span> ${esc(info.source)}</div>
       <div><span class="tip-label">Path:</span> ${esc(info.path)}</div>
       <div><span class="tip-label">File:</span> <span class="tip-file">${esc(info.file)}</span></div>
+      <div><span class="tip-label">Row ID:</span> ${esc(m?.rowId ?? "—")}</div>
       <div><span class="tip-label">Model ID:</span> ${esc(m?.modelId || "—")}</div>
     </div>`;
 }
@@ -350,7 +352,7 @@ async function renderList(){
     list.innerHTML = filteredModels.map(m=>{
       const imageUrl=modelImageUrl(m);
       return `
-        <div class="model-card" data-model-id="${esc(m.modelId)}">
+        <div class="model-card" data-model-id="${esc(m.modelId)}" data-row-id="${esc(m.rowId)}">
           ${modelImageTooltipHtml(m)}
           <div class="thumb-image">
             <img data-image-url="${esc(imageUrl)}" alt="${esc(m.brand)} ${esc(m.model)}">
@@ -369,13 +371,13 @@ async function renderList(){
       const warning=img.parentElement.nextElementSibling;
       const imageUrl=img.dataset.imageUrl || "";
       const card=img.closest(".model-card");
-      const modelId=card?.dataset.modelId || "";
+      const rowId=card?.dataset.rowId || "";
       loadModelImage(img,imageUrl,ph,null);
-      setAiWarningForModel(modelId,warning);
+      setAiWarningForModel(rowId,warning);
     });
   }else{
     list.innerHTML = filteredModels.map(m=>`
-      <div class="model-card" data-model-id="${esc(m.modelId)}">
+      <div class="model-card" data-model-id="${esc(m.modelId)}" data-row-id="${esc(m.rowId)}">
         ${modelImageTooltipHtml(m)}
         <div class="model-name">${esc(m.brand)} ${esc(m.model)}</div>
         <div class="model-functions">${esc(functionsText(m))}</div>
@@ -583,12 +585,13 @@ async function openModel(modelId){
     $("detailFunctions").textContent=functionsText(m);
     document.title=`${m.brand} ${m.model} – Car Stereo Garage`;
     const img=$("modelImage"), ph=$("imagePlaceholder"), aiWarning=$("imageAiWarning");
-    const indexedImageUrl = m.modelId && modelImageIndex[m.modelId]?.url
-      ? modelImageIndex[m.modelId].url
+    const rowKey = m?.rowId !== null && m?.rowId !== undefined ? String(m.rowId) : "";
+    const indexedImageUrl = rowKey && modelImageIndex[rowKey]?.url
+      ? modelImageIndex[rowKey].url
       : "";
-    const automaticImageUrl = m.modelId
-      ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}`
-      : "";
+    const automaticImageUrl = rowKey
+      ? `${API_BASE}/models/image?row_id=${encodeURIComponent(rowKey)}`
+      : (m.modelId ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}` : "");
     // Same priority as thumbnail view. Standard Market/Brand/Model image wins;
     // Main Image URL is only a fallback for manually created rows without Model ID.
     const selectedImageUrl = indexedImageUrl || automaticImageUrl || m.mainImageUrl || "";
@@ -702,6 +705,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260808-2300</div>
+">models.html V20260808-2320</div>
 </body>
 </html>

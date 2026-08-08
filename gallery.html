@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- V20260808-0835 -->
+<!-- V20260808-1610 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1100,6 +1100,10 @@ owners: (item.field_8379595 || []).map(x => ({
   name: x.value || x.name || ""
 })) || [],
       submitted_by: (item.field_8379596 || []).map(x => x.value).join(", ") || "",
+      submitted_by_users: (item.field_8379596 || []).map(x => ({
+        id: Number(x.id),
+        name: x.value || x.name || ""
+      })) || [],
       notes: item.field_8379601 || "",
       model_numbers: formatModelNumbers(item.field_9356970),
       claim_ownership_url: (item.field_8384825 && item.field_8384825.url) || "",
@@ -1676,6 +1680,6 @@ loadBrochures().catch(error => {
     `Could not load gallery.<br><br>${esc(error.message)}`;
 });
 </script>
-<!-- V20260808-1428 -->
+<!-- V20260808-1610 -->
 </body>
 </html>

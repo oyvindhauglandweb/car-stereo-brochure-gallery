@@ -458,6 +458,41 @@ body.dark-mode .model-source-notes-merge-label{color:#ff8a8a;}
   font-size:11px;
   color:var(--muted);
 }
+.model-conflict-copy-row td{
+  padding-top:3px;
+  padding-bottom:8px;
+  background:rgba(201,75,75,.08);
+}
+body.dark-mode .model-conflict-copy-row td{
+  background:rgba(170,45,45,.14);
+}
+.model-conflict-copy-actions{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.model-conflict-copy-button{
+  min-height:30px;
+  padding:4px 10px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--card);
+  color:var(--text);
+  cursor:pointer;
+  font:inherit;
+  font-size:12px;
+  font-weight:bold;
+}
+.model-conflict-copy-button:hover{
+  border-color:var(--link);
+}
+.model-conflict-copy-arrow{
+  font-size:16px;
+  line-height:1;
+  vertical-align:-1px;
+}
 body:not(.dark-mode) .model-conflict-row{
   background:#fff0f0;
 }
@@ -1534,6 +1569,109 @@ function conflictImportEditorHtml(row, conflict, displayValue){
 }
 
 
+
+function conflictSideControl(rowElement, side){
+  if(!rowElement) return null;
+  const selector = side === "existing"
+    ? ".model-conflict-existing-choice, .model-conflict-existing-edit"
+    : ".model-conflict-import-choice, .model-conflict-edit:not(.model-conflict-existing-edit)";
+  return rowElement.querySelector(selector);
+}
+
+function readConflictSideValue(rowElement, side){
+  const choiceSelector = side === "existing"
+    ? ".model-conflict-existing-choice"
+    : ".model-conflict-import-choice";
+  const choices = Array.from(rowElement.querySelectorAll(choiceSelector));
+
+  if(choices.length){
+    if(choices[0].type === "checkbox"){
+      return choices.filter(item => item.checked).map(item => item.value).join("; ");
+    }
+    return choices[0].value;
+  }
+
+  const editor = side === "existing"
+    ? rowElement.querySelector(".model-conflict-existing-edit")
+    : rowElement.querySelector(".model-conflict-edit:not(.model-conflict-existing-edit)");
+  return editor ? editor.value : "";
+}
+
+function setConflictSideValue(rowElement, side, value){
+  const choiceSelector = side === "existing"
+    ? ".model-conflict-existing-choice"
+    : ".model-conflict-import-choice";
+  const choices = Array.from(rowElement.querySelectorAll(choiceSelector));
+  const wanted = new Set(
+    String(value || "").split(";").map(item => normalizeSourceNoteFragment(item)).filter(Boolean)
+  );
+
+  if(choices.length){
+    if(choices[0].type === "checkbox"){
+      for(const item of choices){
+        item.checked = wanted.has(normalizeSourceNoteFragment(item.value));
+      }
+      const menu = choices[0].closest(".model-conflict-multi-menu");
+      updateConflictMultiSelect(menu, side);
+      return;
+    }
+
+    choices[0].value = value || "";
+    choices[0].dispatchEvent(new Event("change", {bubbles:true}));
+    return;
+  }
+
+  const editor = side === "existing"
+    ? rowElement.querySelector(".model-conflict-existing-edit")
+    : rowElement.querySelector(".model-conflict-edit:not(.model-conflict-existing-edit)");
+  if(editor){
+    editor.value = value || "";
+    editor.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+}
+
+function copyConflictValueForBoth(button, sourceSide){
+  const copyRow = button.closest(".model-conflict-copy-row");
+  const valueRow = copyRow?.previousElementSibling;
+  if(!valueRow || !valueRow.classList.contains("model-conflict-row")) return;
+
+  const value = readConflictSideValue(valueRow, sourceSide);
+  setConflictSideValue(valueRow, "existing", value);
+  setConflictSideValue(valueRow, "import", value);
+
+  const original = button.textContent;
+  button.textContent = "Applied to both";
+  setTimeout(() => {
+    if(button.isConnected) button.textContent = original;
+  }, 1000);
+}
+
+function conflictCopyActionsHtml(row, conflict){
+  const field = String(conflict?.field || "");
+  const rowId = Number(row?.rowId || 0);
+  const sourceRow = String(row?.sourceRow || "");
+
+  return `
+    <tr class="model-conflict-copy-row"
+        data-field="${esc(field)}"
+        data-row-id="${esc(rowId)}"
+        data-source-row="${esc(sourceRow)}">
+      <td></td>
+      <td colspan="2">
+        <div class="model-conflict-copy-actions">
+          <button type="button" class="model-conflict-copy-button model-use-existing-for-both"
+                  title="Copy the Existing model value to the Import file value too.">
+            Existing <span class="model-conflict-copy-arrow">→</span> use for both
+          </button>
+          <button type="button" class="model-conflict-copy-button model-use-import-for-both"
+                  title="Copy the Import file value to the Existing model value too.">
+            use for both <span class="model-conflict-copy-arrow">←</span> Import
+          </button>
+        </div>
+      </td>
+    </tr>`;
+}
+
 function sourceNoteMergeFragments(value){
   const raw = String(value || "").trim();
   if(!raw || raw === "—" || raw === "No unique source-note information after filtering.") return [];
@@ -1694,7 +1832,8 @@ function modelConflictComparisonHtml(row){
         <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${reason}</td>
         <td class="model-conflict-value">${conflictExistingEditorHtml(row, conflict)}</td>
         <td class="model-conflict-value">${conflictImportEditorHtml(row, conflict, displayModelImportValue(conflict?.incoming))}</td>
-      </tr>`;
+      </tr>
+      ${conflictCopyActionsHtml(row, conflict)}`;
   }).join("");
 
   const safeFields = Array.isArray(row?.fields) ? row.fields.filter(Boolean) : [];
@@ -1992,6 +2131,22 @@ async function loadFormData(){
       event.preventDefault();
       event.stopPropagation();
       useMergedSourceNotesForBoth(useBoth);
+      return;
+    }
+
+    const useExisting = event.target.closest(".model-use-existing-for-both");
+    if(useExisting){
+      event.preventDefault();
+      event.stopPropagation();
+      copyConflictValueForBoth(useExisting, "existing");
+      return;
+    }
+
+    const useImport = event.target.closest(".model-use-import-for-both");
+    if(useImport){
+      event.preventDefault();
+      event.stopPropagation();
+      copyConflictValueForBoth(useImport, "import");
     }
   });
 
@@ -2174,6 +2329,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-2005 -->
+<!-- V20260808-2045 -->
 </body>
 </html>

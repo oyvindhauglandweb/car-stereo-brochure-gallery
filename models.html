@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0250 -->
+<!-- V20260808-0835 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -62,6 +62,7 @@
 const API_BASE = "https://api.carstereogarage.com";
 let allModels = [];
 let filteredModels = [];
+let brochureModelNumbers = [];
 let modelImageIndex = {};
 let modelImageIndexPromise = null;
 let viewMode = localStorage.getItem("modelViewMode") === "thumbnail" ? "thumbnail" : "list";
@@ -130,9 +131,16 @@ function setupFilters(){
 function applyUrlFilters(){
   const p = new URLSearchParams(location.search);
   const map = {brand:"brandFilter",market:"marketFilter",model_series:"seriesFilter",unit_type:"typeFilter",year:"yearFilter",model:"searchFilter"};
+
   for(const [key,id] of Object.entries(map)){
-    const value = p.get(key); if(value !== null) $(id).value = value;
+    const value = p.get(key);
+    if(value !== null) $(id).value = value;
   }
+
+  brochureModelNumbers = String(p.get("models") || "")
+    .split("|")
+    .map(value => normalized(value))
+    .filter(Boolean);
 }
 function modelMatchesYear(m, y){
   if(!y) return true; const year=Number(y); if(!Number.isFinite(year)) return true;
@@ -144,13 +152,16 @@ function modelMatchesYear(m, y){
 }
 function applyFilters(){
   const brand=normalized($("brandFilter").value), series=normalized($("seriesFilter").value), market=normalized($("marketFilter").value), type=normalized($("typeFilter").value), year=$("yearFilter").value.trim(), q=normalized($("searchFilter").value);
+  const brochureModels = new Set(brochureModelNumbers);
+
   filteredModels = allModels.filter(m =>
     (!brand || normalized(m.brand)===brand) &&
     (!series || normalized(m.modelSeries)===series) &&
     (!market || (m.markets||[]).some(x=>normalized(x)===market)) &&
     (!type || normalized(m.unitType)===type) &&
     modelMatchesYear(m,year) &&
-    (!q || [m.model,m.brand,m.modelSeries,marketsText(m),functionsText(m),m.description].some(x=>normalized(x).includes(q)))
+    (!q || [m.model,m.brand,m.modelSeries,marketsText(m),functionsText(m),m.description].some(x=>normalized(x).includes(q))) &&
+    (!brochureModels.size || brochureModels.has(normalized(m.model)))
   );
   renderList();
 }
@@ -246,7 +257,9 @@ async function renderList(){
   if(viewMode==="thumbnail"){
     await ensureModelImageIndex();
   }
-  $("resultCount").textContent = `${filteredModels.length} model${filteredModels.length===1?"":"s"}`;
+  $("resultCount").textContent = brochureModelNumbers.length
+    ? `${filteredModels.length} model${filteredModels.length===1?"":"s"} from brochure`
+    : `${filteredModels.length} model${filteredModels.length===1?"":"s"}`;
   const list=$("modelList");
   list.classList.toggle("thumbnail-view",viewMode==="thumbnail");
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0130 -->
+<!-- V20260809-0145 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -42,6 +42,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .compare-table th:last-child,.compare-table td:last-child{border-right:0}
 .compare-image-col{width:130px;min-width:130px}
 .compare-model-col{width:150px;min-width:150px}
+.compare-wide-text{width:440px;min-width:440px;max-width:440px}
 .compare-table th:nth-child(1),.compare-table td:nth-child(1){position:sticky;left:0;z-index:4;background:var(--surface)}
 .compare-table th:nth-child(2),.compare-table td:nth-child(2){position:sticky;left:130px;z-index:4;background:var(--surface)}
 .compare-table th:nth-child(1),.compare-table th:nth-child(2){z-index:7;background:var(--soft)}
@@ -128,6 +129,12 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     width:96px;
     height:54px;
   }
+
+  .compare-wide-text{
+    width:286px;
+    min-width:286px;
+    max-width:286px;
+  }
 }
 </style>
 </head>
@@ -153,7 +160,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0130</div>
+  <div class="version">models-compare.html V20260809-0145</div>
 </div>
 
 <script>
@@ -263,7 +270,7 @@ const comparisonColumns = [
   {key:"Country", label:"Country"},
   {key:"__year", label:"Year", special:true},
   {key:"__modelSeries", label:"Model Series", special:true},
-  {key:"__description", label:"Description", special:true},
+  {key:"__description", label:"Description", special:true, wideText:true},
   {key:"__functions", label:"Functions", special:true},
   {key:"Preamplifier Features", label:"Preamplifier Features"},
   {key:"Equalizer Type", label:"Equalizer Type"},
@@ -275,7 +282,7 @@ const comparisonColumns = [
   {key:"Depth", label:"Depth"},
   {key:"DIN Size", label:"DIN Size"},
   {key:"Original Currency", label:"Original Currency", currencyRequiresPrice:true},
-  {key:"Source Notes", label:"Source Notes"}
+  {key:"Source Notes", label:"Notes", wideText:true}
 ];
 
 function detailValue(model,field){
@@ -345,7 +352,7 @@ function render(models){
   const headers=columns.map(column=>{
     if(column.key==="__image") return '<th class="compare-image-col" aria-label="Image"></th>';
     if(column.key==="__model") return '<th class="compare-model-col">Model</th>';
-    return `<th>${esc(column.label)}</th>`;
+    return `<th${column.wideText ? ' class="compare-wide-text"' : ""}>${esc(column.label)}</th>`;
   }).join("");
 
   const rows=models.map(m=>{
@@ -363,7 +370,7 @@ function render(models){
       }
 
       const value=comparisonValue(m,column);
-      return `<td>${esc(value)}</td>`;
+      return `<td${column.wideText ? ' class="compare-wide-text"' : ""}>${esc(value)}</td>`;
     });
 
     return `<tr>${cells.join("")}</tr>`;

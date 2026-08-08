@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0135 -->
+<!-- V20260809-0150 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -109,9 +109,21 @@
   .compare-actions{
     top:auto;
     right:12px;
-    bottom:12px;
-    left:12px;
-    justify-content:center;
+    left:auto;
+    bottom:calc(env(safe-area-inset-bottom, 0px) + 88px);
+    width:auto;
+    max-width:calc(100vw - 24px);
+    justify-content:flex-end;
+    gap:7px;
+    padding:6px;
+  }
+
+  .compare-button,
+  .cancel-compare-button{
+    min-height:32px;
+    padding:6px 10px;
+    font-size:13px;
+    white-space:nowrap;
   }
 }
 </style>
@@ -939,6 +951,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0135</div>
+">models.html V20260809-0150</div>
 </body>
 </html>

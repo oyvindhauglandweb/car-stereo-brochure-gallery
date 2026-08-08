@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260808-0835 -->
+<!-- V20260808-2200 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -166,10 +166,16 @@ function applyFilters(){
   renderList();
 }
 function modelImageUrl(m){
-  if(m.mainImageUrl) return m.mainImageUrl;
+  // Standard image resolution is authoritative:
+  // Models image index -> /models/image -> Main Image URL fallback.
+  //
+  // This prevents an old/stale Main Image URL from overriding the correct
+  // Market/Brand/Model image in OneDrive. A manually created database row
+  // without Model ID can still use Main Image URL as a fallback.
   const indexed = m.modelId ? modelImageIndex[m.modelId] : null;
   if(indexed?.url) return indexed.url;
-  return m.modelId ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}` : "";
+  if(m.modelId) return `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}`;
+  return m.mainImageUrl || "";
 }
 
 async function ensureModelImageIndex(){
@@ -498,10 +504,15 @@ async function openModel(modelId){
     $("detailFunctions").textContent=functionsText(m);
     document.title=`${m.brand} ${m.model} – Car Stereo Garage`;
     const img=$("modelImage"), ph=$("imagePlaceholder"), aiWarning=$("imageAiWarning");
+    const indexedImageUrl = m.modelId && modelImageIndex[m.modelId]?.url
+      ? modelImageIndex[m.modelId].url
+      : "";
     const automaticImageUrl = m.modelId
       ? `${API_BASE}/models/image?model_id=${encodeURIComponent(m.modelId)}`
       : "";
-    const selectedImageUrl = m.mainImageUrl || automaticImageUrl;
+    // Same priority as thumbnail view. Standard Market/Brand/Model image wins;
+    // Main Image URL is only a fallback for manually created rows without Model ID.
+    const selectedImageUrl = indexedImageUrl || automaticImageUrl || m.mainImageUrl || "";
 
     ph.style.display=selectedImageUrl ? "none" : "block";
     img.style.display="none";

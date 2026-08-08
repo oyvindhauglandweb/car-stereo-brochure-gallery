@@ -1939,6 +1939,17 @@ function addModelImportContinueButton(){
   const box = document.getElementById("modelImportSummary");
   if(!box || !pendingModelDatabasePreview || !pendingModelImport?.rows?.length) return;
 
+  // During conflict review both the dedicated button and the normal form
+  // submit button complete the pending model import. This prevents a second
+  // "Save changes" click from discarding the user's conflict resolutions.
+  const submitButton = document.getElementById("submitButton");
+  if(submitButton){
+    submitButton.textContent = "Import model data";
+  }
+
+  const existingButton = document.getElementById("continueModelImportButton");
+  if(existingButton) return;
+
   const actions = document.createElement("div");
   actions.className = "model-import-actions";
 
@@ -1993,6 +2004,11 @@ async function continueModelImportAfterReview(){
 
     pendingModelDatabasePreview = null;
     pendingModelBrochureId = null;
+
+    const submitButton = document.getElementById("submitButton");
+    if(submitButton){
+      submitButton.textContent = "Save changes";
+    }
 
     setModelImportSummary(
       modelImportResultHtml(result, "Model import completed"),
@@ -2198,6 +2214,14 @@ async function loadFormData(){
 document.getElementById("brochureForm").addEventListener("submit", async function(event){
   event.preventDefault();
 
+  // If the brochure was already saved and we are now reviewing model
+  // conflicts, do NOT start the import workflow from scratch. Reuse the
+  // edited values + Forced Variant choices currently on screen.
+  if(pendingModelDatabasePreview && pendingModelBrochureId && pendingModelImport?.rows?.length){
+    await continueModelImportAfterReview();
+    return;
+  }
+
   const brochureId = getParam("brochure_id");
   const brandId = document.getElementById("brandSelect").value;
   const title = document.getElementById("titleInput").value.trim();
@@ -2329,6 +2353,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-2045 -->
+<!-- V20260808-2115 -->
 </body>
 </html>

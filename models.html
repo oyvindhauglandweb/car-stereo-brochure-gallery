@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0250 -->
+<!-- V20260809-0305 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -244,8 +244,14 @@ $("compareToggle").addEventListener("click", ()=>{
 window.addEventListener("resize", ()=>{
   if(compareMode) positionCompareActions();
 });
+window.addEventListener("scroll", ()=>{
+  if(compareMode) positionCompareActions();
+}, {passive:true});
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize", ()=>{
+    if(compareMode) positionCompareActions();
+  });
+  window.visualViewport.addEventListener("scroll", ()=>{
     if(compareMode) positionCompareActions();
   });
 }
@@ -467,20 +473,27 @@ function positionCompareActions(){
   if(!actions || !toggle) return;
 
   if(window.matchMedia("(max-width:720px)").matches){
-    // Anchor the floating controls directly below the square Compare button.
-    // Because the panel itself is fixed, it stays at this screen position
-    // even after the page is scrolled.
     const rect = toggle.getBoundingClientRect();
-    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    const viewport = window.visualViewport;
+    const viewportTop = viewport?.offsetTop || 0;
+    const viewportHeight = viewport?.height || window.innerHeight;
     const panelHeight = actions.offsetHeight || 44;
-    const preferredTop = rect.bottom + 10;
-    const maxTop = Math.max(12, viewportHeight - panelHeight - 12);
 
-    actions.style.top = `${Math.min(preferredTop, maxTop)}px`;
-    actions.style.right = "auto";
+    // Prefer directly below the square Compare button, but ALWAYS clamp the
+    // floating panel inside the actually visible Safari viewport. This also
+    // handles browser-history scroll restoration where the top menu may
+    // already be partly above the screen when Compare mode is restored.
+    const safeTop = viewportTop + 12;
+    const safeBottom = viewportTop + viewportHeight - 12;
+    const preferredTop = rect.bottom + 10;
+    const maxTop = Math.max(safeTop, safeBottom - panelHeight);
+    const finalTop = Math.max(safeTop, Math.min(preferredTop, maxTop));
+
+    actions.style.top = `${finalTop}px`;
+    actions.style.right = "12px";
     actions.style.bottom = "auto";
-    actions.style.left = "50%";
-    actions.style.transform = "translateX(-50%)";
+    actions.style.left = "auto";
+    actions.style.transform = "none";
   }else{
     actions.style.top = "";
     actions.style.right = "";
@@ -998,6 +1011,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0250</div>
+">models.html V20260809-0305</div>
 </body>
 </html>

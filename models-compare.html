@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0030 -->
+<!-- V20260809-0045 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -44,7 +44,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
   <div class="header">
     <img class="logo" id="siteLogo" src="Car Stereo Garage2_3.png" alt="Car Stereo Garage">
     <div class="top-buttons">
-      <a class="top-button" href="models.html" title="Back to models">←</a>
+      <button type="button" class="top-button" id="backButton" title="Back to models">←</button>
       <a class="top-button" href="index.html" title="Home">⌂</a>
       <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
     </div>
@@ -57,7 +57,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0030</div>
+  <div class="version">models-compare.html V20260809-0045</div>
 </div>
 
 <script>
@@ -75,6 +75,13 @@ function toggleTheme(){
   applyTheme();
 }
 $("themeToggle").addEventListener("click", toggleTheme);
+$("backButton").addEventListener("click", ()=>{
+  if(history.length > 1){
+    history.back();
+  }else{
+    location.href = "models.html";
+  }
+});
 applyTheme();
 
 async function fetchJson(url){

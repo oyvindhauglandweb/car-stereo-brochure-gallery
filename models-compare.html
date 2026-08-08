@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0220 -->
+<!-- V20260809-0255 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,7 +16,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .top-buttons{display:flex;justify-content:center;gap:10px}
 .top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}
 .top-button.active{background:var(--accent);color:#fff}
-#compareControlsToggle.compare-active{background:#00B050;color:#fff}
+#compareControlsToggle.compare-active{background:var(--accent);color:#fff}
 .compare-actions{
   position:fixed;
   z-index:1000;
@@ -184,7 +184,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0220</div>
+  <div class="version">models-compare.html V20260809-0255</div>
 </div>
 
 <script>
@@ -215,8 +215,9 @@ function updateCompareControls(){
 }
 
 $("compareControlsToggle").addEventListener("click", ()=>{
-  compareControlsVisible = !compareControlsVisible;
-  updateCompareControls();
+  // Compare is already active on this page. Clicking the active Compare
+  // button therefore has exactly the same meaning as Cancel Compare.
+  location.href = "models.html";
 });
 
 $("backButton").addEventListener("click", ()=>{

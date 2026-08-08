@@ -282,8 +282,12 @@ input[type="file"]{padding:10px 14px;}
 .model-conflict-table{
   width:100%;
   border-collapse:collapse;
+  table-layout:fixed;
   font-size:13px;
 }
+.model-conflict-table col.model-conflict-col-field{width:33.333%;}
+.model-conflict-table col.model-conflict-col-existing{width:33.333%;}
+.model-conflict-table col.model-conflict-col-import{width:33.334%;}
 .model-conflict-table th,
 .model-conflict-table td{
   padding:8px 10px;
@@ -334,6 +338,65 @@ input[type="file"]{padding:10px 14px;}
 body:not(.dark-mode) .model-conflict-edit{
   background:rgba(0,0,0,.025);
 }
+.model-conflict-select{
+  width:100%;
+  min-width:180px;
+  min-height:36px;
+  box-sizing:border-box;
+  padding:6px 30px 6px 8px;
+  border:1px solid var(--border);
+  border-radius:5px;
+  background:var(--card);
+  color:var(--text);
+  font:inherit;
+}
+.model-conflict-multi{position:relative;}
+.model-conflict-multi > summary{
+  list-style:none;
+  min-height:36px;
+  box-sizing:border-box;
+  padding:7px 30px 7px 9px;
+  border:1px solid var(--border);
+  border-radius:5px;
+  background:var(--card);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:normal;
+}
+.model-conflict-multi > summary::-webkit-details-marker{display:none;}
+.model-conflict-multi > summary::after{
+  content:"▾";
+  position:absolute;
+  right:10px;
+}
+.model-conflict-multi-menu{
+  position:absolute;
+  z-index:30;
+  left:0;
+  right:0;
+  margin-top:3px;
+  padding:7px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--card);
+  box-shadow:0 8px 24px rgba(0,0,0,.28);
+  max-height:220px;
+  overflow:auto;
+}
+.model-conflict-option{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 5px;
+  cursor:pointer;
+  font-weight:normal;
+}
+.model-conflict-option input{
+  width:17px;
+  height:17px;
+  min-height:17px;
+  margin:0;
+}
 body.dark-mode .model-conflict-row{
   background:rgba(170,45,45,.22);
 }
@@ -354,6 +417,46 @@ body.dark-mode .model-conflict-row .model-conflict-value{
   color:var(--muted);
   font-weight:normal;
   margin-top:3px;
+}
+.model-source-notes-merge-row td{
+  background:rgba(201,75,75,.08);
+}
+body.dark-mode .model-source-notes-merge-row td{
+  background:rgba(170,45,45,.14);
+}
+.model-source-notes-merge-label{
+  color:#e36b6b;
+  font-weight:bold;
+}
+body.dark-mode .model-source-notes-merge-label{color:#ff8a8a;}
+.model-source-notes-merge-wrap{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+}
+.model-source-notes-merged-edit{
+  flex:1 1 auto;
+  min-width:0;
+  min-height:88px;
+}
+.model-source-notes-use-both{
+  flex:0 0 auto;
+  align-self:stretch;
+  min-width:132px;
+  padding:8px 12px;
+  border:0;
+  border-radius:6px;
+  background:var(--link);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+  white-space:normal;
+}
+.model-source-notes-use-both:hover{filter:brightness(1.08);}
+.model-source-notes-merge-help{
+  margin-top:5px;
+  font-size:11px;
+  color:var(--muted);
 }
 body:not(.dark-mode) .model-conflict-row{
   background:#fff0f0;
@@ -1167,6 +1270,7 @@ function sourceNoteFragmentIsRedundant(fragment, structuredContext){
 
   // Permanent Source Notes exclusions: these are either intentionally
   // low-value or already have dedicated structured fields.
+  if(/wow\s*\/?\s*flutter\s*\d+(?:\.\d+)?\s*%/.test(f)) return true;
   if(/channel separation\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
   if(/loudness\s*[+±-]?\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
   if(/bass\/treble\s*[+±-]?\s*\d+(?:\.\d+)?\s*db/.test(f)) return true;
@@ -1298,7 +1402,99 @@ function currentExistingEdits(){
     .map(edit => ({rowId:edit.rowId, values:{...edit.values}}));
 }
 
+
+function conflictOptionValues(conflict){
+  return (Array.isArray(conflict?.options) ? conflict.options : [])
+    .map(option => String(option?.value ?? option ?? "").trim())
+    .filter(Boolean);
+}
+
+function conflictSelectedValues(value){
+  if(Array.isArray(value)){
+    return value.map(item => displayModelImportValue(item)).filter(Boolean);
+  }
+  return String(displayModelImportValue(value) || "")
+    .split(";")
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function conflictEditorControlHtml({row, conflict, side}){
+  const field = String(conflict?.field || "");
+  const fieldType = String(conflict?.fieldType || "");
+  const options = conflictOptionValues(conflict);
+  const isExisting = side === "existing";
+  const rowId = Number(row?.rowId || 0);
+  const sourceRow = String(row?.sourceRow || "");
+  const rawValue = isExisting
+    ? editedExistingValue(rowId, field, conflict?.existing)
+    : editedConflictValue(field, sourceRow, conflict?.incoming);
+
+  const sideClass = isExisting ? "model-conflict-existing-choice" : "model-conflict-import-choice";
+  const attrs = isExisting
+    ? `data-row-id="${esc(rowId)}"`
+    : `data-source-row="${esc(sourceRow)}"`;
+
+  if(fieldType === "single_select" && options.length){
+    const current = conflictSelectedValues(rawValue)[0] || "";
+    const optionHtml = ['<option value=""></option>']
+      .concat(options.map(option =>
+        `<option value="${esc(option)}"${normalizeSourceNoteFragment(option) === normalizeSourceNoteFragment(current) ? " selected" : ""}>${esc(option)}</option>`
+      )).join("");
+
+    return `
+      <select class="model-conflict-select ${sideClass}" ${attrs} data-field="${esc(field)}">
+        ${optionHtml}
+      </select>
+      <div class="model-conflict-edit-note">${isExisting ? "Editable database value" : "Editable import value"}</div>`;
+  }
+
+  if(fieldType === "multiple_select" && options.length){
+    const selected = new Set(conflictSelectedValues(rawValue).map(normalizeSourceNoteFragment));
+    const display = options.filter(option => selected.has(normalizeSourceNoteFragment(option))).join("; ") || "None selected";
+    const optionHtml = options.map(option => {
+      const checked = selected.has(normalizeSourceNoteFragment(option)) ? " checked" : "";
+      return `<label class="model-conflict-option">
+        <input type="checkbox" class="${sideClass}" ${attrs} data-field="${esc(field)}" value="${esc(option)}"${checked}>
+        <span>${esc(option)}</span>
+      </label>`;
+    }).join("");
+
+    return `
+      <details class="model-conflict-multi">
+        <summary class="model-conflict-multi-summary">${esc(display)}</summary>
+        <div class="model-conflict-multi-menu">${optionHtml}</div>
+      </details>
+      <div class="model-conflict-edit-note">${isExisting ? "Editable database value" : "Editable import value"}</div>`;
+  }
+
+  return null;
+}
+
+function updateConflictMultiSelect(container, side){
+  if(!container) return;
+  const selector = side === "existing" ? ".model-conflict-existing-choice" : ".model-conflict-import-choice";
+  const checkboxes = Array.from(container.querySelectorAll(selector));
+  if(!checkboxes.length) return;
+
+  const selected = checkboxes.filter(input => input.checked).map(input => input.value);
+  const first = checkboxes[0];
+  const value = selected.join("; ");
+
+  const summary = container.closest(".model-conflict-multi")?.querySelector(".model-conflict-multi-summary");
+  if(summary) summary.textContent = value || "None selected";
+
+  if(side === "existing"){
+    updatePendingExistingConflictValue(first.dataset.rowId, first.dataset.field, value);
+  }else{
+    updatePendingImportConflictValue(first.dataset.sourceRow, first.dataset.field, value);
+  }
+}
+
 function conflictExistingEditorHtml(row, conflict){
+  const choice = conflictEditorControlHtml({row, conflict, side:"existing"});
+  if(choice) return choice;
+
   const field = String(conflict?.field || "");
   const rowId = Number(row?.rowId || 0);
   const rawValue = editedExistingValue(rowId, field, conflict?.existing);
@@ -1317,6 +1513,9 @@ function conflictExistingEditorHtml(row, conflict){
 }
 
 function conflictImportEditorHtml(row, conflict, displayValue){
+  const choice = conflictEditorControlHtml({row, conflict, side:"import"});
+  if(choice) return choice;
+
   const field = String(conflict?.field || "");
   const sourceRow = String(row?.sourceRow || "");
   const rawValue = editedConflictValue(field, sourceRow, conflict?.incoming);
@@ -1334,6 +1533,149 @@ function conflictImportEditorHtml(row, conflict, displayValue){
     <div class="model-conflict-edit-note">Editable import value</div>`;
 }
 
+
+function sourceNoteMergeFragments(value){
+  const raw = String(value || "").trim();
+  if(!raw || raw === "—" || raw === "No unique source-note information after filtering.") return [];
+
+  return raw
+    .split(/(?<=[.!?])\s+|;\s*/g)
+    .map(fragment => fragment.trim())
+    .filter(Boolean);
+}
+
+function mergeSourceNotesSuggestion(existingValue, incomingValue){
+  const result = [];
+  const seen = new Set();
+
+  for(const fragment of [
+    ...sourceNoteMergeFragments(existingValue),
+    ...sourceNoteMergeFragments(incomingValue)
+  ]){
+    const key = normalizeSourceNoteFragment(fragment);
+    if(!key || seen.has(key)) continue;
+
+    // Avoid keeping a shorter fragment when the same information is already
+    // contained in a more complete fragment, and vice versa.
+    const containedIndex = result.findIndex(item => {
+      const itemKey = normalizeSourceNoteFragment(item);
+      return itemKey.includes(key) || key.includes(itemKey);
+    });
+
+    if(containedIndex >= 0){
+      const existingKey = normalizeSourceNoteFragment(result[containedIndex]);
+      if(key.length > existingKey.length){
+        result[containedIndex] = fragment;
+      }
+      continue;
+    }
+
+    seen.add(key);
+    result.push(fragment);
+  }
+
+  return result.join("; ");
+}
+
+function sourceNotesConflictHtml(row, conflict, reason){
+  const rowId = Number(row?.rowId || 0);
+  const sourceRow = String(row?.sourceRow || "");
+
+  const existingFiltered = filteredSourceNotesForDisplay(
+    editedExistingValue(rowId, "Source Notes", conflict?.existing),
+    row
+  );
+  const incomingFiltered = filteredSourceNotesForDisplay(
+    editedConflictValue("Source Notes", sourceRow, conflict?.incoming),
+    row
+  );
+  const merged = mergeSourceNotesSuggestion(existingFiltered, incomingFiltered);
+
+  return `
+    <tr class="model-conflict-row model-source-notes-original-row">
+      <td class="model-conflict-field">
+        Source Notes
+        <div class="model-source-notes-filtered">Redundant information already represented by structured fields is hidden here.</div>
+        ${reason}
+      </td>
+      <td class="model-conflict-value">
+        <textarea
+          class="model-conflict-edit model-conflict-existing-edit model-source-notes-existing"
+          data-row-id="${esc(rowId)}"
+          data-field="Source Notes"
+          rows="5"
+          spellcheck="false"
+          title="Edit the Source Notes already stored in the database."
+        >${esc(existingFiltered === "—" || existingFiltered.startsWith("No unique ") ? "" : existingFiltered)}</textarea>
+        <div class="model-conflict-edit-note">Existing model</div>
+      </td>
+      <td class="model-conflict-value">
+        <textarea
+          class="model-conflict-edit model-source-notes-import"
+          data-source-row="${esc(sourceRow)}"
+          data-field="Source Notes"
+          rows="5"
+          spellcheck="false"
+          title="Edit the incoming Source Notes."
+        >${esc(incomingFiltered === "—" || incomingFiltered.startsWith("No unique ") ? "" : incomingFiltered)}</textarea>
+        <div class="model-conflict-edit-note">Import file</div>
+      </td>
+    </tr>
+    <tr class="model-source-notes-merge-row">
+      <td class="model-source-notes-merge-label">Combined Source Notes</td>
+      <td colspan="2">
+        <div class="model-source-notes-merge-wrap">
+          <textarea
+            class="model-conflict-edit model-source-notes-merged-edit"
+            data-row-id="${esc(rowId)}"
+            data-source-row="${esc(sourceRow)}"
+            rows="5"
+            spellcheck="false"
+            title="Suggested combination of unique information from both Source Notes fields."
+          >${esc(merged)}</textarea>
+          <button
+            type="button"
+            class="model-source-notes-use-both"
+            data-row-id="${esc(rowId)}"
+            data-source-row="${esc(sourceRow)}"
+          >Use this text for both</button>
+        </div>
+        <div class="model-source-notes-merge-help">Unique information from both texts is combined here. Edit the suggestion if needed, then use the button to apply it to both the existing model and the import row.</div>
+      </td>
+    </tr>`;
+}
+
+function refreshSourceNotesMergedSuggestion(container){
+  if(!container) return;
+  const existing = container.querySelector(".model-source-notes-existing");
+  const incoming = container.querySelector(".model-source-notes-import");
+  const merged = container.querySelector(".model-source-notes-merged-edit");
+  if(!existing || !incoming || !merged) return;
+  merged.value = mergeSourceNotesSuggestion(existing.value, incoming.value);
+}
+
+function useMergedSourceNotesForBoth(button){
+  const card = button.closest(".model-conflict-card");
+  if(!card) return;
+
+  const merged = card.querySelector(".model-source-notes-merged-edit");
+  const existing = card.querySelector(".model-source-notes-existing");
+  const incoming = card.querySelector(".model-source-notes-import");
+  if(!merged || !existing || !incoming) return;
+
+  const value = merged.value.trim();
+  existing.value = value;
+  incoming.value = value;
+
+  updatePendingExistingConflictValue(button.dataset.rowId, "Source Notes", value);
+  updatePendingImportConflictValue(button.dataset.sourceRow, "Source Notes", value);
+
+  button.textContent = "Applied to both";
+  setTimeout(() => {
+    if(button.isConnected) button.textContent = "Use this text for both";
+  }, 1200);
+}
+
 function modelConflictComparisonHtml(row){
   const conflicts = Array.isArray(row?.conflicts) ? row.conflicts : [];
   if(!conflicts.length) return "";
@@ -1342,21 +1684,16 @@ function modelConflictComparisonHtml(row){
   const rowsHtml = conflicts.map(conflict => {
     const reason = conflict?.reason ? `<div class="model-import-details">${esc(conflict.reason)}</div>` : "";
     const isSourceNotes = String(conflict?.field || "").toLowerCase() === "source notes";
-    const existingDisplay = isSourceNotes
-      ? filteredSourceNotesForDisplay(conflict?.existing, row)
-      : displayModelImportValue(conflict?.existing);
-    const incomingDisplay = isSourceNotes
-      ? filteredSourceNotesForDisplay(conflict?.incoming, row)
-      : displayModelImportValue(conflict?.incoming);
-    const filterNote = isSourceNotes
-      ? '<div class="model-source-notes-filtered">Redundant information already represented by structured fields is hidden here.</div>'
-      : "";
+
+    if(isSourceNotes){
+      return sourceNotesConflictHtml(row, conflict, reason);
+    }
 
     return `
       <tr class="model-conflict-row">
-        <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${filterNote}${reason}</td>
+        <td class="model-conflict-field">${esc(conflict?.field || "Unknown field")}${reason}</td>
         <td class="model-conflict-value">${conflictExistingEditorHtml(row, conflict)}</td>
-        <td class="model-conflict-value">${conflictImportEditorHtml(row, conflict, incomingDisplay)}</td>
+        <td class="model-conflict-value">${conflictImportEditorHtml(row, conflict, displayModelImportValue(conflict?.incoming))}</td>
       </tr>`;
   }).join("");
 
@@ -1383,6 +1720,11 @@ function modelConflictComparisonHtml(row){
       </div>
       <div class="model-conflict-table-wrap">
         <table class="model-conflict-table">
+          <colgroup>
+            <col class="model-conflict-col-field">
+            <col class="model-conflict-col-existing">
+            <col class="model-conflict-col-import">
+          </colgroup>
           <thead>
             <tr>
               <th>Field</th>
@@ -1642,6 +1984,14 @@ async function loadFormData(){
   document.getElementById("modelImportSummary").addEventListener("click", event => {
     if(event.target.closest(".model-force-variant")){
       event.stopPropagation();
+      return;
+    }
+
+    const useBoth = event.target.closest(".model-source-notes-use-both");
+    if(useBoth){
+      event.preventDefault();
+      event.stopPropagation();
+      useMergedSourceNotesForBoth(useBoth);
     }
   });
 
@@ -1649,12 +1999,44 @@ async function loadFormData(){
     const existingEditor = event.target.closest(".model-conflict-existing-edit");
     if(existingEditor){
       updatePendingExistingConflictValue(existingEditor.dataset.rowId, existingEditor.dataset.field, existingEditor.value);
+      if(existingEditor.classList.contains("model-source-notes-existing")){
+        refreshSourceNotesMergedSuggestion(existingEditor.closest(".model-conflict-card"));
+      }
       return;
     }
 
     const editor = event.target.closest(".model-conflict-edit");
     if(!editor) return;
+
+    // The combined Source Notes box is only a proposed result until
+    // "Use this text for both" is pressed.
+    if(editor.classList.contains("model-source-notes-merged-edit")) return;
+
     updatePendingImportConflictValue(editor.dataset.sourceRow, editor.dataset.field, editor.value);
+    if(editor.classList.contains("model-source-notes-import")){
+      refreshSourceNotesMergedSuggestion(editor.closest(".model-conflict-card"));
+    }
+  });
+
+  document.getElementById("modelImportSummary").addEventListener("change", event => {
+    const existingChoice = event.target.closest(".model-conflict-existing-choice");
+    if(existingChoice){
+      if(existingChoice.type === "checkbox"){
+        updateConflictMultiSelect(existingChoice.closest(".model-conflict-multi-menu"), "existing");
+      }else{
+        updatePendingExistingConflictValue(existingChoice.dataset.rowId, existingChoice.dataset.field, existingChoice.value);
+      }
+      return;
+    }
+
+    const importChoice = event.target.closest(".model-conflict-import-choice");
+    if(importChoice){
+      if(importChoice.type === "checkbox"){
+        updateConflictMultiSelect(importChoice.closest(".model-conflict-multi-menu"), "import");
+      }else{
+        updatePendingImportConflictValue(importChoice.dataset.sourceRow, importChoice.dataset.field, importChoice.value);
+      }
+    }
   });
 }
 
@@ -1792,6 +2174,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1920 -->
+<!-- V20260808-2005 -->
 </body>
 </html>

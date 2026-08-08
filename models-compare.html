@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0045 -->
+<!-- V20260809-0055 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -57,7 +57,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0045</div>
+  <div class="version">models-compare.html V20260809-0055</div>
 </div>
 
 <script>
@@ -148,7 +148,7 @@ function functionsText(m){return Array.isArray(m.sourceUnitFunctions) ? m.source
 const comparisonColumns = [
   {key:"__image", label:"", special:true},
   {key:"__model", label:"Model", special:true},
-  {key:"Sound Control Unit", label:"Type"},
+  {key:"__type", label:"Type", special:true},
   {key:"__market", label:"Market", special:true},
   {key:"Country", label:"Country"},
   {key:"__year", label:"Year", special:true},
@@ -173,8 +173,37 @@ function detailValue(model,field){
   return model.details?.[field];
 }
 
+
+function mergedTypeText(model){
+  const details = model?.details || {};
+  const values = [];
+
+  const add = value => {
+    const parts = Array.isArray(value)
+      ? value
+      : String(value ?? "").split(/[;,]+/);
+
+    for(const part of parts){
+      const text = String(part ?? "").trim();
+      if(!text) continue;
+      if(!values.some(existing => existing.toLowerCase() === text.toLowerCase())){
+        values.push(text);
+      }
+    }
+  };
+
+  // Combine these four database columns into the single visible "Type" column.
+  add(model?.sourceUnitFunctions);
+  add(details["Sound Control Unit"]);
+  add(details["Speaker Type"]);
+  add(details["Accessory Type"]);
+
+  return values.join(", ");
+}
+
 function comparisonValue(model,column){
   switch(column.key){
+    case "__type": return mergedTypeText(model);
     case "__market": return marketsText(model);
     case "__year": return yearText(model);
     case "__modelSeries": return model.modelSeries || "";

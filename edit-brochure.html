@@ -260,6 +260,16 @@ input[type="file"]{padding:10px 14px;}
 }
 .model-conflict-value{
   min-width:190px;
+  color:var(--text);
+}
+body.dark-mode .model-conflict-row{
+  background:rgba(170,45,45,.22);
+}
+body.dark-mode .model-conflict-row .model-conflict-field{
+  color:#ff8a8a;
+}
+body.dark-mode .model-conflict-row .model-conflict-value{
+  color:#f2f2f2;
 }
 .model-conflict-row{
   background:rgba(201,75,75,.12);
@@ -267,10 +277,10 @@ input[type="file"]{padding:10px 14px;}
 .model-conflict-row .model-conflict-field{
   color:#e36b6b;
 }
-html:not([data-theme="dark"]) .model-conflict-row{
+body:not(.dark-mode) .model-conflict-row{
   background:#fff0f0;
 }
-html:not([data-theme="dark"]) .model-conflict-row .model-conflict-field{
+body:not(.dark-mode) .model-conflict-row .model-conflict-field{
   color:#a22;
 }
 .model-safe-fields{
@@ -1331,6 +1341,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-1715 -->
+<!-- V20260808-1730 -->
 </body>
 </html>

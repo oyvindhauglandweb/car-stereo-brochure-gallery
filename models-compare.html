@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0355 -->
+<!-- V20260809-0410 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -189,7 +189,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0355</div>
+  <div class="version">models-compare.html V20260809-0410</div>
 </div>
 
 <script>
@@ -339,6 +339,7 @@ function fieldDisplayValue(name,value){
     [/Maximum Music Power$/i," W"],
     [/Maximum RMS Power$/i," W"],
     [/Output Voltage$/i," mV"],
+    [/^Original Price$/i,""],
     [/Signal-to-Noise Ratio$/i," dB"],
     [/Sensitivity$/i," dB"],
     [/THD$/i," %"],
@@ -368,17 +369,68 @@ const comparisonColumns = [
   {key:"__year", label:"Year", special:true},
   {key:"__modelSeries", label:"Model Series", special:true},
   {key:"__description", label:"Description", special:true, wideText:true},
-  {key:"__functions", label:"Functions", special:true},
+
   {key:"Preamplifier Features", label:"Preamplifier Features"},
+  {key:"Preamplifier Output Voltage", label:"Preamplifier Output Voltage"},
+  {key:"External Units", label:"External Units"},
+  {key:"Remote Control", label:"Remote Control"},
+  {key:"Clock", label:"Clock"},
+  {key:"Anti-Theft System", label:"Anti-Theft System"},
+  {key:"Illumination", label:"Illumination"},
+
+  {key:"CD Signal-to-Noise Ratio", label:"CD Signal-to-Noise Ratio"},
+  {key:"CD THD", label:"CD THD"},
+  {key:"CD Frequency Response Low", label:"CD Frequency Response Low"},
+  {key:"CD Frequency Response High", label:"CD Frequency Response High"},
+
+  {key:"MD Signal-to-Noise Ratio", label:"MD Signal-to-Noise Ratio"},
+  {key:"MD THD", label:"MD THD"},
+  {key:"MD Frequency Response Low", label:"MD Frequency Response Low"},
+  {key:"MD Frequency Response High", label:"MD Frequency Response High"},
+
+  {key:"Cassette Features", label:"Cassette Features"},
+  {key:"Cassette Tape Selector", label:"Cassette Tape Selector"},
+  {key:"Cassette Noise Reduction Systems", label:"Cassette Noise Reduction Systems"},
+  {key:"Cassette Radio Monitor", label:"Cassette Radio Monitor"},
+  {key:"Cassette Signal-to-Noise Ratio", label:"Cassette Signal-to-Noise Ratio"},
+  {key:"Cassette THD", label:"Cassette THD"},
+  {key:"Cassette Frequency Response Low", label:"Cassette Frequency Response Low"},
+  {key:"Cassette Frequency Response High", label:"Cassette Frequency Response High"},
+
+  {key:"Tuner Features", label:"Tuner Features"},
+  {key:"Tuner Bands", label:"Tuner Bands"},
+  {key:"Tuner Display Type", label:"Tuner Display Type"},
+  {key:"Tuner Preset positions", label:"Tuner Preset positions"},
+
+  {key:"Equalizer Features", label:"Equalizer Features"},
   {key:"Equalizer Type", label:"Equalizer Type"},
-  {key:"Amplifier Channels", label:"Amplifier Channels"},
+  {key:"Equalizer Number of Rear Frequencies", label:"Equalizer Number of Rear Frequencies"},
+  {key:"Equalizer Number of Front Frequencies", label:"Equalizer Number of Front Frequencies"},
+  {key:"Equalizer Memories positions", label:"Equalizer Memories positions"},
+  {key:"Equalizer Signal-to-Noise Ratio", label:"Equalizer Signal-to-Noise Ratio"},
+
   {key:"Amplifier Features", label:"Amplifier Features"},
+  {key:"Amplifier Channels", label:"Amplifier Channels"},
   {key:"Amplifier Power per Channel", label:"Amplifier Power per Channel"},
+  {key:"Amplifier Signal-to-Noise Ratio", label:"Amplifier Signal-to-Noise Ratio"},
+
+  {key:"Crossover Type", label:"Crossover Type"},
+  {key:"Crossover Rear Channels", label:"Crossover Rear Channels"},
+  {key:"Crossover Front Channels", label:"Crossover Front Channels"},
+
+  {key:"Speaker Frequency Response Low", label:"Speaker Frequency Response Low"},
+  {key:"Speaker Frequency Response High", label:"Speaker Frequency Response High"},
+  {key:"Speaker Crossover Ways", label:"Speaker Crossover Ways"},
+  {key:"Speaker Sensitivity", label:"Speaker Sensitivity"},
+  {key:"Speaker Maximum Music Power", label:"Speaker Maximum Music Power"},
+  {key:"Speaker Maximum RMS Power", label:"Speaker Maximum RMS Power"},
+
   {key:"Width", label:"Width"},
   {key:"Height", label:"Height"},
   {key:"Depth", label:"Depth"},
   {key:"DIN Size", label:"DIN Size"},
   {key:"Original Currency", label:"Original Currency", currencyRequiresPrice:true},
+  {key:"Original Price", label:"Original Price"},
   {key:"Source Notes", label:"Notes", wideText:true}
 ];
 
@@ -429,13 +481,13 @@ function comparisonValue(model,column){
 
 function visibleComparisonColumns(models){
   return comparisonColumns.filter(column=>{
-    // Image and Model are structural columns and must always be visible.
+    // Image and Model are structural columns and always remain visible.
     if(column.key === "__image" || column.key === "__model"){
       return true;
     }
 
-    // Original Currency is relevant only when at least one compared model
-    // actually has an Original Price.
+    // Original Currency is only useful when at least one compared model has
+    // Original Price, even if a currency value happens to be stored.
     if(column.currencyRequiresPrice){
       const hasOriginalPrice = models.some(
         model => isMeaningful(detailValue(model,"Original Price"))
@@ -443,9 +495,8 @@ function visibleComparisonColumns(models){
       if(!hasOriginalPrice) return false;
     }
 
-    // Hide any specification column where every compared model is empty.
-    // Keep zero/false-like numeric values that are meaningful; comparisonValue
-    // already normalizes the displayed value for synthetic columns.
+    // Every other reviewed comparison field is shown whenever at least one
+    // selected model contains a meaningful value.
     return models.some(model => isMeaningful(comparisonValue(model,column)));
   });
 }

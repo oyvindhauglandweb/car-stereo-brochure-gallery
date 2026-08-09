@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0445 -->
+<!-- V20260809-0455 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -130,6 +130,15 @@
     white-space:nowrap;
   }
 }
+
+.spec-value a.brochure-link{
+  color:#fff;
+  text-decoration:underline;
+}
+:root[data-theme="light"] .spec-value a.brochure-link{
+  color:var(--link);
+}
+
 </style>
 <script data-goatcounter="https://oyvindhaugland.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -801,7 +810,7 @@ function sourceBrochureLinkHtml(value){
   if(modelName) params.set("source_model", modelName);
 
   const label = ids.length === 1 ? "View brochure" : `View brochures (${ids.length})`;
-  return `<a href="gallery.html?${params.toString()}">${esc(label)}</a>`;
+  return `<a class="brochure-link" href="gallery.html?${params.toString()}">${esc(label)}</a>`;
 }
 
 function renderSpecGroup(items, groupName){
@@ -1047,6 +1056,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0445</div>
+">models.html V20260809-0455</div>
 </body>
 </html>

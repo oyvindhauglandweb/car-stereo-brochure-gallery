@@ -424,6 +424,9 @@ body.dark-mode .model-conflict-row .model-conflict-value{
 body.dark-mode .model-source-notes-merge-row td{
   background:rgba(170,45,45,.14);
 }
+.model-conflict-copy-row + .model-source-notes-merge-row td{
+  border-top:0;
+}
 .model-source-notes-merge-label{
   color:#e36b6b;
   font-weight:bold;
@@ -462,6 +465,11 @@ body.dark-mode .model-source-notes-merge-label{color:#ff8a8a;}
   padding-top:3px;
   padding-bottom:8px;
   background:rgba(201,75,75,.08);
+  border-bottom:0;
+}
+/* Keep each copy-action row visually attached to the conflict values above it. */
+.model-conflict-row:has(+ .model-conflict-copy-row) td{
+  border-bottom:0;
 }
 body.dark-mode .model-conflict-copy-row td{
   background:rgba(170,45,45,.14);
@@ -1759,6 +1767,7 @@ function sourceNotesConflictHtml(row, conflict, reason){
         <div class="model-conflict-edit-note">Import file</div>
       </td>
     </tr>
+    ${conflictCopyActionsHtml(row, conflict)}
     <tr class="model-source-notes-merge-row">
       <td class="model-source-notes-merge-label">Combined Source Notes</td>
       <td colspan="2">
@@ -2353,6 +2362,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260808-2115 -->
+<!-- V20260809-2205 -->
 </body>
 </html>

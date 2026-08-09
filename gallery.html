@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- V20260808-1610 -->
+<!-- V20260809-0445 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -968,13 +968,23 @@ async function loadBrochures() {
   const ownerFilter = params.get("owner");
   const modelSeriesFilter = params.get("model_series");
   const modelNumberFilter = params.get("model_number");
+  const brochureIdsFilter = String(params.get("brochure_ids") || "")
+    .split(/[|,;]+/)
+    .map(value => Number(String(value).trim()))
+    .filter(value => Number.isFinite(value) && value > 0);
+  const sourceModelFilter = String(params.get("source_model") || "").trim();
   const brandFilter = params.get("brand");
   const yearFilter = params.get("year");
   const languageFilter = params.get("language");
   const marketFilter = params.get("market");
   const submittedByFilter = params.get("submitted_by");
 
-  if(ownerFilter){
+  if(brochureIdsFilter.length){
+    document.getElementById("pageTitle").innerText =
+      sourceModelFilter
+        ? "Brochures containing " + sourceModelFilter
+        : "Brochures linked to this model";
+  } else if(ownerFilter){
     document.getElementById("pageTitle").innerText = "Brochures owned by " + ownerFilter;
   } else if(modelSeriesFilter){
     document.getElementById("pageTitle").innerText = "Brochures in model series: " + modelSeriesFilter;
@@ -995,6 +1005,7 @@ async function loadBrochures() {
   }
 
   const hasFilter =
+    brochureIdsFilter.length ||
     ownerFilter ||
     modelSeriesFilter ||
     modelNumberFilter ||
@@ -1047,9 +1058,12 @@ setupFilters(allRows, {
   model_number: modelNumberFilter
 });
 
+  const brochureIdSet = new Set(brochureIdsFilter);
+
   const brochures = allRows
     .filter(item => (item.field_8379597 && item.field_8379597.value) !== "Rejected")
     .filter(item => (item.field_8379592 && item.field_8379592.length) > 0)
+    .filter(item => !brochureIdSet.size || brochureIdSet.has(Number(item.id)))
     .filter(item => {
       if (!ownerFilter) return true;
       const owners = (item.field_8379595 || []).map(x => x.value) || [];

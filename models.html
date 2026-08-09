@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0320 -->
+<!-- V20260809-0445 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -777,14 +777,45 @@ function canReturnToPreviousPage(){
   }
 }
 
+
+function sourceBrochureIdList(value){
+  const raw = Array.isArray(value) ? value : String(value ?? "").split(/[;,|]+/);
+
+  return [...new Set(
+    raw
+      .map(item => String(item?.value ?? item ?? "").trim())
+      .filter(Boolean)
+  )];
+}
+
+function sourceBrochureLinkHtml(value){
+  const ids = sourceBrochureIdList(value);
+  if(!ids.length) return "";
+
+  const params = new URLSearchParams();
+  params.set("brochure_ids", ids.join("|"));
+
+  const brand = String(currentModelForRender?.brand || "").trim();
+  const model = String(currentModelForRender?.model || "").trim();
+  const modelName = [brand, model].filter(Boolean).join(" ");
+  if(modelName) params.set("source_model", modelName);
+
+  const label = ids.length === 1 ? "View brochure" : `View brochures (${ids.length})`;
+  return `<a href="gallery.html?${params.toString()}">${esc(label)}</a>`;
+}
+
 function renderSpecGroup(items, groupName){
   const normal = [];
   const fullWidth = [];
 
   for(const [name,value] of items){
-    const label = publicFieldLabel(name,groupName);
-    const shown = fieldDisplayValue(name,value,detailsForRender);
-    const html = `<div class="spec-row${name === "Source Notes" ? " full-width" : ""}"><div class="spec-label">${esc(label)}</div><div class="spec-value">${esc(shown)}</div></div>`;
+    const isSourceBrochures = name === "Source Brochure IDs";
+    const label = isSourceBrochures ? "Brochures" : publicFieldLabel(name,groupName);
+    const shown = isSourceBrochures
+      ? sourceBrochureLinkHtml(value)
+      : esc(fieldDisplayValue(name,value,detailsForRender));
+
+    const html = `<div class="spec-row${name === "Source Notes" ? " full-width" : ""}"><div class="spec-label">${esc(label)}</div><div class="spec-value">${shown}</div></div>`;
 
     if(name === "Source Notes") fullWidth.push(html);
     else normal.push(html);
@@ -801,6 +832,7 @@ function renderSpecGroup(items, groupName){
 }
 
 let detailsForRender = null;
+let currentModelForRender = null;
 
 async function openModel(modelId, options = {}){
   const historyMode = options.historyMode || "push";
@@ -886,12 +918,14 @@ async function openModel(modelId, options = {}){
       const group=groupFor(name); (groups[group] ||= []).push([name,value]);
     }
     const order=["CD","MD","Cassette","Tuner","Preamplifier","Amplifier","Equalizer","Speaker","Crossover","Dimensions","Other specifications","Availability & Value"];
+    currentModelForRender = m;
     detailsForRender = details;
     $("specSections").innerHTML=order
       .filter(g=>groups[g]?.length)
       .map(g=>`<section class="spec-section"><div class="spec-title">${esc(g)}</div><div class="spec-grid">${renderSpecGroup(groups[g],g)}</div></section>`)
       .join("");
     detailsForRender = null;
+    currentModelForRender = null;
     const detailUrl = `models.html?model_id=${encodeURIComponent(m.modelId)}`;
     if(historyMode === "push"){
       history.pushState({view:"detail", modelId:m.modelId}, "", detailUrl);
@@ -1013,6 +1047,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260809-0320</div>
+">models.html V20260809-0445</div>
 </body>
 </html>

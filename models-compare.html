@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0410 -->
+<!-- V20260809-0430 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -189,7 +189,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
     <table class="compare-table" id="compareTable"></table>
   </div>
 
-  <div class="version">models-compare.html V20260809-0410</div>
+  <div class="version">models-compare.html V20260809-0430</div>
 </div>
 
 <script>
@@ -380,13 +380,11 @@ const comparisonColumns = [
 
   {key:"CD Signal-to-Noise Ratio", label:"CD Signal-to-Noise Ratio"},
   {key:"CD THD", label:"CD THD"},
-  {key:"CD Frequency Response Low", label:"CD Frequency Response Low"},
-  {key:"CD Frequency Response High", label:"CD Frequency Response High"},
+  {key:"__cdFrequencyResponse", label:"CD Frequency Response", special:true},
 
   {key:"MD Signal-to-Noise Ratio", label:"MD Signal-to-Noise Ratio"},
   {key:"MD THD", label:"MD THD"},
-  {key:"MD Frequency Response Low", label:"MD Frequency Response Low"},
-  {key:"MD Frequency Response High", label:"MD Frequency Response High"},
+  {key:"__mdFrequencyResponse", label:"MD Frequency Response", special:true},
 
   {key:"Cassette Features", label:"Cassette Features"},
   {key:"Cassette Tape Selector", label:"Cassette Tape Selector"},
@@ -394,8 +392,7 @@ const comparisonColumns = [
   {key:"Cassette Radio Monitor", label:"Cassette Radio Monitor"},
   {key:"Cassette Signal-to-Noise Ratio", label:"Cassette Signal-to-Noise Ratio"},
   {key:"Cassette THD", label:"Cassette THD"},
-  {key:"Cassette Frequency Response Low", label:"Cassette Frequency Response Low"},
-  {key:"Cassette Frequency Response High", label:"Cassette Frequency Response High"},
+  {key:"__cassetteFrequencyResponse", label:"Cassette Frequency Response", special:true},
 
   {key:"Tuner Features", label:"Tuner Features"},
   {key:"Tuner Bands", label:"Tuner Bands"},
@@ -418,8 +415,7 @@ const comparisonColumns = [
   {key:"Crossover Rear Channels", label:"Crossover Rear Channels"},
   {key:"Crossover Front Channels", label:"Crossover Front Channels"},
 
-  {key:"Speaker Frequency Response Low", label:"Speaker Frequency Response Low"},
-  {key:"Speaker Frequency Response High", label:"Speaker Frequency Response High"},
+  {key:"__speakerFrequencyResponse", label:"Speaker Frequency Response", special:true},
   {key:"Speaker Crossover Ways", label:"Speaker Crossover Ways"},
   {key:"Speaker Sensitivity", label:"Speaker Sensitivity"},
   {key:"Speaker Maximum Music Power", label:"Speaker Maximum Music Power"},
@@ -467,9 +463,31 @@ function mergedTypeText(model){
   return values.join(", ");
 }
 
+
+function frequencyResponseText(model, lowField, highField){
+  const lowRaw = detailValue(model, lowField);
+  const highRaw = detailValue(model, highField);
+
+  const low = compactNumber(displayValue(lowRaw));
+  const high = compactNumber(displayValue(highRaw));
+
+  if(low && high) return `${low}–${high} Hz`;
+  if(low) return `${low} Hz`;
+  if(high) return `${high} Hz`;
+  return "";
+}
+
 function comparisonValue(model,column){
   switch(column.key){
     case "__type": return mergedTypeText(model);
+    case "__cdFrequencyResponse":
+      return frequencyResponseText(model, "CD Frequency Response Low", "CD Frequency Response High");
+    case "__mdFrequencyResponse":
+      return frequencyResponseText(model, "MD Frequency Response Low", "MD Frequency Response High");
+    case "__cassetteFrequencyResponse":
+      return frequencyResponseText(model, "Cassette Frequency Response Low", "Cassette Frequency Response High");
+    case "__speakerFrequencyResponse":
+      return frequencyResponseText(model, "Speaker Frequency Response Low", "Speaker Frequency Response High");
     case "__market": return marketsText(model);
     case "__year": return yearText(model);
     case "__modelSeries": return model.modelSeries || "";

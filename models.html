@@ -222,8 +222,20 @@ function valueList(value){
   return text ? [text] : [];
 }
 function modelFunctionTypes(model){
+  const sourceFunctions=valueList(model.sourceUnitFunctions);
+
+  // "Amplifier" in Source Unit Functions is also used by combined source units
+  // (for example Cassette Player + Amplifier). In the Function / type filter,
+  // Amplifier should mean a standalone amplifier, not every unit that contains
+  // an internal power amplifier. Therefore expose Amplifier only when it is the
+  // model's sole Source Unit Function. Other source functions are unchanged.
+  const filterSourceFunctions=sourceFunctions.filter(value=>
+    normalized(value)!=="amplifier" ||
+    (sourceFunctions.length===1 && normalized(sourceFunctions[0])==="amplifier")
+  );
+
   const values=[
-    ...valueList(model.sourceUnitFunctions),
+    ...filterSourceFunctions,
     ...valueList(model.soundControlUnit),
     ...valueList(model.accessoryType)
   ];

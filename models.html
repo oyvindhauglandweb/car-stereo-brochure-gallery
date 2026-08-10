@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260809-0455 -->
+<!-- V20260810-0745 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -60,7 +60,7 @@
   color:#fff;
   font-weight:700;
   z-index:2;
-}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr .75fr 1.4fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
+}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.2fr .95fr .95fr .95fr 1.25fr .7fr 1.3fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field{min-width:0}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.multiselect{position:relative}.multiselect-button{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 34px 0 11px;font-size:15px;text-align:left;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.multiselect-button::after{content:"⌄";position:absolute;right:11px;top:50%;transform:translateY(-54%);font-size:18px;color:var(--muted)}.multiselect.open .multiselect-button::after{content:"⌃"}.multiselect-menu{display:none;position:absolute;z-index:1200;top:calc(100% + 5px);left:0;min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 28px));max-height:320px;overflow:auto;padding:7px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 7px 22px rgba(0,0,0,.38)}.multiselect.open .multiselect-menu{display:block}.multiselect-option{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:6px;cursor:pointer;white-space:nowrap}.multiselect-option:hover{background:var(--soft)}.multiselect-option input{width:16px;height:16px;margin:0;accent-color:var(--accent)}.multiselect-option span{font-size:14px}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
 .model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:visible}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
@@ -167,6 +167,7 @@
       <div class="field"><label for="seriesFilter">Model Series</label><select id="seriesFilter"><option value="">All series</option></select></div>
       <div class="field"><label for="marketFilter">Market</label><select id="marketFilter"><option value="">All markets</option></select></div>
       <div class="field"><label for="typeFilter">Unit Type</label><select id="typeFilter"><option value="">All types</option></select></div>
+      <div class="field"><label for="functionTypeButton">Function / type</label><div class="multiselect" id="functionTypeFilter"><button type="button" class="multiselect-button" id="functionTypeButton" aria-haspopup="true" aria-expanded="false">All functions / types</button><div class="multiselect-menu" id="functionTypeMenu"></div></div></div>
       <div class="field"><label for="yearFilter">Year</label><input id="yearFilter" inputmode="numeric" placeholder="e.g. 1981"></div>
       <div class="field"><label for="searchFilter">Model / search</label><input id="searchFilter" placeholder="e.g. 7138"></div>
     </div>
@@ -200,6 +201,7 @@ let modelImageIndexPromise = null;
 let viewMode = localStorage.getItem("modelViewMode") === "thumbnail" ? "thumbnail" : "list";
 let compareMode = false;
 const selectedCompareRows = new Set();
+const selectedFunctionTypes = new Set();
 
 const $ = id => document.getElementById(id);
 function esc(value){return String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -213,6 +215,55 @@ function yearText(model){
 }
 function marketsText(model){return Array.isArray(model.markets) ? model.markets.join(", ") : String(model.markets || "");}
 function functionsText(model){return Array.isArray(model.sourceUnitFunctions) ? model.sourceUnitFunctions.join(", ") : "";}
+function valueList(value){
+  if(Array.isArray(value)) return value.map(v=>String(v ?? "").trim()).filter(Boolean);
+  const text=String(value ?? "").trim();
+  return text ? [text] : [];
+}
+function modelFunctionTypes(model){
+  const values=[
+    ...valueList(model.sourceUnitFunctions),
+    ...valueList(model.soundControlUnit),
+    ...valueList(model.accessoryType)
+  ];
+  if(normalized(model.unitType)==="speaker") values.push("Speaker");
+  return [...new Set(values.filter(Boolean))];
+}
+function updateFunctionTypeButton(){
+  const button=$("functionTypeButton");
+  if(!button) return;
+  const selected=[...selectedFunctionTypes].sort((a,b)=>a.localeCompare(b,"en",{numeric:true,sensitivity:"base"}));
+  button.textContent=selected.length===0 ? "All functions / types" : selected.length===1 ? selected[0] : `${selected.length} selected`;
+}
+function renderFunctionTypeFilter(){
+  const menu=$("functionTypeMenu");
+  const values=[...new Set(allModels.flatMap(model=>modelFunctionTypes(model)))].sort((a,b)=>a.localeCompare(b,"en",{numeric:true,sensitivity:"base"}));
+  menu.innerHTML=values.map(value=>`<label class="multiselect-option"><input type="checkbox" value="${esc(value)}"${selectedFunctionTypes.has(value)?" checked":""}><span>${esc(value)}</span></label>`).join("");
+  menu.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener("change",()=>{
+    if(input.checked) selectedFunctionTypes.add(input.value); else selectedFunctionTypes.delete(input.value);
+    updateFunctionTypeButton();
+    applyFilters();
+  }));
+  updateFunctionTypeButton();
+}
+function closeFunctionTypeFilter(){
+  const root=$("functionTypeFilter");
+  if(!root) return;
+  root.classList.remove("open");
+  $("functionTypeButton")?.setAttribute("aria-expanded","false");
+}
+function setupFunctionTypeDropdown(){
+  const root=$("functionTypeFilter"), button=$("functionTypeButton");
+  button.addEventListener("click",event=>{
+    event.stopPropagation();
+    const willOpen=!root.classList.contains("open");
+    root.classList.toggle("open",willOpen);
+    button.setAttribute("aria-expanded",willOpen?"true":"false");
+  });
+  $("functionTypeMenu").addEventListener("click",event=>event.stopPropagation());
+  document.addEventListener("click",closeFunctionTypeFilter);
+  document.addEventListener("keydown",event=>{if(event.key==="Escape") closeFunctionTypeFilter();});
+}
 
 function applyTheme(){
   const saved = localStorage.getItem("theme") || "dark";
@@ -287,6 +338,8 @@ function setupFilters(){
   fillSelect("seriesFilter", allModels.map(m=>m.modelSeries));
   fillSelect("marketFilter", allModels.flatMap(m=>m.markets || []));
   fillSelect("typeFilter", allModels.map(m=>m.unitType));
+  renderFunctionTypeFilter();
+  setupFunctionTypeDropdown();
   ["brandFilter","seriesFilter","marketFilter","typeFilter"].forEach(id=>$(id).addEventListener("change", applyFilters));
   ["yearFilter","searchFilter"].forEach(id=>$(id).addEventListener("input", applyFilters));
 }
@@ -315,12 +368,14 @@ function modelMatchesYear(m, y){
 function applyFilters(){
   const brand=normalized($("brandFilter").value), series=normalized($("seriesFilter").value), market=normalized($("marketFilter").value), type=normalized($("typeFilter").value), year=$("yearFilter").value.trim(), q=normalized($("searchFilter").value);
   const brochureModels = new Set(brochureModelNumbers);
+  const selectedFunctionKeys = new Set([...selectedFunctionTypes].map(normalized));
 
   filteredModels = allModels.filter(m =>
     (!brand || normalized(m.brand)===brand) &&
     (!series || normalized(m.modelSeries)===series) &&
     (!market || (m.markets||[]).some(x=>normalized(x)===market)) &&
     (!type || normalized(m.unitType)===type) &&
+    (!selectedFunctionKeys.size || modelFunctionTypes(m).some(value=>selectedFunctionKeys.has(normalized(value)))) &&
     modelMatchesYear(m,year) &&
     (!q || [m.model,m.brand,m.modelSeries,marketsText(m),functionsText(m),m.description].some(x=>normalized(x).includes(q))) &&
     (!brochureModels.size || brochureModels.has(normalized(m.model)))

@@ -202,6 +202,7 @@ let viewMode = localStorage.getItem("modelViewMode") === "thumbnail" ? "thumbnai
 let compareMode = false;
 const selectedCompareRows = new Set();
 const selectedFunctionTypes = new Set();
+let functionTypeOptions = [];
 
 const $ = id => document.getElementById(id);
 function esc(value){return String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -237,7 +238,8 @@ function updateFunctionTypeButton(){
 }
 function renderFunctionTypeFilter(){
   const menu=$("functionTypeMenu");
-  const values=[...new Set(allModels.flatMap(model=>modelFunctionTypes(model)))].sort((a,b)=>a.localeCompare(b,"en",{numeric:true,sensitivity:"base"}));
+  const populatedValues=allModels.flatMap(model=>modelFunctionTypes(model));
+  const values=[...new Set([...(functionTypeOptions||[]), ...populatedValues])].sort((a,b)=>a.localeCompare(b,"en",{numeric:true,sensitivity:"base"}));
   menu.innerHTML=values.map(value=>`<label class="multiselect-option"><input type="checkbox" value="${esc(value)}"${selectedFunctionTypes.has(value)?" checked":""}><span>${esc(value)}</span></label>`).join("");
   menu.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener("change",()=>{
     if(input.checked) selectedFunctionTypes.add(input.value); else selectedFunctionTypes.delete(input.value);
@@ -1064,8 +1066,12 @@ function restoreCompareSelectionFromUrl(){
 async function init(){
   updateMenuBackButton();
   try{
-    const data=await fetchJson(`${API_BASE}/models?summary=1`);
+    const [data, optionData]=await Promise.all([
+      fetchJson(`${API_BASE}/models?summary=1`),
+      fetchJson(`${API_BASE}/models/filter-options`).catch(()=>({options:[]}))
+    ]);
     allModels=data.results||[];
+    functionTypeOptions=Array.isArray(optionData?.options) ? optionData.options : [];
     setupFilters();
     applyUrlFilters();
     restoreCompareSelectionFromUrl();

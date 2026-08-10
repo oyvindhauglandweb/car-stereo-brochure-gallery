@@ -1088,6 +1088,14 @@ function restoreCompareSelectionFromUrl(){
 
 async function init(){
   updateMenuBackButton();
+
+  // Start the image-index lookup immediately in thumbnail mode. This runs in
+  // parallel with the model/filter requests so a KV cache hit is ready before
+  // the cards are rendered.
+  if(viewMode==="thumbnail"){
+    ensureModelImageIndex();
+  }
+
   try{
     const [data, optionData]=await Promise.all([
       fetchJson(`${API_BASE}/models?summary=1`),
@@ -1140,6 +1148,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260810-1045</div>
+">models.html V20260810-1115</div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260810-0745 -->
+<!-- V20260811-0701 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1004,6 +1004,22 @@ async function openModel(modelId, options = {}){
       }
 
       if(/Frequency Response High$/i.test(String(name)) && consumed.has(name)) continue;
+
+      // Combine Tuner FM-range Start/End into one user-facing row,
+      // e.g. "FM-range 87.90-107.90 MHz".
+      if(String(name) === "Tuner FM-range Start"){
+        const endName = "Tuner FM-range End";
+        const endValue = details[endName];
+        if(isMeaningful(endValue)){
+          const group=groupFor(name);
+          (groups[group] ||= []).push(["Tuner FM-range",`${displayValue(value)}-${displayValue(endValue)} MHz`]);
+          consumed.add(name);
+          consumed.add(endName);
+          continue;
+        }
+      }
+
+      if(String(name) === "Tuner FM-range End" && consumed.has(name)) continue;
       const group=groupFor(name); (groups[group] ||= []).push([name,value]);
     }
     const order=["CD","MD","Cassette","Tuner","Preamplifier","Amplifier","Equalizer","Speaker","Crossover","Dimensions","Other specifications","Availability & Value"];
@@ -1148,6 +1164,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260810-1115</div>
+">models.html V20260811-0701</div>
 </body>
 </html>

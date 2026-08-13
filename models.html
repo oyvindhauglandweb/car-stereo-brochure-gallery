@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260813-1515 -->
+<!-- V20260813-1600 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -10,37 +10,44 @@
 :root[data-theme="light"]{--bg:#f2f3f5;--surface:#fff;--card:#fff;--soft:#f1f3f5;--border:#d7dbe0;--text:#171717;--muted:#666;--link:#006da0;--accent:#1f789d;--danger:#a94442}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.container{max-width:1280px;margin:auto;padding:24px}.header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-bottom:28px}.logo{width:260px;max-width:58vw;margin:0 auto}.top-buttons{display:flex;justify-content:center;gap:10px}.top-button{width:44px;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:23px;cursor:pointer}
 #compareToggle.active{background:var(--accent);color:#fff}
-.compare-actions{
-  position:fixed;
-  z-index:1000;
-  top:18px;
-  right:auto;
-  left:50%;
-  transform:translateX(-50%);
-  display:none;
-  justify-content:center;
-  gap:10px;
-  min-height:38px;
-  padding:8px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--surface);
-  box-shadow:0 4px 16px rgba(0,0,0,.35);
+.compare-controls{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
-.compare-actions.compare-mode{display:flex}
-.compare-button,.cancel-compare-button{
-  min-height:36px;
-  border:1px solid var(--border);
+.compare-button{
+  width:44px;
+  min-width:44px;
+  height:44px;
+  padding:0;
+  font-size:24px;
+  font-weight:900;
+  box-sizing:border-box;
+}
+.compare-button.active{
+  width:auto;
+  min-width:190px;
+  padding:0 14px;
+  font-size:15px;
+  white-space:nowrap;
+  background:var(--accent);
+  color:#fff;
+}
+.compare-cancel{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  height:44px;
+  padding:0 14px;
+  border:0;
   border-radius:8px;
-  padding:7px 15px;
   background:var(--soft);
   color:var(--text);
+  font-size:14px;
   font-weight:700;
   cursor:pointer;
 }
-.compare-button.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.compare-button:disabled{opacity:1;cursor:default}
-.cancel-compare-button{display:inline-block}
+body.compare-mode .compare-cancel{display:flex}
 .model-card.compare-selected{
   border-color:var(--link);
   box-shadow:inset 0 0 0 2px var(--link);
@@ -60,7 +67,7 @@
   color:#fff;
   font-weight:700;
   z-index:2;
-}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.2fr .95fr .95fr .95fr 1.25fr .7fr 1.3fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field{min-width:0}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.multiselect{position:relative}.multiselect-button{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 34px 0 11px;font-size:15px;text-align:left;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.multiselect-button::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;border-right:2px solid var(--text);border-bottom:2px solid var(--text);transform:translateY(-67%) rotate(45deg);transform-origin:center;opacity:.9}.multiselect.open .multiselect-button::after{transform:translateY(-33%) rotate(225deg)}.multiselect-menu{display:none;position:absolute;z-index:1200;top:calc(100% + 5px);left:0;min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 28px));max-height:320px;overflow:auto;padding:7px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 7px 22px rgba(0,0,0,.38)}.multiselect.open .multiselect-menu{display:block}.field .multiselect-option{display:flex;align-items:center;gap:8px;padding:3px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;line-height:18px;margin:0}.multiselect-option:hover{background:var(--soft)}.field .multiselect-option input{width:16px;height:16px;flex:0 0 16px;margin:0;padding:0;accent-color:var(--accent)}.field .multiselect-option span{display:inline-block;font-size:14px;line-height:18px;margin:0}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
+}.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}.field{min-width:0;width:220px}.field label{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.field input,.field select{width:100%;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);padding:0 14px;font-size:16px;box-sizing:border-box}.multiselect{position:relative}.multiselect-button{width:100%;height:44px;border:0;border-radius:8px;background:var(--soft);color:var(--text);padding:0 36px 0 14px;font-size:16px;text-align:left;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}.multiselect-button::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;border-right:2px solid var(--text);border-bottom:2px solid var(--text);transform:translateY(-67%) rotate(45deg);transform-origin:center;opacity:.9}.multiselect.open .multiselect-button::after{transform:translateY(-33%) rotate(225deg)}.multiselect-menu{display:none;position:absolute;z-index:1200;top:calc(100% + 5px);left:0;min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 28px));max-height:320px;overflow:auto;padding:7px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 7px 22px rgba(0,0,0,.38)}.multiselect.open .multiselect-menu{display:block}.field .multiselect-option{display:flex;align-items:center;gap:8px;padding:3px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;line-height:18px;margin:0}.multiselect-option:hover{background:var(--soft)}.field .multiselect-option input{width:16px;height:16px;flex:0 0 16px;margin:0;padding:0;accent-color:var(--accent)}.field .multiselect-option span{display:inline-block;font-size:14px;line-height:18px;margin:0}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
 .model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:visible}.model-list.compact-thumbnail-view{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.compact-thumbnail-view .model-card{display:block;padding:8px;overflow:visible}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.compact-thumbnail-view .thumb-image{margin-bottom:8px}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
@@ -105,31 +112,23 @@
 .model-image-path-tooltip .tip-file{font-weight:700}
 .detail{display:none}.detail.active{display:block}.detail-heading-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}.detail-title{font-size:30px;font-weight:700;margin:0}.detail-functions{font-size:16px;color:var(--text);text-align:right;line-height:1.3}.image-panel{width:100%;min-height:230px;max-height:380px;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:18px;margin-bottom:18px}.image-panel img{display:none;max-width:100%;max-height:340px;object-fit:contain}.image-placeholder{color:var(--muted);font-size:17px}.back-row{margin-bottom:14px}.back-button{border:0;border-radius:7px;background:var(--soft);color:var(--text);padding:10px 14px;font-weight:700;cursor:pointer}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}.summary-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}.summary-label{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:4px}.summary-value{font-size:16px}.spec-section{margin:14px 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}.spec-title{font-size:18px;font-weight:700;padding:13px 15px;background:var(--soft)}.spec-grid{display:block}.spec-pair{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}.spec-pair.full-width{grid-template-columns:1fr}.spec-row{display:grid;grid-template-columns:minmax(170px,42%) 1fr;gap:10px;padding:10px 15px}.spec-row.full-width{grid-template-columns:minmax(170px,21%) 1fr}.spec-label{font-weight:700}.spec-value{word-break:break-word}.muted{color:var(--muted)}
 @media(max-width:1100px){.model-list.compact-thumbnail-view{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:950px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list.compact-thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spec-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.container{padding:14px}.logo{width:220px;max-width:90vw}.top-buttons{width:100%}.filters{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:1fr}.model-list.compact-thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-card{grid-template-columns:1fr;gap:4px}.model-functions{grid-column:1}.model-meta{grid-column:1}.summary-grid{grid-template-columns:1fr}.image-panel{min-height:160px;max-height:270px}.image-panel img{max-height:235px}.detail-heading-row{align-items:flex-start;gap:10px}.detail-title{font-size:26px}.detail-functions{font-size:14px;max-width:55%}.spec-pair{grid-template-columns:1fr}.spec-pair:not(.full-width) .spec-row + .spec-row{border-top:1px solid var(--border)}.spec-row,.spec-row.full-width{grid-template-columns:1fr;gap:4px}}
-
-@media(max-width:720px){
-  .compare-actions{
-    top:0;
-    right:auto;
-    bottom:auto;
-    left:50%;
-    transform:translateX(-50%);
-    width:max-content;
-    max-width:calc(100vw - 24px);
-    justify-content:center;
-    gap:7px;
-    padding:6px;
+@media(max-width:950px){.filters{gap:12px}.field{width:calc(50% - 6px)}.model-list{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list.compact-thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spec-grid{grid-template-columns:1fr}}
+@media(max-width:800px){
+  .compare-button.active{
+    min-width:72px;
+    width:72px;
+    padding:0 8px;
+    font-size:15px;
   }
-
-  .compare-button,
-  .cancel-compare-button{
-    min-height:32px;
-    padding:6px 10px;
-    font-size:13px;
-    white-space:nowrap;
+  .compare-cancel{
+    height:44px;
+    padding:0 12px;
+    font-size:14px;
   }
 }
+@media(max-width:600px){.container{padding:14px}.logo{width:220px;max-width:90vw}.top-buttons{width:100%}.filters{gap:10px}.field{width:calc(50% - 5px)}.model-list.thumbnail-view{grid-template-columns:1fr}.model-list.compact-thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-card{grid-template-columns:1fr;gap:4px}.model-functions{grid-column:1}.model-meta{grid-column:1}.summary-grid{grid-template-columns:1fr}.image-panel{min-height:160px;max-height:270px}.image-panel img{max-height:235px}.detail-heading-row{align-items:flex-start;gap:10px}.detail-title{font-size:26px}.detail-functions{font-size:14px;max-width:55%}.spec-pair{grid-template-columns:1fr}.spec-pair:not(.full-width) .spec-row + .spec-row{border-top:1px solid var(--border)}.spec-row,.spec-row.full-width{grid-template-columns:1fr;gap:4px}}
+
+
 
 .spec-value a.brochure-link{
   color:#fff;
@@ -149,13 +148,12 @@
     <div class="top-buttons">
       <a class="top-button" id="menuBackButton" href="index.html" title="Back">←</a>
       <a class="top-button" href="index.html" title="Home">⌂</a>
-      <button type="button" class="top-button" id="viewToggle" title="Switch to thumbnail view" aria-label="Switch to thumbnail view">▦</button>
-      <button type="button" class="top-button" id="compareToggle" title="Compare models" aria-label="Compare models">⇄</button>
-      <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode">◐</button>
-    </div>
-    <div class="compare-actions" id="compareActions">
-      <button type="button" class="compare-button" id="compareButton">Compare</button>
-      <button type="button" class="cancel-compare-button" id="cancelCompareButton">Cancel Compare</button>
+      <button type="button" class="top-button" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">☾</button>
+      <button type="button" class="top-button view-toggle" id="viewToggle" title="Switch to thumbnail view" aria-label="Switch to thumbnail view">▦</button>
+      <div class="compare-controls">
+        <button type="button" class="top-button compare-button" id="compareToggle" title="Compare models" aria-label="Compare models">⇄</button>
+        <button type="button" class="compare-cancel" id="cancelCompareButton">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -295,13 +293,15 @@ function setupFunctionTypeDropdown(){
 }
 
 function applyTheme(){
-  const saved = localStorage.getItem("theme") || "dark";
+  const saved = localStorage.getItem("brochureTheme") || "dark";
   document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
-  $("siteLogo").src = saved === "light" ? "Car Stereo Garage2_3.png" : "Car Stereo Garage2_3.png";
+  $("siteLogo").src = "Car Stereo Garage2_3.png";
+  $("themeToggle").textContent = "☾";
 }
 function toggleTheme(){
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
-  localStorage.setItem("theme", next); applyTheme();
+  localStorage.setItem("brochureTheme", next);
+  applyTheme();
 }
 $("themeToggle").addEventListener("click", toggleTheme); applyTheme();
 
@@ -325,32 +325,16 @@ function toggleViewMode(){
 $("viewToggle").addEventListener("click",toggleViewMode);
 updateViewToggle();
 
-$("compareButton").addEventListener("click", openComparePage);
 $("cancelCompareButton").addEventListener("click", cancelCompareMode);
 $("compareToggle").addEventListener("click", ()=>{
-  if(compareMode){
-    // Same behaviour as the visible Cancel Compare button.
-    cancelCompareMode();
+  if(!compareMode){
+    startCompareMode();
     return;
   }
-  startCompareMode();
+  openComparePage();
 });
 
-window.addEventListener("resize", ()=>{
-  if(compareMode) positionCompareActions();
-});
-window.addEventListener("scroll", ()=>{
-  if(compareMode) positionCompareActions();
-}, {passive:true});
-if(window.visualViewport){
-  window.visualViewport.addEventListener("resize", ()=>{
-    if(compareMode) positionCompareActions();
-  });
-  window.visualViewport.addEventListener("scroll", ()=>{
-    if(compareMode) positionCompareActions();
-  });
-}
-
+window.addEventListener("resize", updateCompareUi);
 updateCompareUi();
 
 async function fetchJson(url){
@@ -567,67 +551,30 @@ function modelImageTooltipHtml(m){
 
 
 
-function positionCompareActions(){
-  const actions = $("compareActions");
-  const toggle = $("compareToggle");
-  if(!actions || !toggle) return;
-
-  if(window.matchMedia("(max-width:720px)").matches){
-    const rect = toggle.getBoundingClientRect();
-    const viewport = window.visualViewport;
-    const viewportTop = viewport?.offsetTop || 0;
-    const viewportHeight = viewport?.height || window.innerHeight;
-    const panelHeight = actions.offsetHeight || 44;
-
-    // Prefer directly below the square Compare button, but ALWAYS clamp the
-    // floating panel inside the actually visible Safari viewport. This also
-    // handles browser-history scroll restoration where the top menu may
-    // already be partly above the screen when Compare mode is restored.
-    const safeTop = viewportTop + 12;
-    const safeBottom = viewportTop + viewportHeight - 12;
-    const preferredTop = rect.bottom + 10;
-    const maxTop = Math.max(safeTop, safeBottom - panelHeight);
-    const finalTop = Math.max(safeTop, Math.min(preferredTop, maxTop));
-
-    actions.style.top = `${finalTop}px`;
-    actions.style.right = "auto";
-    actions.style.bottom = "auto";
-    actions.style.left = "50%";
-    actions.style.transform = "translateX(-50%)";
-  }else{
-    actions.style.top = "";
-    actions.style.right = "";
-    actions.style.bottom = "";
-    actions.style.left = "";
-    actions.style.transform = "";
-  }
-}
-
 function updateCompareUi(){
   const count = selectedCompareRows.size;
-  const compareButton = $("compareButton");
-  const actions = $("compareActions");
+  const button = $("compareToggle");
+  const isMobile = window.matchMedia("(max-width:800px)").matches;
 
-  actions.classList.toggle("compare-mode", compareMode);
-  compareButton.classList.toggle("active", compareMode);
+  document.body.classList.toggle("compare-mode", compareMode);
 
-  if(compareMode){
-    requestAnimationFrame(positionCompareActions);
-  }
-  const compareToggle = $("compareToggle");
-  if(compareToggle) compareToggle.classList.toggle("active", compareMode);
-
-  if(compareMode){
-    compareButton.textContent = `Compare ${count} model${count === 1 ? "" : "s"}`;
-    compareButton.disabled = count < 2;
-    $("modelClickHint").textContent = "Click models to select or deselect them";
-  }else{
-    compareButton.textContent = "Compare";
-    compareButton.disabled = false;
+  if(!compareMode){
+    button.classList.remove("active");
+    button.textContent = "⇄";
+    button.title = "Compare models";
+    button.setAttribute("aria-label","Compare models");
     $("modelClickHint").textContent = "Click a model to view details";
+    return;
   }
-}
 
+  button.classList.add("active");
+  button.textContent = isMobile
+    ? `⇄ ${count}`
+    : `⇄ Compare ${count} model${count === 1 ? "" : "s"}`;
+  button.title = count >= 2 ? "Open comparison" : "Select at least 2 models";
+  button.setAttribute("aria-label",button.title);
+  $("modelClickHint").textContent = "Click models to select or deselect them";
+}
 function startCompareMode(){
   compareMode = true;
   selectedCompareRows.clear();
@@ -1176,6 +1123,6 @@ init();
   font-size:11px;
   color:var(--muted);
   opacity:.75;
-">models.html V20260811-0701</div>
+">models.html V20260813-1600</div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- V20260809-0445 -->
+<!-- V20260813-1448 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1239,7 +1239,8 @@ function brochureModelsUrl(modelNumbers, brand, market){
 }
 
 function renderModelNumberLinks(modelNumbers, brand, market){
-  const models = parseBrochureModelNumbers(modelNumbers);
+  const models = parseBrochureModelNumbers(modelNumbers)
+    .sort((a,b) => a.localeCompare(b, "en", {numeric:true, sensitivity:"base"}));
 
   return models.map(model => {
     const href = `models.html?brand=${encodeURIComponent(brand || "")}&model=${encodeURIComponent(model)}&market=${encodeURIComponent(market || "")}`;

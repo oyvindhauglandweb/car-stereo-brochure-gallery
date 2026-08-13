@@ -1241,7 +1241,13 @@ async function importBrochureModels(rows, options = {}){
 
   if(!res.ok){
     const detail = data?.detail ? ` ${typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)}` : "";
-    throw new Error((data?.error || `Model import failed (${res.status})`) + detail);
+    const error = new Error((data?.error || `Model import failed (${res.status})`) + detail);
+    // Preserve the complete Worker response so HTTP 400 can still show
+    // row-by-row validation errors returned by the model-import endpoint.
+    error.httpStatus = res.status;
+    error.modelImportData = data;
+    error.responseText = responseText;
+    throw error;
   }
 
   return data;
@@ -1927,6 +1933,18 @@ function modelImportResultHtml(result, prefix = "Model import"){
 }
 
 
+function modelImportErrorHtml(error){
+  const data = error?.modelImportData;
+  if(data && Array.isArray(data.rows)){
+    const details = modelImportResultHtml(data, "Model import failed");
+    const serverMessage = data.error
+      ? `<div class="model-import-details"><strong>Server:</strong> ${esc(typeof data.error === "string" ? data.error : JSON.stringify(data.error))}</div>`
+      : "";
+    return details + (serverMessage ? `<br>${serverMessage}` : "");
+  }
+  return `<strong>Model import failed</strong><div class="model-import-details">${esc(error?.message || "Unknown model import error")}</div>`;
+}
+
 function rowsWithForcedVariantChoices(rows){
   const selectedRows = new Set(
     Array.from(document.querySelectorAll(".model-force-variant-checkbox:checked"))
@@ -2031,7 +2049,7 @@ async function continueModelImportAfterReview(){
   }catch(error){
     console.error(error);
     setModelImportSummary(
-      `<strong>Model import failed</strong><div class="model-import-details">${esc(error.message)}</div>`,
+      modelImportErrorHtml(error),
       "error"
     );
     showStatus("Brochure is saved, but model import failed.<br><br>" + esc(error.message), "warning");
@@ -2336,7 +2354,7 @@ document.getElementById("brochureForm").addEventListener("submit", async functio
           console.error(importError);
           importWarning = `Model import failed: ${importError.message}`;
           setModelImportSummary(
-            `<strong>Model import failed</strong><div class="model-import-details">${esc(importError.message)}</div>`,
+            modelImportErrorHtml(importError),
             "error"
           );
         }
@@ -2362,6 +2380,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260809-2205 -->
+<!-- V20260813-0445-ERRORLOG -->
 </body>
 </html>

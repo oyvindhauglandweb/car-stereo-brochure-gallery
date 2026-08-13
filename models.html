@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- V20260812-0030 -->
+<!-- V20260813-1515 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -61,14 +61,13 @@
   font-weight:700;
   z-index:2;
 }.page-title{font-size:30px;font-weight:700;margin-bottom:8px}.intro{color:var(--muted);margin-bottom:22px}.filters{display:grid;grid-template-columns:1.2fr .95fr .95fr .95fr 1.25fr .7fr 1.3fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px}.field{min-width:0}.field label{display:block;font-weight:700;font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 11px;font-size:15px}.multiselect{position:relative}.multiselect-button{width:100%;height:42px;border:1px solid var(--border);border-radius:7px;background:var(--soft);color:var(--text);padding:0 34px 0 11px;font-size:15px;text-align:left;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.multiselect-button::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;border-right:2px solid var(--text);border-bottom:2px solid var(--text);transform:translateY(-67%) rotate(45deg);transform-origin:center;opacity:.9}.multiselect.open .multiselect-button::after{transform:translateY(-33%) rotate(225deg)}.multiselect-menu{display:none;position:absolute;z-index:1200;top:calc(100% + 5px);left:0;min-width:100%;width:max-content;max-width:min(360px,calc(100vw - 28px));max-height:320px;overflow:auto;padding:7px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 7px 22px rgba(0,0,0,.38)}.multiselect.open .multiselect-menu{display:block}.field .multiselect-option{display:flex;align-items:center;gap:8px;padding:3px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;line-height:18px;margin:0}.multiselect-option:hover{background:var(--soft)}.field .multiselect-option input{width:16px;height:16px;flex:0 0 16px;margin:0;padding:0;accent-color:var(--accent)}.field .multiselect-option span{display:inline-block;font-size:14px;line-height:18px;margin:0}.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}.model-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.model-card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:15px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:8px 16px}.model-card:hover{border-color:var(--link)}.model-name{font-size:20px;font-weight:700}.model-functions{color:var(--text)}.model-meta{grid-column:1/-1;color:var(--muted);line-height:1.5}
-.model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:visible}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{
+.model-list.thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.thumbnail-view .model-card{display:block;padding:10px;overflow:visible}.model-list.compact-thumbnail-view{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.compact-thumbnail-view .model-card{display:block;padding:8px;overflow:visible}.thumb-image{width:100%;aspect-ratio:4/1;background:var(--soft);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px}.thumb-image img{width:100%;height:100%;object-fit:contain;display:block}.compact-thumbnail-view .thumb-image{margin-bottom:8px}.thumb-placeholder{color:var(--muted);font-size:13px;text-align:center;padding:8px}.thumb-caption{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
   align-items:baseline;
   gap:10px;
 }
-.thumb-name{font-size:17px;font-weight:700;min-width:0}
-.thumb-market{
+.compact-thumb-caption{display:block}.thumb-name,.compact-thumb-name{font-size:17px;font-weight:700;min-width:0}.compact-thumb-name{font-size:15px;line-height:1.25;text-align:center}.thumb-market{
   color:var(--muted);
   font-size:14px;
   text-align:center;
@@ -105,8 +104,9 @@
 .model-image-path-tooltip .tip-label{color:var(--muted);font-weight:700}
 .model-image-path-tooltip .tip-file{font-weight:700}
 .detail{display:none}.detail.active{display:block}.detail-heading-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}.detail-title{font-size:30px;font-weight:700;margin:0}.detail-functions{font-size:16px;color:var(--text);text-align:right;line-height:1.3}.image-panel{width:100%;min-height:230px;max-height:380px;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:18px;margin-bottom:18px}.image-panel img{display:none;max-width:100%;max-height:340px;object-fit:contain}.image-placeholder{color:var(--muted);font-size:17px}.back-row{margin-bottom:14px}.back-button{border:0;border-radius:7px;background:var(--soft);color:var(--text);padding:10px 14px;font-weight:700;cursor:pointer}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}.summary-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}.summary-label{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:4px}.summary-value{font-size:16px}.spec-section{margin:14px 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}.spec-title{font-size:18px;font-weight:700;padding:13px 15px;background:var(--soft)}.spec-grid{display:block}.spec-pair{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}.spec-pair.full-width{grid-template-columns:1fr}.spec-row{display:grid;grid-template-columns:minmax(170px,42%) 1fr;gap:10px;padding:10px 15px}.spec-row.full-width{grid-template-columns:minmax(170px,21%) 1fr}.spec-label{font-weight:700}.spec-value{word-break:break-word}.muted{color:var(--muted)}
-@media(max-width:950px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spec-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.container{padding:14px}.logo{width:220px;max-width:90vw}.top-buttons{width:100%}.filters{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:1fr}.model-card{grid-template-columns:1fr;gap:4px}.model-functions{grid-column:1}.model-meta{grid-column:1}.summary-grid{grid-template-columns:1fr}.image-panel{min-height:160px;max-height:270px}.image-panel img{max-height:235px}.detail-heading-row{align-items:flex-start;gap:10px}.detail-title{font-size:26px}.detail-functions{font-size:14px;max-width:55%}.spec-pair{grid-template-columns:1fr}.spec-pair:not(.full-width) .spec-row + .spec-row{border-top:1px solid var(--border)}.spec-row,.spec-row.full-width{grid-template-columns:1fr;gap:4px}}
+@media(max-width:1100px){.model-list.compact-thumbnail-view{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:950px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-list.compact-thumbnail-view{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spec-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.container{padding:14px}.logo{width:220px;max-width:90vw}.top-buttons{width:100%}.filters{grid-template-columns:1fr}.model-list.thumbnail-view{grid-template-columns:1fr}.model-list.compact-thumbnail-view{grid-template-columns:repeat(2,minmax(0,1fr))}.model-card{grid-template-columns:1fr;gap:4px}.model-functions{grid-column:1}.model-meta{grid-column:1}.summary-grid{grid-template-columns:1fr}.image-panel{min-height:160px;max-height:270px}.image-panel img{max-height:235px}.detail-heading-row{align-items:flex-start;gap:10px}.detail-title{font-size:26px}.detail-functions{font-size:14px;max-width:55%}.spec-pair{grid-template-columns:1fr}.spec-pair:not(.full-width) .spec-row + .spec-row{border-top:1px solid var(--border)}.spec-row,.spec-row.full-width{grid-template-columns:1fr;gap:4px}}
 
 @media(max-width:720px){
   .compare-actions{
@@ -198,7 +198,8 @@ let filteredModels = [];
 let brochureModelNumbers = [];
 let modelImageIndex = {};
 let modelImageIndexPromise = null;
-let viewMode = localStorage.getItem("modelViewMode") === "thumbnail" ? "thumbnail" : "list";
+const savedViewMode = localStorage.getItem("modelViewMode");
+let viewMode = ["list","thumbnail","compact-thumbnail"].includes(savedViewMode) ? savedViewMode : "list";
 let compareMode = false;
 const selectedCompareRows = new Set();
 const selectedFunctionTypes = new Set();
@@ -306,13 +307,17 @@ $("themeToggle").addEventListener("click", toggleTheme); applyTheme();
 
 function updateViewToggle(){
   const button=$("viewToggle");
-  const thumbnails=viewMode==="thumbnail";
-  button.textContent=thumbnails ? "☷" : "▦";
-  button.title=thumbnails ? "Switch to list view" : "Switch to thumbnail view";
-  button.setAttribute("aria-label",button.title);
+  const config = {
+    "list": {icon:"▦", title:"Switch to thumbnail view"},
+    "thumbnail": {icon:"▥", title:"Switch to compact thumbnail view"},
+    "compact-thumbnail": {icon:"☰", title:"Switch to list view"}
+  }[viewMode] || {icon:"▦", title:"Switch to thumbnail view"};
+  button.textContent=config.icon;
+  button.title=config.title;
+  button.setAttribute("aria-label",config.title);
 }
 function toggleViewMode(){
-  viewMode=viewMode==="thumbnail" ? "list" : "thumbnail";
+  viewMode=viewMode==="list" ? "thumbnail" : viewMode==="thumbnail" ? "compact-thumbnail" : "list";
   localStorage.setItem("modelViewMode",viewMode);
   updateViewToggle();
   renderList();
@@ -668,7 +673,7 @@ function openComparePage(){
 async function renderList(){
   $("listStatus").style.display="none";
 
-  if(viewMode==="thumbnail"){
+  if(viewMode==="thumbnail" || viewMode==="compact-thumbnail"){
     await ensureModelImageIndex();
   }
   $("resultCount").textContent = brochureModelNumbers.length
@@ -676,8 +681,9 @@ async function renderList(){
     : `${filteredModels.length} model${filteredModels.length===1?"":"s"}`;
   const list=$("modelList");
   list.classList.toggle("thumbnail-view",viewMode==="thumbnail");
+  list.classList.toggle("compact-thumbnail-view",viewMode==="compact-thumbnail");
 
-  if(viewMode==="thumbnail"){
+  if(viewMode==="thumbnail" || viewMode==="compact-thumbnail"){
     list.innerHTML = filteredModels.map((m,index)=>{
       const imageUrl=modelThumbnailUrl(m);
       // Do not lazy-load: every thumbnail starts loading immediately. Give the
@@ -692,11 +698,9 @@ async function renderList(){
             <div class="thumb-placeholder"${imageUrl?' style="display:none"':""}>No image available</div>
           </div>
           <div class="ai-image-warning" style="display:none">AI-generated: Do not trust the details</div>
-          <div class="thumb-caption">
-            <div class="thumb-name">${esc(m.brand)} ${esc(m.model)}</div>
-            <div class="thumb-market">${esc(marketsText(m))}</div>
-            <div class="thumb-year">${esc(yearText(m))}</div>
-          </div>
+          ${viewMode==="compact-thumbnail"
+            ? `<div class="compact-thumb-caption"><div class="compact-thumb-name">${esc(m.brand)} ${esc(m.model)}</div></div>`
+            : `<div class="thumb-caption"><div class="thumb-name">${esc(m.brand)} ${esc(m.model)}</div><div class="thumb-market">${esc(marketsText(m))}</div><div class="thumb-year">${esc(yearText(m))}</div></div>`}
         </div>`;
     }).join("");
 

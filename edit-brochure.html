@@ -1079,7 +1079,11 @@ async function runMandatoryModelImportPreflight(rows){
     method:"POST",
     credentials:"include",
     cache:"no-store",
-    headers:{"Content-Type":"application/json"},
+    // Use a CORS-safelisted content type. The API is on a different origin and
+    // Cloudflare/Access can intercept the browser's automatic OPTIONS preflight
+    // before the Worker sees it. text/plain avoids that extra OPTIONS request;
+    // request.json() in the Worker can still parse the JSON body normally.
+    headers:{"Content-Type":"text/plain;charset=UTF-8"},
     body:JSON.stringify({rows})
   });
   const text = await response.text();

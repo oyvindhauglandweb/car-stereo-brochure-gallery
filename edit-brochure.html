@@ -2081,6 +2081,23 @@ function modelImportResultHtml(result, prefix = "Model import"){
     parts.push(`<div class="model-conflict-list">${conflictCards}</div>`);
   }
 
+  if(Number(result?.missingImagesChecked || 0) > 0){
+    parts.push(`Missing images: ${Number((result?.missingImages || []).length)} of ${Number(result?.missingImagesChecked || 0)} imported model${Number(result?.missingImagesChecked || 0) === 1 ? "" : "s"}`);
+  }
+
+  if(result?.missingImagesError){
+    parts.push(`<div class="model-import-details"><strong>Missing image report:</strong> ${esc(String(result.missingImagesError))}</div>`);
+  }else if(Array.isArray(result?.missingImages) && result.missingImages.length){
+    const missingLines = result.missingImages.map(item => {
+      const label = [item.brand, item.model].filter(Boolean).join(" ");
+      const markets = Array.isArray(item.markets) && item.markets.length ? ` [${item.markets.join(", ")}]` : "";
+      return `${esc(label || `Row ${item.sourceRow || "?"}`)}${esc(markets)}`;
+    });
+    parts.push(
+      `<div class="model-import-details"><strong>Models missing image:</strong><br>${missingLines.join("<br>")}</div>`
+    );
+  }
+
   return parts.join("<br>");
 }
 
@@ -2532,6 +2549,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260813-0550-SCHEMA-AUTH-CORS-FIX -->
+<!-- V20260813-0605-MISSING-IMAGE-REPORT -->
 </body>
 </html>

@@ -1074,6 +1074,30 @@ async function getModelImportLiveSchema(){
   return data;
 }
 
+async function runMandatoryModelImportPreflight(rows){
+  const response = await fetch(`${API_BASE}/model-import-preflight`, {
+    method:"POST",
+    credentials:"include",
+    cache:"no-store",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({rows})
+  });
+  const text = await response.text();
+  let data = null;
+  try{ data = JSON.parse(text); }catch(error){}
+
+  if(!data || typeof data !== "object"){
+    throw new Error(`Mandatory final preflight could not be read (${response.status}).`);
+  }
+
+  // A 400 response is a successful preflight execution with validation errors;
+  // network/auth/server failures are treated as hard failures and block import.
+  if(!response.ok && response.status !== 400){
+    throw new Error(data.error || `Mandatory final preflight failed (${response.status}).`);
+  }
+  return data;
+}
+
 function liveSchemaKey(value){
   return String(value ?? "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
@@ -1276,17 +1300,27 @@ async function readModelImportFile(file){
     }
   }
 
-  // Validate the complete file against the live Baserow schema immediately.
-  // This is deliberately done before Save changes, so illegal import data
-  // cannot reach the database-write stage.
-  const liveSchema = await getModelImportLiveSchema();
-  const liveValidation = validateRowsAgainstLiveSchema(rows, headers, liveSchema);
-  errors.push(...liveValidation.errors);
-  warnings.push(...liveValidation.warnings);
+  // Mandatory server-side final preflight. It validates against BOTH the live
+  // Baserow schema and the complete active Brochure Interpretation Rules set,
+  // including semantic cleanup checks. Import is fail-closed if this cannot run.
+  const mandatoryPreflight = await runMandatoryModelImportPreflight(rows);
+  const preflightErrors = Array.isArray(mandatoryPreflight.validationErrors)
+    ? mandatoryPreflight.validationErrors
+    : [];
+  errors.push(...preflightErrors.map(item => {
+    const rowText = item?.sourceRow ? `Row ${item.sourceRow}: ` : "";
+    const ruleText = item?.ruleId ? ` [${item.ruleId}]` : "";
+    return `${rowText}${item?.error || "Mandatory final preflight failed"}${ruleText}`;
+  }));
+
+  if(!mandatoryPreflight.ok && !preflightErrors.length){
+    errors.push(mandatoryPreflight.error || "Mandatory final preflight failed.");
+  }
 
   return {
     file, sheetName, headers, rows, models, errors, warnings, fileBrands,
-    liveSchemaGeneratedAt:liveSchema.generated_at || null
+    liveSchemaGeneratedAt:mandatoryPreflight.schema_generated_at || null,
+    mandatoryPreflight
   };
 }
 
@@ -1313,7 +1347,10 @@ async function handleModelImportFile(file){
       `<strong>${result.rows.length} model row${result.rows.length === 1 ? "" : "s"} found</strong>`,
       `Worksheet: ${esc(result.sheetName)}`,
       `${result.models.length} unique model number${result.models.length === 1 ? "" : "s"} copied to Model numbers`,
-      result.liveSchemaGeneratedAt ? `Live Baserow schema: ${esc(result.liveSchemaGeneratedAt)}` : "Live Baserow schema loaded"
+      result.liveSchemaGeneratedAt ? `Live Baserow schema: ${esc(result.liveSchemaGeneratedAt)}` : "Live Baserow schema loaded",
+      result.mandatoryPreflight?.rule_set
+        ? `Live interpretation rules: ${Number(result.mandatoryPreflight.rule_set.active_count || 0)} active${Array.isArray(result.mandatoryPreflight.rule_set.versions) && result.mandatoryPreflight.rule_set.versions.length ? ` (v${esc(result.mandatoryPreflight.rule_set.versions.join(", v"))})` : ""}`
+        : "Live interpretation rules: NOT VERIFIED"
     ];
 
     if(result.errors.length){
@@ -1323,7 +1360,7 @@ async function handleModelImportFile(file){
       lines.push(`<div class="model-import-details"><strong>${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"}:</strong><br>${result.warnings.slice(0,10).map(esc).join("<br>")}${result.warnings.length > 10 ? "<br>…" : ""}</div>`);
       setModelImportSummary(lines.join("<br>"), "warning");
     } else {
-      lines.push(`<div class="model-import-details">Full live-schema preflight passed. Every nonblank import value is valid against the current Baserow field definitions/options. Database merge/conflict rules will be checked when changes are saved.</div>`);
+      lines.push(`<div class="model-import-details"><strong>Mandatory final preflight PASSED.</strong><br>Live schema, complete import-column set, controlled/type values, live Brochure Interpretation Rules and semantic Description/Source Notes checks all passed. The same mandatory preflight runs again server-side immediately before any database write.</div>`);
       setModelImportSummary(lines.join("<br>"), "ok");
     }
   }catch(error){
@@ -2549,6 +2586,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260813-0605-MISSING-IMAGE-REPORT -->
+<!-- V20260813-1715-MANDATORY-RULE-PREFLIGHT -->
 </body>
 </html>

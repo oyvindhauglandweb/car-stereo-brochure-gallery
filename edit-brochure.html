@@ -1059,6 +1059,7 @@ async function getModelImportLiveSchema(){
 
   const response = await fetch(`${API_BASE}/model-import-schema`, {
     method:"GET",
+    credentials:"include",
     cache:"no-store"
   });
   const text = await response.text();
@@ -2531,6 +2532,6 @@ loadFormData().catch(error => {
 });
 </script>
 
-<!-- V20260813-0545-FULL-PREFLIGHT -->
+<!-- V20260813-0550-SCHEMA-AUTH-CORS-FIX -->
 </body>
 </html>

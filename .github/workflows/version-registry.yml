@@ -1,1 +1,7 @@
-
+.github/
+  workflows/
+    version-registry.yml
+scripts/
+  sync-version-registry.mjs
+version.json
+version-registry-manifest.json

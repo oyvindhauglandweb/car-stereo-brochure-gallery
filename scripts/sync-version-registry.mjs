@@ -96,6 +96,7 @@ async function register(item, version) {
   }
 
   console.log(`${item.application} | ${item.component} | ${item.file} -> ${version} | ${data.changed ? "ny versjon" : "samme versjon"}`);
+  console.log("Registry response:", JSON.stringify(data));
 }
 
 const changed = changedFiles();

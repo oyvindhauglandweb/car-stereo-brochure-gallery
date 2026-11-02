@@ -1,7 +1,50 @@
-.github/
-  workflows/
-    version-registry.yml
-scripts/
-  sync-version-registry.mjs
-version.json
-version-registry-manifest.json
+name: Version registry
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "version.json"
+      - "version-registry-manifest.json"
+      - "scripts/sync-version-registry.mjs"
+  workflow_dispatch:
+    inputs:
+      register_all:
+        description: "Registrer alle komponenter på nytt"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: version-registry
+  cancel-in-progress: false
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Register versions
+        env:
+          VERSION_REGISTRY_API_BASE: ${{ secrets.VERSION_REGISTRY_API_BASE }}
+          VERSION_REGISTRY_SECRET: ${{ secrets.VERSION_REGISTRY_SECRET }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          REGISTER_ALL: ${{ github.event_name == 'workflow_dispatch' && inputs.register_all && '1' || '0' }}
+        run: node scripts/sync-version-registry.mjs

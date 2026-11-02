@@ -43,6 +43,8 @@ jobs:
         env:
           VERSION_REGISTRY_API_BASE: ${{ secrets.VERSION_REGISTRY_API_BASE }}
           VERSION_REGISTRY_SECRET: ${{ secrets.VERSION_REGISTRY_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}

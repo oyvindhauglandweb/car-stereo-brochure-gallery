@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 /*
-  Sync version registry V001.
+  Sync version registry V002.
   Detects changed tracked files, extracts each file's version and registers it
   through the common Worker endpoint.
+
+  V002:
+  - Adds Cloudflare Access Service Token headers for GitHub Actions.
+  - Fails clearly if Cloudflare Access or another proxy returns non-JSON.
+  - Keeps VERSION_REGISTRY_SECRET Bearer authentication unchanged.
 */
 import fs from "node:fs/promises";
 import { execFileSync } from "node:child_process";
@@ -10,12 +15,16 @@ import { execFileSync } from "node:child_process";
 const manifestPath = process.env.VERSION_REGISTRY_MANIFEST || "version-registry-manifest.json";
 const apiBase = String(process.env.VERSION_REGISTRY_API_BASE || "").replace(/\/+$/, "");
 const secret = process.env.VERSION_REGISTRY_SECRET || "";
+const cfAccessClientId = process.env.CF_ACCESS_CLIENT_ID || "";
+const cfAccessClientSecret = process.env.CF_ACCESS_CLIENT_SECRET || "";
 const before = process.env.GITHUB_EVENT_BEFORE || "";
 const sha = process.env.GITHUB_SHA || "";
 const repository = process.env.GITHUB_REPOSITORY || "oyvindhauglandweb/kvimarka92";
 
 if (!apiBase) throw new Error("VERSION_REGISTRY_API_BASE mangler.");
 if (!secret) throw new Error("VERSION_REGISTRY_SECRET mangler.");
+if (!cfAccessClientId) throw new Error("CF_ACCESS_CLIENT_ID mangler.");
+if (!cfAccessClientSecret) throw new Error("CF_ACCESS_CLIENT_SECRET mangler.");
 
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 
@@ -82,20 +91,41 @@ async function register(item, version) {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${secret}`,
+      "CF-Access-Client-Id": cfAccessClientId,
+      "CF-Access-Client-Secret": cfAccessClientSecret,
       "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
   });
 
-  const text = await res.text();
-  let data;
-  try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+  const responseText = await res.text();
 
   if (!res.ok) {
-    throw new Error(`${item.file}: HTTP ${res.status}: ${JSON.stringify(data)}`);
+    throw new Error(
+      `${item.file}: HTTP ${res.status}: ${responseText.slice(0, 1000)}`
+    );
   }
 
-  console.log(`${item.application} | ${item.component} | ${item.file} -> ${version} | ${data.changed ? "ny versjon" : "samme versjon"}`);
+  let data;
+  try {
+    data = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    throw new Error(
+      `${item.file}: versjonsregisteret returnerte ikke JSON. ` +
+      `Svar: ${responseText.slice(0, 1000)}`
+    );
+  }
+
+  if (typeof data !== "object" || data === null || typeof data.changed !== "boolean") {
+    throw new Error(
+      `${item.file}: ugyldig svar fra versjonsregisteret: ${JSON.stringify(data)}`
+    );
+  }
+
+  console.log(
+    `${item.application} | ${item.component} | ${item.file} -> ${version} | ` +
+    `${data.changed ? "ny versjon" : "samme versjon"}`
+  );
   console.log("Registry response:", JSON.stringify(data));
 }
 
